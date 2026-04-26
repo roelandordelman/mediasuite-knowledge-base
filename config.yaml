@@ -1,0 +1,101 @@
+# mediasuite-knowledge-base configuration
+
+source:
+  repo_path: /tmp/mediasuite-website
+
+output:
+  knowledge_base_json: knowledge_base.json
+
+chunking:
+  target_chars: 800
+  overlap_chars: 150
+
+embedding:
+  model: nomic-embed-text
+  batch_size: 64
+
+vector_store:
+  collection_name: mediasuite
+  chroma_host: localhost
+  chroma_port: 8000
+
+# Media Suite tool names used for structured filtering
+known_tools:
+  - Collection Inspector
+  - Workspace
+  - Search Tool
+  - Compare Tool
+  - Explore Tool
+  - Resource Viewer
+  - Annotation Tool
+  - Statistical Analysis
+  - Bookmarking
+  - User Project
+  - Data Stories
+  - Timeline
+  - Word Cloud
+  - Fragment Cutter
+  - Speech Recognition
+  - Computer Vision
+  - FactRank Tool
+  - Reflexivity Tool
+
+# Media Suite data collection names used for structured filtering
+known_collections:
+  - Sound & Vision Archive
+  - Sound & Vision Radio Archive
+  - Sound & Vision Television Archive
+  - DANS Oral History Archive
+  - Radio Oranje
+  - Open Beelden
+  - KB Newspaper Collection
+  - EYE Film Collection
+  - Tweede Kamer Archive
+  - Meertens Soundbites Collection
+  - Amateur Film Collection
+  - Dutch Program Guides
+  - Kijk & Luistercijfers
+  - NISV Art Collection
+  - Open Beelden Natuurbeelden
+
+collections:
+  _help:
+    content_type: "Help / Documentation"
+    url_prefix: "https://mediasuite.clariah.nl/documentation"
+    include: true
+  _howtos:
+    content_type: "How-to Guide"
+    url_prefix: "https://mediasuite.clariah.nl/documentation/howtos"
+    include: true
+  _faq:
+    content_type: "FAQ"
+    url_prefix: "https://mediasuite.clariah.nl/documentation/faq"
+    include: true
+  _glossary:
+    content_type: "Glossary"
+    url_prefix: "https://mediasuite.clariah.nl/documentation/glossary"
+    include: true
+  _learn_main:
+    content_type: "Learn (General)"
+    url_prefix: "https://mediasuite.clariah.nl/learn"
+    include: true
+  _learn_tutorials_tool:
+    content_type: "Tool Tutorial"
+    url_prefix: "https://mediasuite.clariah.nl/learn/tool-tutorials"
+    include: true
+  _learn_tutorials_subject:
+    content_type: "Subject Tutorial"
+    url_prefix: "https://mediasuite.clariah.nl/learn/subject-tutorials"
+    include: true
+  _learn_tool_criticism:
+    content_type: "Tool Criticism"
+    url_prefix: "https://mediasuite.clariah.nl/learn/tool-criticism"
+    include: true
+  _learn_example_projects:
+    content_type: "Example Project"
+    url_prefix: "https://mediasuite.clariah.nl/learn/example-projects"
+    include: true
+  _labo-help:
+    content_type: "Labo Help"
+    url_prefix: "https://mediasuite.clariah.nl/labo/documentation"
+    include: true

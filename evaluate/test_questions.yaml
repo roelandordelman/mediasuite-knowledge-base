@@ -1,0 +1,46 @@
+# Retrieval evaluation questions
+#
+# Each entry has:
+#   question:      what a researcher would actually type
+#   expected_urls: one or more source URLs that MUST appear in the top-10 results
+#   notes:         optional — why this question is useful as a test case
+#
+# Add new questions here as the knowledge base grows.
+# Run: python evaluate/eval_retrieval.py
+
+questions:
+
+  - question: "How do I search for a specific word in a video?"
+    expected_urls:
+      - https://mediasuite.clariah.nl/documentation/howtos/single-search
+    notes: Core search how-to
+
+  - question: "What is the Collection Inspector?"
+    expected_urls:
+      - https://mediasuite.clariah.nl/documentation
+    notes: Tool overview — tests glossary/help retrieval
+
+  - question: "How do I create an annotation?"
+    expected_urls:
+      - https://mediasuite.clariah.nl/documentation/howtos/annotate
+    notes: Annotation tool how-to
+
+  - question: "What collections are available in the Media Suite?"
+    expected_urls:
+      - https://mediasuite.clariah.nl/documentation
+    notes: Should pull overview / help content about available datasets
+
+  - question: "How do I save items to my user project?"
+    expected_urls:
+      - https://mediasuite.clariah.nl/documentation/howtos/user-project
+    notes: Workspace / bookmarking
+
+  - question: "Can I compare two time periods in a collection?"
+    expected_urls:
+      - https://mediasuite.clariah.nl/documentation/howtos/single-search
+    notes: Comparative search or timeline functionality
+
+  - question: "What is automatic speech recognition in the Media Suite?"
+    expected_urls:
+      - https://mediasuite.clariah.nl/documentation
+    notes: ASR / Speech Recognition feature

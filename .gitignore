@@ -1,0 +1,7 @@
+.DS_Store
+knowledge_base.json
+stores/
+__pycache__/
+*.pyc
+.env
+export_to_knowledge_base/
