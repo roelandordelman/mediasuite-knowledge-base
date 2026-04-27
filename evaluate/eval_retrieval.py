@@ -11,7 +11,9 @@ Metrics reported:
 
 Usage:
     python evaluate/eval_retrieval.py
-    python evaluate/eval_retrieval.py --top-k 10 --config config.yaml
+    python evaluate/eval_retrieval.py --top-k 10
+    python evaluate/eval_retrieval.py --category answerable
+    python evaluate/eval_retrieval.py --category gap
 """
 
 import argparse
@@ -31,9 +33,12 @@ def load_config(path: Path) -> dict:
         return yaml.safe_load(f)
 
 
-def load_questions(path: Path) -> list[dict]:
+def load_questions(path: Path, category: str | None = None) -> list[dict]:
     with open(path) as f:
-        return yaml.safe_load(f)["questions"]
+        questions = yaml.safe_load(f)["questions"]
+    if category:
+        questions = [q for q in questions if q.get("category") == category]
+    return questions
 
 
 def embed(text: str, model: str) -> list[float]:
@@ -61,7 +66,7 @@ def reciprocal_rank(retrieved_urls: list[str], expected_urls: list[str]) -> floa
     return 0.0
 
 
-def evaluate(cfg: dict, questions: list[dict], top_k: int) -> None:
+def evaluate(cfg: dict, questions: list[dict], top_k: int, category: str | None = None) -> None:
     vs = cfg["vector_store"]
     embed_model = cfg["embedding"]["model"]
 
@@ -72,7 +77,8 @@ def evaluate(cfg: dict, questions: list[dict], top_k: int) -> None:
     mrr_sum = 0.0
     results = []
 
-    print(f"Evaluating {len(questions)} questions  (top-k={top_k}, deduped by URL)\n")
+    cat_label = f"  category={category}" if category else ""
+    print(f"Evaluating {len(questions)} questions  (top-k={top_k}, deduped by URL{cat_label})\n")
     print(f"{'─' * 70}")
 
     for q in questions:
@@ -96,8 +102,10 @@ def evaluate(cfg: dict, questions: list[dict], top_k: int) -> None:
         hits += int(hit)
         mrr_sum += rr
 
+        cat = q.get("category", "")
+        cat_tag = f" [{cat}]" if cat else ""
         status = "PASS" if hit else "FAIL"
-        print(f"[{status}]  {question}")
+        print(f"[{status}]{cat_tag}  {question}")
         if not hit:
             print(f"  expected:  {expected}")
             print(f"  retrieved: {retrieved_urls[:3]}")
@@ -114,11 +122,16 @@ def main():
     parser.add_argument("--config", type=Path, default=CONFIG_PATH)
     parser.add_argument("--questions", type=Path, default=QUESTIONS_PATH)
     parser.add_argument("--top-k", type=int, default=10)
+    parser.add_argument("--category", choices=["answerable", "partial", "gap"],
+                        help="Only evaluate questions of this category")
     args = parser.parse_args()
 
     cfg = load_config(args.config)
-    questions = load_questions(args.questions)
-    evaluate(cfg, questions, args.top_k)
+    questions = load_questions(args.questions, args.category)
+    if not questions:
+        print(f"No questions found{f' for category={args.category}' if args.category else ''}.")
+        return
+    evaluate(cfg, questions, args.top_k, args.category)
 
 
 if __name__ == "__main__":
