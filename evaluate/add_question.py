@@ -9,6 +9,8 @@ Usage:
     python evaluate/add_question.py --config config.yaml
 """
 
+from __future__ import annotations
+
 import argparse
 import json
 from pathlib import Path
@@ -33,7 +35,7 @@ def load_config(path: Path) -> dict:
         return yaml.safe_load(f)
 
 
-def retrieve(question: str, cfg: dict, top_k: int = 7) -> "list[dict]":
+def retrieve(question: str, cfg: dict, top_k: int = 7) -> list[dict]:
     vs = cfg["vector_store"]
     client = chromadb.HttpClient(host=vs["chroma_host"], port=vs["chroma_port"])
     collection = client.get_or_create_collection(vs["collection_name"])

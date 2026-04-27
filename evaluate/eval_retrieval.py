@@ -16,6 +16,8 @@ Usage:
     python evaluate/eval_retrieval.py --category gap
 """
 
+from __future__ import annotations
+
 import argparse
 import json
 from pathlib import Path
@@ -33,7 +35,7 @@ def load_config(path: Path) -> dict:
         return yaml.safe_load(f)
 
 
-def load_questions(path: Path, category: "str | None" = None) -> "list[dict]":
+def load_questions(path: Path, category: str | None = None) -> list[dict]:
     with open(path) as f:
         questions = yaml.safe_load(f)["questions"]
     if category:
@@ -66,7 +68,7 @@ def reciprocal_rank(retrieved_urls: list[str], expected_urls: list[str]) -> floa
     return 0.0
 
 
-def evaluate(cfg: dict, questions: list[dict], top_k: int, category: "str | None" = None) -> None:
+def evaluate(cfg: dict, questions: list[dict], top_k: int, category: str | None = None) -> None:
     vs = cfg["vector_store"]
     embed_model = cfg["embedding"]["model"]
 

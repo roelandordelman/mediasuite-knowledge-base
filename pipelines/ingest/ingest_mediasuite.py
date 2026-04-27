@@ -15,6 +15,8 @@ Requirements:
     pip install python-frontmatter pyyaml
 """
 
+from __future__ import annotations
+
 import argparse
 import hashlib
 import json
