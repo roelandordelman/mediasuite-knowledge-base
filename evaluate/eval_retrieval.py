@@ -77,7 +77,7 @@ def evaluate(cfg: dict, questions: list[dict], top_k: int, category: str | None 
 
     hits = 0
     mrr_sum = 0.0
-    results = []
+    n_scored = 0  # gap questions excluded from Hit@k and MRR
 
     cat_label = f"  category={category}" if category else ""
     print(f"Evaluating {len(questions)} questions  (top-k={top_k}, deduped by URL{cat_label})\n")
@@ -85,7 +85,9 @@ def evaluate(cfg: dict, questions: list[dict], top_k: int, category: str | None 
 
     for q in questions:
         question = q["question"]
-        expected = q["expected_urls"]
+        cat = q.get("category", "")
+        expected = q.get("expected_urls", [])
+        is_gap = cat == "gap"
 
         embedding = embed(question, embed_model)
         response = collection.query(
@@ -98,25 +100,35 @@ def evaluate(cfg: dict, questions: list[dict], top_k: int, category: str | None 
             response["metadatas"][0], response["distances"][0]
         )
         retrieved_urls = [m["url"] for m in metadatas[:top_k]]
-        rr = reciprocal_rank(retrieved_urls, expected)
-        hit = rr > 0
 
-        hits += int(hit)
-        mrr_sum += rr
+        if is_gap:
+            # Gap questions pass when retrieval finds nothing relevant
+            rr = reciprocal_rank(retrieved_urls, expected) if expected else 0.0
+            hit = rr == 0.0
+            status = "PASS" if hit else "WARN"
+            cat_tag = " [gap]"
+            print(f"[{status}]{cat_tag}  {question}")
+            if not hit:
+                print(f"  WARNING: gap question returned results — check for hallucination")
+                print(f"  retrieved: {retrieved_urls[:3]}")
+        else:
+            rr = reciprocal_rank(retrieved_urls, expected)
+            hit = rr > 0
+            hits += int(hit)
+            mrr_sum += rr
+            n_scored += 1
+            cat_tag = f" [{cat}]" if cat else ""
+            status = "PASS" if hit else "FAIL"
+            print(f"[{status}]{cat_tag}  {question}")
+            if not hit:
+                print(f"  expected:  {expected}")
+                print(f"  retrieved: {retrieved_urls[:3]}")
 
-        cat = q.get("category", "")
-        cat_tag = f" [{cat}]" if cat else ""
-        status = "PASS" if hit else "FAIL"
-        print(f"[{status}]{cat_tag}  {question}")
-        if not hit:
-            print(f"  expected:  {expected}")
-            print(f"  retrieved: {retrieved_urls[:3]}")
-        results.append({"question": question, "hit": hit, "rr": rr})
-
-    n = len(questions)
     print(f"\n{'─' * 70}")
-    print(f"Hit@{top_k}:  {hits}/{n}  ({100 * hits / n:.0f}%)")
-    print(f"MRR:     {mrr_sum / n:.3f}")
+    if n_scored:
+        print(f"Hit@{top_k}:  {hits}/{n_scored}  ({100 * hits / n_scored:.0f}%)  "
+              f"(gap questions excluded)")
+        print(f"MRR:     {mrr_sum / n_scored:.3f}")
 
 
 def main():
