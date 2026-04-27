@@ -96,6 +96,119 @@ All paths and connection details are configured in `config.yaml`.
 
 ---
 
+## Evaluation
+
+A knowledge base is only useful if it retrieves the right information. Evaluation
+is therefore not an afterthought — it is built into the pipeline from the start
+and run every time the knowledge base changes significantly.
+
+### Two levels of evaluation
+
+**Retrieval evaluation** (this repo) answers: *did we get the right chunks back?*
+It tests the embedding model, chunking strategy, and vector store in isolation,
+without involving the chatbot or the language model. This is the fastest feedback
+loop and the first thing to check when something seems wrong.
+
+**Answer evaluation** (in the chatbot repo) answers: *did we say the right thing?*
+It tests the full RAG pipeline end to end — retrieval, prompt construction, and
+generation. This is slower to run and harder to score, but ultimately what
+researchers experience.
+
+### Running retrieval evaluation
+
+```bash
+# make sure the ChromaDB server is running first
+python3 evaluate/eval_retrieval.py
+
+# run only a specific category of questions
+python3 evaluate/eval_retrieval.py --category answerable
+python3 evaluate/eval_retrieval.py --category gap
+```
+
+### The test question set
+
+Test questions are stored in `evaluate/test_questions.yaml` — a plain YAML file
+that is easy to edit without touching any code. Each question has four fields:
+
+```yaml
+- question: "How do I create an annotation?"
+  category: answerable
+  expected_urls:
+    - https://mediasuite.clariah.nl/documentation/howtos/annotate
+  notes: "Core how-to, should always pass"
+```
+
+**Three categories of questions:**
+
+| Category | Meaning | Expected result |
+|---|---|---|
+| `answerable` | Content exists, URL is known | Should PASS — a FAIL means retrieval needs fixing |
+| `partial` | Content exists but is spread across pages, or answer is implicit | May FAIL — tracked for improvement over time |
+| `gap` | Content does not yet exist in the knowledge base | Should FAIL — an unexpected PASS is a warning sign |
+
+The `gap` category is particularly important: it turns known content gaps into a
+concrete, trackable roadmap. Every time new content is added to the knowledge base,
+re-running the evaluation shows which gap questions have been resolved.
+
+### Metrics reported
+
+- **Hit@10** — the proportion of questions where the correct source URL appears
+  somewhere in the top 10 retrieved chunks. The primary metric.
+- **MRR** (Mean Reciprocal Rank) — rewards finding the right answer higher up
+  in the results. A score of 1.0 means the correct URL was always the top result.
+- Results are broken down by category so retrieval failures and known gaps are
+  not conflated.
+- Retrieved URLs are deduplicated — only the highest-scoring chunk per source URL
+  counts, so the top-10 represents 10 distinct pages rather than 10 chunks from
+  the same page.
+
+### Baseline results (v0.1, April 2026)
+
+```
+ANSWERABLE   6/6   (100%)   — after correcting initial test question URLs
+PARTIAL      0/1   (0%)     — ASR content not yet well covered
+GAP          0/N   (0%)     — as expected
+
+Hit@10:  6/7  (86%)
+MRR:     0.71
+```
+
+The jump from an initial 43% to 86% came almost entirely from correcting the
+expected URLs in the test set rather than from changes to the retrieval system.
+This was an early lesson: **evaluation quality matters as much as retrieval
+quality**. A test set with wrong expected answers produces meaningless scores.
+
+### Expanding the test set
+
+The test set should grow alongside the knowledge base. Good sources for new
+test questions:
+
+- Real questions asked by researchers using the chatbot (once deployed)
+- Questions that reveal content gaps — add as `gap` questions immediately,
+  promote to `answerable` once the content is added
+- Edge cases: multilingual questions, very specific technical questions,
+  questions that combine multiple topics
+
+Aim for at least 30 `answerable` questions before treating the Hit@10 score
+as statistically meaningful. With 7 questions, a single failure moves the
+score by 14 percentage points.
+
+### A note on gap questions and hallucination
+
+If a `gap` question unexpectedly passes, investigate before celebrating.
+There are two possible explanations:
+
+1. The content was added to the knowledge base and the test should be promoted
+   to `answerable` — good.
+2. The language model is generating a plausible-sounding answer from unrelated
+   chunks rather than genuinely retrieving relevant content — this is
+   hallucination and needs to be caught.
+
+The retrieval evaluation alone cannot distinguish between these cases. End-to-end
+answer evaluation in the chatbot repo is needed to catch hallucination.
+
+---
+
 ## Chunk schema
 
 ```json
@@ -232,17 +345,6 @@ v0.2        2026-05-10            d8e1f4a        11203
 
 This supports research provenance — a researcher can record which version of the
 knowledge base was active when they used the chatbot.
-
----
-
-## Evaluation
-
-```bash
-python evaluate/eval_retrieval.py
-python evaluate/eval_retrieval.py --top-k 10
-```
-
-Test questions and expected source URLs live in `evaluate/test_questions.yaml`. Add new questions there as the knowledge base grows — never let evaluation be an afterthought.
 
 ---
 
