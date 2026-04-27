@@ -279,7 +279,7 @@ items are kept visible so the learning journey is traceable.
 If something turns out to be harder, less useful, or superseded by a better
 approach than expected, that is noted inline rather than silently removed.
 
-### Phase 1 — Local prototype ✓
+### Phase 1 — Local prototype (in progress)
 
 The goal of this phase is a working end-to-end RAG pipeline running locally,
 good enough to test retrieval quality and answer quality on real questions.
@@ -287,16 +287,18 @@ good enough to test retrieval quality and answer quality on real questions.
 - [x] Ingest Media Suite website content from `beeldengeluid/mediasuite-website`
 - [x] Parse Jekyll/Markdown front matter — preserve title, section, collection, URL
 - [x] Deduplicate chunks across collections (cross-posted tutorials)
+- [x] Fix chunk_text bug — 1-char-step loop was producing 32% junk chunks
 - [x] Embed chunks using `nomic-embed-text` via Ollama
 - [x] Store vectors and metadata in ChromaDB
 - [x] Serve ChromaDB over HTTP (decouple knowledge base from application)
+- [x] URL deduplication in retrieval — keep highest-scoring chunk per source URL
 - [x] Build retrieval evaluation script with Hit@10 and MRR metrics
-- [x] Structured test question set with `answerable` / `partial` / `gap` categories
+- [x] Structured test question set with expected URLs per question
 - [x] Extract `tools_mentioned` and `collections_mentioned` per chunk
-- [x] Add `modified_date` and `source_commit` from git log per source file
-- [x] Add `content_hash` (SHA256) per chunk for drift detection
 - [x] Separate knowledge base repo from chatbot application repo
 - [x] Knowledge base connects to chatbot via HTTP only — no shared filesystem
+- [ ] Add `modified_date` and `source_commit` from git log per source file
+- [ ] Add `content_hash` (SHA256) per chunk for drift detection
 
 ### Phase 2 — Knowledge base enrichment
 
@@ -325,7 +327,8 @@ what we learn from evaluation and real researcher questions.
 - [ ] Implement recency boost — favour recently modified chunks when scores are close
 - [ ] Implement staleness check — periodically compare live page content against ingested chunks
 - [ ] Add re-ingestion pipeline that only re-embeds changed chunks (using `content_hash`)
-- [ ] Investigate query expansion / rewriting to address vocabulary mismatch
+- [ ] Enrich chunk context prefix with UI tool names to fix vocabulary mismatch (e.g. "Collection Inspector" vs "Inspect tool" in docs)
+- [ ] Investigate query expansion / rewriting to address vocabulary mismatch (e.g. "time periods" vs "date intervals")
   - [ ] Evaluate HyDE (Hypothetical Document Embedding) approach
   - [ ] Evaluate simple LLM-based query rewriting before embedding
 - [ ] Tune chunk size and overlap based on retrieval evaluation results
