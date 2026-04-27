@@ -81,6 +81,9 @@ def build_index(input_path: Path, cfg: dict) -> None:
                     "categories": _list_to_json(c.get("categories", [])),
                     "tools_mentioned": _list_to_json(c.get("tools_mentioned", [])),
                     "collections_mentioned": _list_to_json(c.get("collections_mentioned", [])),
+                    "modified_date": c.get("modified_date", ""),
+                    "source_commit": c.get("source_commit", ""),
+                    "content_hash": c.get("content_hash", ""),
                     "char_count": c.get("char_count", 0),
                 }
                 for c in batch

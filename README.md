@@ -279,7 +279,7 @@ items are kept visible so the learning journey is traceable.
 If something turns out to be harder, less useful, or superseded by a better
 approach than expected, that is noted inline rather than silently removed.
 
-### Phase 1 — Local prototype (in progress)
+### Phase 1 — Local prototype ✓
 
 The goal of this phase is a working end-to-end RAG pipeline running locally,
 good enough to test retrieval quality and answer quality on real questions.
@@ -297,8 +297,8 @@ good enough to test retrieval quality and answer quality on real questions.
 - [x] Extract `tools_mentioned` and `collections_mentioned` per chunk
 - [x] Separate knowledge base repo from chatbot application repo
 - [x] Knowledge base connects to chatbot via HTTP only — no shared filesystem
-- [ ] Add `modified_date` and `source_commit` from git log per source file
-- [ ] Add `content_hash` (SHA256) per chunk for drift detection
+- [x] Add `modified_date` and `source_commit` from git log per source file
+- [x] Add `content_hash` (SHA256) per chunk for drift detection
 
 ### Phase 2 — Knowledge base enrichment
 

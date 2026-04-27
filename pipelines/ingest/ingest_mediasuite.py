@@ -16,8 +16,10 @@ Requirements:
 """
 
 import argparse
+import hashlib
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -102,6 +104,30 @@ def chunk_text(text: str, target: int, overlap: int) -> list[str]:
     return chunks
 
 
+def get_git_file_info(repo_path: Path, filepath: Path) -> tuple[str, str]:
+    """Return (modified_date, source_commit) from git log for a file.
+
+    Note: a shallow clone (--depth=1) gives the same date for all files since
+    there is only one commit in the local history. Clone without --depth for
+    accurate per-file modification dates.
+    """
+    try:
+        relative = filepath.relative_to(repo_path)
+        result = subprocess.run(
+            ["git", "log", "-1", "--format=%H %ad", "--date=short", "--", str(relative)],
+            cwd=str(repo_path),
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            commit_hash, date = result.stdout.strip().split(" ", 1)
+            return date, commit_hash
+    except Exception:
+        pass
+    return "", ""
+
+
 def extract_mentioned(haystack: str, known: list[str]) -> list[str]:
     """Return items from known whose name appears (word-boundary match) in haystack."""
     return [
@@ -118,12 +144,15 @@ def ingest_file(
     chunk_overlap: int,
     known_tools: list[str],
     known_collections: list[str],
+    repo_path: Path,
 ) -> list[dict]:
     try:
         post = frontmatter.load(filepath)
     except Exception as e:
         print(f"  WARNING: could not parse {filepath}: {e}", file=sys.stderr)
         return []
+
+    modified_date, source_commit = get_git_file_info(repo_path, filepath)
 
     slug = slug_from_filename(filepath.name)
     url = build_url(conf["url_prefix"], slug)
@@ -175,6 +204,9 @@ def ingest_file(
                 "categories": categories,
                 "tools_mentioned": extract_mentioned(search_text, known_tools),
                 "collections_mentioned": extract_mentioned(search_text, known_collections),
+                "modified_date": modified_date,
+                "source_commit": source_commit,
+                "content_hash": hashlib.sha256(full_text.encode("utf-8")).hexdigest(),
                 "text": full_text,
                 "char_count": len(full_text),
             }
@@ -212,6 +244,7 @@ def ingest_repo(
                 f, collection_key, conf,
                 chunk_target, chunk_overlap,
                 known_tools, known_collections,
+                repo_path,
             )
             file_chunks.extend(chunks)
             if chunks:
