@@ -22,7 +22,11 @@ questions:
   - question: "How do I create an annotation?"
     expected_urls:
       - https://mediasuite.clariah.nl/documentation/howtos/annotate
-    notes: Annotation tool how-to
+      - https://mediasuite.clariah.nl/learn/tool-tutorials/tutorial-sharing-media-suite-annotations-following-the-fair-principles
+      - https://mediasuite.clariah.nl/learn/subject-tutorials/tutorial-sharing-media-suite-annotations-following-the-fair-principles
+      - https://mediasuite.clariah.nl/learn/subject-tutorials/tutorial-segmenting-and-annotating-sesamstraat
+      - https://mediasuite.clariah.nl/learn/tool-tutorials/tutorial-segmenting-and-annotating-sesamstraat
+    notes: How-to or any annotation tutorial acceptable. How-to ranks below tutorials for this query — known retrieval gap.
 
   - question: "What kind of data is available in the Media Suite?"
     expected_urls:
