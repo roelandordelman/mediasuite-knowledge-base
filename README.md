@@ -69,7 +69,9 @@ pip install -r requirements.txt
 ollama pull nomic-embed-text
 
 # 1. Clone the content source
-git clone --depth=1 https://github.com/beeldengeluid/mediasuite-website.git /tmp/mediasuite-website
+# Use full clone (no --depth) to get accurate per-file modified_date from git log.
+# A shallow clone works but all files will show the same date.
+git clone https://github.com/beeldengeluid/mediasuite-website.git /tmp/mediasuite-website
 
 # 2. Ingest → JSON
 python pipelines/ingest/ingest_mediasuite.py
@@ -78,6 +80,15 @@ python pipelines/ingest/ingest_mediasuite.py
 chroma run --path ./stores/chroma_db
 
 # 4. Embed → ChromaDB
+python pipelines/embed/build_index.py
+```
+
+To rebuild the index from scratch (e.g. after a schema change):
+
+```bash
+# Stop the chroma server, then:
+rm -rf ./stores/chroma_db
+chroma run --path ./stores/chroma_db   # restart in a separate terminal
 python pipelines/embed/build_index.py
 ```
 
