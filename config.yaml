@@ -17,7 +17,7 @@ embedding:
 vector_store:
   collection_name: mediasuite
   chroma_host: localhost
-  chroma_port: 8000
+  chroma_port: 8001
 
 # Media Suite tool names used for structured filtering
 known_tools:

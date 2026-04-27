@@ -150,5 +150,5 @@ mediasuite-knowledge-base/
 knowledge_base:
   collection_name: mediasuite
   chroma_host: localhost
-  chroma_port: 8000
+  chroma_port: 8001
 ```

@@ -2,7 +2,8 @@
 Retrieval evaluation — measures how well ChromaDB finds the right sources.
 
 For each question in test_questions.yaml, embeds the question, queries ChromaDB,
-and checks whether each expected URL appears in the top-k results.
+and checks whether any of the expected URLs appears in the top-k results.
+A question PASSES if at least one expected URL is found.
 
 Metrics reported:
   Hit@k   — fraction of questions where ≥1 expected URL appears in top k
@@ -39,6 +40,19 @@ def embed(text: str, model: str) -> list[float]:
     return ollama.embed(model=model, input=[text])["embeddings"][0]
 
 
+def deduplicate_by_url(
+    metadatas: list[dict], distances: list[float]
+) -> tuple[list[dict], list[float]]:
+    """Keep only the highest-scoring (lowest-distance) chunk per source URL."""
+    seen: dict[str, tuple[dict, float]] = {}
+    for meta, dist in zip(metadatas, distances):
+        url = meta["url"]
+        if url not in seen or dist < seen[url][1]:
+            seen[url] = (meta, dist)
+    deduped = sorted(seen.values(), key=lambda x: x[1])
+    return [m for m, _ in deduped], [d for _, d in deduped]
+
+
 def reciprocal_rank(retrieved_urls: list[str], expected_urls: list[str]) -> float:
     """Return 1/rank of the first expected URL found, or 0 if none found."""
     for rank, url in enumerate(retrieved_urls, start=1):
@@ -58,7 +72,7 @@ def evaluate(cfg: dict, questions: list[dict], top_k: int) -> None:
     mrr_sum = 0.0
     results = []
 
-    print(f"Evaluating {len(questions)} questions  (top-k={top_k})\n")
+    print(f"Evaluating {len(questions)} questions  (top-k={top_k}, deduped by URL)\n")
     print(f"{'─' * 70}")
 
     for q in questions:
@@ -68,11 +82,14 @@ def evaluate(cfg: dict, questions: list[dict], top_k: int) -> None:
         embedding = embed(question, embed_model)
         response = collection.query(
             query_embeddings=[embedding],
-            n_results=top_k,
+            n_results=top_k * 3,  # fetch extra so dedup still yields top_k
             include=["metadatas", "distances"],
         )
 
-        retrieved_urls = [m["url"] for m in response["metadatas"][0]]
+        metadatas, distances = deduplicate_by_url(
+            response["metadatas"][0], response["distances"][0]
+        )
+        retrieved_urls = [m["url"] for m in metadatas[:top_k]]
         rr = reciprocal_rank(retrieved_urls, expected)
         hit = rr > 0
 

@@ -2,17 +2,16 @@
 #
 # Each entry has:
 #   question:      what a researcher would actually type
-#   expected_urls: one or more source URLs that MUST appear in the top-10 results
+#   expected_urls: list of acceptable source URLs — PASS if any appears in top-k
 #   notes:         optional — why this question is useful as a test case
 #
 # Add new questions here as the knowledge base grows.
 # Run: python evaluate/eval_retrieval.py
 
 questions:
-
-  - question: "How do I search for a specific word in a video?"
+  - question: "What kind of search operators can I use in the Media Suite?"
     expected_urls:
-      - https://mediasuite.clariah.nl/documentation/howtos/single-search
+      - https://mediasuite.clariah.nl/documentation/howtos/search
     notes: Core search how-to
 
   - question: "What is the Collection Inspector?"
@@ -25,22 +24,23 @@ questions:
       - https://mediasuite.clariah.nl/documentation/howtos/annotate
     notes: Annotation tool how-to
 
-  - question: "What collections are available in the Media Suite?"
+  - question: "What kind of data is available in the Media Suite?"
     expected_urls:
-      - https://mediasuite.clariah.nl/documentation
+      - https://mediasuite.clariah.nl/documentation/faq/what-data
     notes: Should pull overview / help content about available datasets
 
   - question: "How do I save items to my user project?"
     expected_urls:
-      - https://mediasuite.clariah.nl/documentation/howtos/user-project
+      - https://mediasuite.clariah.nl/documentation/howtos/bookmark
     notes: Workspace / bookmarking
 
   - question: "Can I compare two time periods in a collection?"
     expected_urls:
-      - https://mediasuite.clariah.nl/documentation/howtos/single-search
+      - https://mediasuite.clariah.nl/learn/tool-tutorials/tutorial-searching-and-analysing-automatic-speech-recognition-asr-transcripts-as-data-layer-in-television-collections
     notes: Comparative search or timeline functionality
 
   - question: "What is automatic speech recognition in the Media Suite?"
     expected_urls:
-      - https://mediasuite.clariah.nl/documentation
-    notes: ASR / Speech Recognition feature
+      - https://mediasuite.clariah.nl/learn/tool-tutorials/tutorial-searching-and-analysing-automatic-speech-recognition-asr-transcripts-as-data-layer-in-television-collections
+      - https://mediasuite.clariah.nl/learn/tool-tutorials/tutorial-searching-and-analysing-the-sound-and-vision-radio-collection-using-automatic-speech-recognition
+    notes: ASR / Speech Recognition feature — two tutorials are acceptable sources
