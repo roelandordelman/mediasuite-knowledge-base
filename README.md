@@ -370,6 +370,10 @@ production use, where researchers need to cite sources and rely on stable links.
 - [ ] Implement per-chunk provenance metadata suitable for research citation
 - [ ] Add API endpoint to query knowledge base version history
 - [ ] Define deprecation policy for outdated chunks
+- [ ] Expose knowledge base as an MCP server
+  - [ ] Implement `search`, `get_by_url`, `list_collections` tools
+  - [ ] Register as a CLARIAH shared MCP server
+  - [ ] Document for use by other CLARIAH applications
 
 ### Phase 6 — User evaluation and iteration
 
