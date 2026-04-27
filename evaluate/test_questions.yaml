@@ -16,8 +16,9 @@ questions:
 
   - question: "What is the Collection Inspector?"
     expected_urls:
-      - https://mediasuite.clariah.nl/documentation
-    notes: Tool overview — tests glossary/help retrieval
+      - https://mediasuite.clariah.nl/documentation/howtos/inspect-collections
+      - https://mediasuite.clariah.nl/labo/documentation/collection-inspector
+    notes: Tool overview — how-to and labo help both acceptable
 
   - question: "How do I create an annotation?"
     expected_urls:
@@ -40,8 +41,9 @@ questions:
 
   - question: "Can I compare two time periods in a collection?"
     expected_urls:
-      - https://mediasuite.clariah.nl/learn/tool-tutorials/tutorial-searching-and-analysing-automatic-speech-recognition-asr-transcripts-as-data-layer-in-television-collections
-    notes: Comparative search or timeline functionality
+      - https://mediasuite.clariah.nl/labo/documentation/query-comparison
+      - https://mediasuite.clariah.nl/documentation/howtos/compare-queries
+    notes: Query comparison tool — labo help or how-to both acceptable
 
   - question: "What is automatic speech recognition in the Media Suite?"
     expected_urls:
