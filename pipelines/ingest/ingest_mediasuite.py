@@ -95,7 +95,9 @@ def chunk_text(text: str, target: int, overlap: int) -> list[str]:
         if chunk:
             chunks.append(chunk)
 
-        start = max(start + 1, end - overlap)
+        if end >= len(text):
+            break
+        start = end - overlap
 
     return chunks
 
