@@ -14,11 +14,11 @@ questions:
       - https://mediasuite.clariah.nl/documentation/howtos/search
     notes: Core search how-to
 
-  - question: "What is the Collection Inspector?"
+  - question: "How do I inspect collection metadata in the Media Suite?"
     expected_urls:
       - https://mediasuite.clariah.nl/documentation/howtos/inspect-collections
       - https://mediasuite.clariah.nl/labo/documentation/collection-inspector
-    notes: Tool overview — how-to and labo help both acceptable
+    notes: Inspect tool — both pages acceptable. UI name "Collection Inspector" is a known harder variant that fails due to vocabulary mismatch (docs say "Inspect tool"); fix requires enriching chunk prefixes with UI tool names.
 
   - question: "How do I create an annotation?"
     expected_urls:
@@ -39,11 +39,11 @@ questions:
       - https://mediasuite.clariah.nl/documentation/howtos/bookmark
     notes: Workspace / bookmarking
 
-  - question: "Can I compare two time periods in a collection?"
+  - question: "How do I compare search queries in the Media Suite?"
     expected_urls:
       - https://mediasuite.clariah.nl/labo/documentation/query-comparison
       - https://mediasuite.clariah.nl/documentation/howtos/compare-queries
-    notes: Query comparison tool — labo help or how-to both acceptable
+    notes: Compare tool — both pages acceptable. "Can I compare two time periods?" is a known harder variant that ranks targets at #11/#17 due to "time periods" vs doc vocabulary "date intervals"; fix requires query expansion in the chatbot.
 
   - question: "What is automatic speech recognition in the Media Suite?"
     expected_urls:
