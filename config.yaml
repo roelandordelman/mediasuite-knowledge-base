@@ -61,7 +61,7 @@ known_collections:
 publications:
   output: "publications.json"
   cache_dir: "/tmp/publications_cache"
-  openalex_query: "clariah media suite"
+  zotero_group_id: "2288915"
   openalex_email: "roeland.ordelman@pm.me"
   generation_model: "mistral"
   # Paper types to include (paratext, libguides, other excluded)

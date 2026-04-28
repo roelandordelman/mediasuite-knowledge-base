@@ -1,21 +1,22 @@
 """
-Ingest research publications that used the CLARIAH Media Suite.
+Ingest research publications related to the CLARIAH Media Suite.
 
 Pipeline:
-  1. Discover papers via OpenAlex API ("clariah media suite")
-  2. Download open-access PDFs (cached locally)
-  3. Extract text with pdfplumber; detect sections
-  4. Filter for papers that genuinely use Media Suite as a research tool
-  5. Extract: abstract, conclusion, MS-relevant passages, methodology
-  6. Generate a 2-3 sentence summary via Ollama (mistral)
-  7. Output chunks as content_type "Research Example"
-
-Intermediate results cached in publications.cache_dir to make reruns cheap.
+  1. Fetch all items from the Media Studies CLARIAH WP5 Zotero group (public)
+  2. Filter to academic publication types (journal articles, conference papers, etc.)
+  3. Enrich with abstracts + OA PDF URLs from OpenAlex (by DOI, cached)
+  4. Download open-access PDFs where available
+  5. Extract text sections with pdfplumber
+  6. Extract relevant passages (abstract, conclusion, MS-relevant sections)
+  7. Generate a 2-3 sentence summary via Ollama (mistral)
+  8. Output chunks as content_type "Research Example"
 
 Usage:
     python pipelines/ingest/ingest_publications.py
     python pipelines/ingest/ingest_publications.py --no-generate   # skip summaries
-    python pipelines/ingest/ingest_publications.py --limit 10       # test on first 10
+    python pipelines/ingest/ingest_publications.py --limit 10      # test on first 10
+    python pipelines/ingest/ingest_publications.py --no-pdf        # abstracts only
+    python pipelines/ingest/ingest_publications.py --refresh       # re-fetch Zotero + OpenAlex
 
 Requirements:
     pip install pdfplumber requests
@@ -38,15 +39,18 @@ import yaml
 
 CONFIG_PATH = Path(__file__).parents[2] / "config.yaml"
 
-# Media Suite identity terms — a paper must mention at least one in the abstract
-# to be considered genuinely about using the Media Suite
-MS_IDENTITY_TERMS = [
-    "media suite",
-    "mediasuite",
-    "clariah media",
-]
+# Zotero item types treated as academic publications
+ACADEMIC_TYPES = {
+    "journalArticle",
+    "conferencePaper",
+    "bookSection",
+    "book",
+    "report",
+    "document",
+    "thesis",
+    "preprint",
+}
 
-# Section heading patterns (case-insensitive, matched against stripped lines)
 HEADING_RE = re.compile(
     r"^(?:\d+\.?\s*)?"
     r"(abstract|introduction|background|related work|"
@@ -56,6 +60,8 @@ HEADING_RE = re.compile(
     r"conclusion|summary|acknowledgment|references?)s?\.?$",
     re.IGNORECASE,
 )
+
+MAX_SECTION_CHARS = 3000
 
 SUMMARY_PROMPT = """\
 You are summarizing how the CLARIAH Media Suite was used in a research paper.
@@ -83,10 +89,92 @@ def load_config(path: Path) -> dict:
         return yaml.safe_load(f)
 
 
-# ── OpenAlex discovery ──────────────────────────────────────────────────────
+# ── Zotero discovery ────────────────────────────────────────────────────────
+
+def fetch_zotero_items(group_id: str) -> list[dict]:
+    """Fetch all top-level items from a public Zotero group."""
+    base = f"https://api.zotero.org/groups/{group_id}/items/top"
+    items = []
+    start = 0
+    while True:
+        resp = requests.get(
+            base,
+            params={"format": "json", "limit": 100, "v": 3, "start": start},
+            timeout=30,
+        )
+        resp.raise_for_status()
+        batch = resp.json()
+        if not batch:
+            break
+        items.extend(batch)
+        start += 100
+        if len(batch) < 100:
+            break
+        time.sleep(0.1)
+    return items
+
+
+def _extract_year(date_str: str) -> str:
+    m = re.search(r"\b(19|20)\d{2}\b", date_str or "")
+    return m.group(0) if m else ""
+
+
+def _norm_doi(raw: str) -> str:
+    return re.sub(r"^https?://doi\.org/", "", (raw or "").strip(), flags=re.IGNORECASE).lower()
+
+
+def _format_authors(creators: list[dict]) -> str:
+    parts = []
+    for c in creators:
+        if c.get("creatorType") != "author":
+            continue
+        if c.get("lastName") and c.get("firstName"):
+            parts.append(f"{c['lastName']}, {c['firstName']}")
+        elif c.get("lastName"):
+            parts.append(c["lastName"])
+        elif c.get("name"):
+            parts.append(c["name"])
+    return "; ".join(parts)
+
+
+def normalise_zotero_items(raw_items: list[dict]) -> list[dict]:
+    papers = []
+    seen_dois: set[str] = set()
+
+    for item in raw_items:
+        d = item.get("data", {})
+        item_type = d.get("itemType", "")
+        if item_type not in ACADEMIC_TYPES:
+            continue
+        doi = _norm_doi(d.get("DOI", ""))
+        url = d.get("url", "")
+        zotero_web_url = (item.get("links") or {}).get("alternate", {}).get("href", "")
+        canonical_url = f"https://doi.org/{doi}" if doi else (url or zotero_web_url)
+
+        # Deduplicate by DOI — Zotero sometimes has the same paper twice
+        if doi and doi in seen_dois:
+            continue
+        if doi:
+            seen_dois.add(doi)
+
+        papers.append({
+            "zotero_key": item.get("key", ""),
+            "item_type": item_type,
+            "title": (d.get("title") or "").strip(),
+            "authors": _format_authors(d.get("creators", [])),
+            "year": _extract_year(d.get("date", "")),
+            "doi": doi,
+            "url": canonical_url,
+            "abstract": (d.get("abstractNote") or "").strip(),
+            "oa_pdf_url": "",
+            "openalex_id": "",
+        })
+    return papers
+
+
+# ── OpenAlex enrichment ─────────────────────────────────────────────────────
 
 def reconstruct_abstract(inverted_index: dict) -> str:
-    """OpenAlex stores abstracts as inverted indexes. Reconstruct plain text."""
     if not inverted_index:
         return ""
     positions: dict[int, str] = {}
@@ -96,83 +184,60 @@ def reconstruct_abstract(inverted_index: dict) -> str:
     return " ".join(positions[i] for i in sorted(positions))
 
 
-def fetch_openalex_papers(query: str, email: str, types_include: list[str]) -> list[dict]:
-    """Return all OA papers matching the query from OpenAlex."""
+def enrich_from_openalex(papers: list[dict], email: str) -> list[dict]:
+    """Fetch abstract and OA PDF URL from OpenAlex for papers with DOIs."""
     base = "https://api.openalex.org/works"
-    params = {
-        "search": query,
-        "filter": "open_access.is_oa:true",
-        "per_page": 100,
-        "select": "id,title,doi,open_access,best_oa_location,publication_year,type,authorships,abstract_inverted_index",
-        "mailto": email,
-    }
-    papers = []
-    page = 1
-    while True:
-        params["page"] = page
-        resp = requests.get(base, params=params, timeout=30)
-        resp.raise_for_status()
-        data = resp.json()
-        results = data["results"]
-        if not results:
-            break
-        for w in results:
-            wtype = w.get("type", "")
-            if wtype not in types_include:
+    headers = {"User-Agent": f"mediasuite-kb-bot/1.0 (mailto:{email})"}
+    n_enriched = 0
+
+    for paper in papers:
+        if not paper["doi"]:
+            continue
+        try:
+            resp = requests.get(
+                f"{base}/https://doi.org/{paper['doi']}",
+                params={"select": "id,abstract_inverted_index,open_access,best_oa_location"},
+                headers=headers,
+                timeout=15,
+            )
+            if resp.status_code == 404:
                 continue
-            doi = (w.get("doi") or "").replace("https://doi.org/", "")
-            oa_url = (w.get("open_access") or {}).get("oa_url") or ""
-            # Prefer best_oa_location.pdf_url (direct PDF) over oa_url (may be landing page)
-            best_loc = w.get("best_oa_location") or {}
-            pdf_url = best_loc.get("pdf_url") or oa_url
-            abstract = reconstruct_abstract(w.get("abstract_inverted_index") or {})
-            authors = [
-                a["author"]["display_name"]
-                for a in (w.get("authorships") or [])
-                if a.get("author", {}).get("display_name")
-            ]
-            papers.append({
-                "openalex_id": w.get("id", ""),
-                "title": w.get("title") or "",
-                "doi": doi,
-                "url": f"https://doi.org/{doi}" if doi else oa_url,
-                "oa_pdf_url": pdf_url,
-                "year": w.get("publication_year") or "",
-                "type": wtype,
-                "authors": authors,
-                "abstract": abstract,
-            })
-        if page * 100 >= data["meta"]["count"]:
-            break
-        page += 1
-        time.sleep(0.2)  # polite rate limiting
+            resp.raise_for_status()
+            data = resp.json()
 
+            if not paper["abstract"]:
+                abstract = reconstruct_abstract(data.get("abstract_inverted_index") or {})
+                if abstract:
+                    paper["abstract"] = abstract
+
+            best_loc = data.get("best_oa_location") or {}
+            pdf_url = best_loc.get("pdf_url") or (data.get("open_access") or {}).get("oa_url") or ""
+            paper["oa_pdf_url"] = pdf_url
+            paper["openalex_id"] = data.get("id", "")
+            n_enriched += 1
+            time.sleep(0.1)
+        except Exception as e:
+            print(f"    OpenAlex lookup failed for {paper['doi']}: {e}", file=sys.stderr)
+
+    print(f"  Enriched {n_enriched} papers with OpenAlex data")
     return papers
-
-
-# ── Relevance filtering ─────────────────────────────────────────────────────
-
-def is_ms_relevant(paper: dict, known_tools: list[str], known_collections: list[str]) -> bool:
-    """Return True if the abstract indicates genuine Media Suite usage."""
-    haystack = (paper["abstract"] + " " + paper["title"]).lower()
-    if not any(term in haystack for term in MS_IDENTITY_TERMS):
-        return False
-    # Exclude papers where Media Suite is merely cited in passing
-    # Heuristic: must have ≥2 MS-related signals, or at least 1 tool/collection name
-    signals = sum(haystack.count(term) for term in MS_IDENTITY_TERMS)
-    tool_hit = any(t.lower() in haystack for t in known_tools)
-    coll_hit = any(c.lower() in haystack for c in known_collections)
-    return signals >= 2 or tool_hit or coll_hit
 
 
 # ── PDF download and text extraction ───────────────────────────────────────
 
-def doi_slug(identifier: str) -> str:
-    # OpenAlex work URL (https://openalex.org/W...) → extract just the ID
+def _id_slug(identifier: str) -> str:
     m = re.search(r"/(W\d+)$", identifier, re.IGNORECASE)
     if m:
         return m.group(1)
     return re.sub(r"[^a-zA-Z0-9]", "-", identifier)
+
+
+def paper_slug(paper: dict) -> str:
+    if paper["doi"]:
+        return _id_slug(paper["doi"])
+    if paper["openalex_id"]:
+        return _id_slug(paper["openalex_id"])
+    return _id_slug(paper["zotero_key"])
 
 
 def download_pdf(url: str, dest: Path) -> bool:
@@ -186,10 +251,8 @@ def download_pdf(url: str, dest: Path) -> bool:
         )
         resp.raise_for_status()
         content_type = resp.headers.get("content-type", "")
-        if "pdf" not in content_type and not url.lower().endswith(".pdf"):
-            # Might be HTML landing page — skip
-            if "html" in content_type:
-                return False
+        if "html" in content_type and "pdf" not in content_type and not url.lower().endswith(".pdf"):
+            return False
         dest.write_bytes(resp.content)
         return True
     except Exception as e:
@@ -198,10 +261,6 @@ def download_pdf(url: str, dest: Path) -> bool:
 
 
 def extract_text_sections(pdf_path: Path) -> tuple[str, dict[str, str]]:
-    """
-    Extract full text and split into named sections.
-    Returns (full_text, {section_name: section_text}).
-    """
     try:
         with pdfplumber.open(pdf_path) as pdf:
             pages_text = [page.extract_text() or "" for page in pdf.pages]
@@ -211,7 +270,7 @@ def extract_text_sections(pdf_path: Path) -> tuple[str, dict[str, str]]:
 
     full_text = "\n".join(pages_text)
     if len(full_text.strip()) < 200:
-        return full_text, {}  # image-based PDF or nearly empty
+        return full_text, {}
 
     lines = full_text.split("\n")
     sections: dict[str, list[str]] = {}
@@ -223,7 +282,7 @@ def extract_text_sections(pdf_path: Path) -> tuple[str, dict[str, str]]:
         if not stripped:
             continue
         if HEADING_RE.match(stripped) and len(stripped) < 60:
-            current = stripped.lower().split()[0]  # normalise: "1. Introduction" → "introduction"
+            current = stripped.lower().split()[0]
             if current not in sections:
                 sections[current] = []
         else:
@@ -234,40 +293,29 @@ def extract_text_sections(pdf_path: Path) -> tuple[str, dict[str, str]]:
 
 # ── Passage extraction ──────────────────────────────────────────────────────
 
-MAX_SECTION_CHARS = 3000  # cap per extracted passage — avoids dumping the full paper
-
-
 def extract_relevant_passages(
     sections: dict[str, str],
     known_tools: list[str],
     known_collections: list[str],
 ) -> dict[str, str]:
-    """
-    Keep abstract, conclusion always.
-    Keep any section containing Media Suite identity terms or tool/collection names.
-    Cap each passage at MAX_SECTION_CHARS to avoid indexing entire papers when
-    section-heading detection misses most headings.
-    """
     always_keep = {"abstract", "conclusion", "summary", "preamble"}
-    ms_terms_lower = MS_IDENTITY_TERMS + [t.lower() for t in known_tools] + [c.lower() for c in known_collections]
-
+    ms_terms_lower = (
+        ["media suite", "mediasuite", "clariah media"]
+        + [t.lower() for t in known_tools]
+        + [c.lower() for c in known_collections]
+    )
     kept = {}
     for name, text in sections.items():
-        text_lower = text.lower()
         if any(k in name for k in always_keep):
             kept[name] = text[:MAX_SECTION_CHARS]
-        elif any(term in text_lower for term in ms_terms_lower):
+        elif any(term in text.lower() for term in ms_terms_lower):
             kept[name] = text[:MAX_SECTION_CHARS]
     return kept
 
 
 # ── Summary generation ──────────────────────────────────────────────────────
 
-def generate_summary(
-    paper: dict,
-    relevant_passages: dict[str, str],
-    model: str,
-) -> str:
+def generate_summary(paper: dict, relevant_passages: dict[str, str], model: str) -> str:
     passages_text = "\n\n".join(
         f"[{name.title()}]\n{text[:1500]}"
         for name, text in list(relevant_passages.items())[:4]
@@ -303,23 +351,20 @@ def make_chunks(
     chunk_target: int,
     chunk_overlap: int,
 ) -> list[dict]:
-    slug = doi_slug(paper["doi"]) if paper["doi"] else doi_slug(paper["openalex_id"])
+    slug = paper_slug(paper)
     title = paper["title"]
-    authors_str = "; ".join(paper["authors"][:3])
-    year = str(paper["year"])
     url = paper["url"]
-    tags = [paper["type"], year]
+    tags = [paper["item_type"], paper["year"]]
 
     records = []
 
     def add_chunk(section_label: str, text: str, chunk_id_suffix: str) -> None:
         if not text.strip():
             return
-        context_prefix = f"{title}"
+        context_prefix = title
         if section_label:
             context_prefix += f" — {section_label}"
         full_text = f"[{context_prefix}]\n{text.strip()}"
-        search_text = full_text
         records.append({
             "id": f"publications/{slug}/{chunk_id_suffix}",
             "title": title,
@@ -328,41 +373,36 @@ def make_chunks(
             "content_type": "Research Example",
             "url": url,
             "tags": tags,
-            "author": authors_str,
+            "author": paper["authors"],
             "categories": [],
-            "tools_mentioned": extract_mentioned(search_text, known_tools),
-            "collections_mentioned": extract_mentioned(search_text, known_collections),
-            "modified_date": year,
+            "tools_mentioned": extract_mentioned(full_text, known_tools),
+            "collections_mentioned": extract_mentioned(full_text, known_collections),
+            "modified_date": paper["year"],
             "source_commit": paper["doi"],
             "content_hash": hashlib.sha256(full_text.encode()).hexdigest(),
             "text": full_text,
             "char_count": len(full_text),
         })
 
-    # Summary chunk first (most useful for "how did researchers use X?" queries)
     if summary:
         add_chunk("Research Summary", summary, "summary")
 
-    # Abstract
     if paper["abstract"]:
         add_chunk("Abstract", paper["abstract"], "abstract")
 
-    # Relevant passages from PDF (skipping abstract which is already covered)
     for i, (section_name, text) in enumerate(relevant_passages.items()):
         if section_name in ("abstract", "preamble") and paper["abstract"]:
             continue
         if len(text) <= chunk_target:
             add_chunk(section_name.title(), text, f"section-{i}")
         else:
-            # Split long sections
             words = text.split()
             target_words = chunk_target // 5
             overlap_words = chunk_overlap // 5
             j = 0
             sub = 0
             while j < len(words):
-                chunk_words = words[j : j + target_words]
-                add_chunk(section_name.title(), " ".join(chunk_words), f"section-{i}-{sub}")
+                add_chunk(section_name.title(), " ".join(words[j : j + target_words]), f"section-{i}-{sub}")
                 sub += 1
                 if j + target_words >= len(words):
                     break
@@ -377,9 +417,11 @@ def main():
     parser = argparse.ArgumentParser(description="Ingest research publications into the knowledge base")
     parser.add_argument("--config", type=Path, default=CONFIG_PATH)
     parser.add_argument("--output", type=Path, help="Output JSON (overrides config)")
-    parser.add_argument("--limit", type=int, help="Process only first N relevant papers (for testing)")
+    parser.add_argument("--limit", type=int, help="Process only first N papers (for testing)")
     parser.add_argument("--no-generate", action="store_true", help="Skip Ollama summary generation")
-    parser.add_argument("--no-pdf", action="store_true", help="Skip PDF download; use abstracts only")
+    parser.add_argument("--no-pdf", action="store_true", help="Skip PDF download")
+    parser.add_argument("--no-enrich", action="store_true", help="Skip OpenAlex enrichment")
+    parser.add_argument("--refresh", action="store_true", help="Re-fetch Zotero and OpenAlex data (ignore cache)")
     args = parser.parse_args()
 
     cfg = load_config(args.config)
@@ -389,33 +431,46 @@ def main():
     (cache_dir / "pdfs").mkdir(exist_ok=True)
 
     output_path = args.output or (args.config.parent / pub_cfg.get("output", "publications.json"))
-    query = pub_cfg.get("openalex_query", "clariah media suite")
+    zotero_group = pub_cfg.get("zotero_group_id", "2288915")
     email = pub_cfg.get("openalex_email", "")
     gen_model = pub_cfg.get("generation_model", "mistral")
-    types_include = pub_cfg.get("types_include", ["article", "book-chapter", "report", "preprint"])
     chunk_target = cfg["chunking"]["target_chars"]
     chunk_overlap = cfg["chunking"]["overlap_chars"]
     known_tools = cfg.get("known_tools", [])
     known_collections = cfg.get("known_collections", [])
 
-    # Phase 1: Discover papers (cached)
-    papers_cache = cache_dir / "papers.json"
-    if papers_cache.exists():
-        papers = json.loads(papers_cache.read_text())
-        print(f"Loaded {len(papers)} papers from cache ({papers_cache})")
+    # Phase 1: Zotero
+    zotero_cache = cache_dir / "zotero_items.json"
+    if not args.refresh and zotero_cache.exists():
+        raw_items = json.loads(zotero_cache.read_text())
+        print(f"Loaded {len(raw_items)} Zotero items from cache")
     else:
-        print(f"Querying OpenAlex for: {query!r} …")
-        papers = fetch_openalex_papers(query, email, types_include)
-        papers_cache.write_text(json.dumps(papers, ensure_ascii=False, indent=2))
-        print(f"  Found {len(papers)} papers matching types {types_include}")
+        print(f"Fetching Zotero group {zotero_group} …")
+        raw_items = fetch_zotero_items(zotero_group)
+        zotero_cache.write_text(json.dumps(raw_items, ensure_ascii=False, indent=2))
+        print(f"  Fetched {len(raw_items)} items")
 
-    # Phase 2: Filter for relevance
-    relevant = [p for p in papers if is_ms_relevant(p, known_tools, known_collections)]
-    print(f"  {len(relevant)} papers pass relevance filter (MS mentioned in abstract/title)")
+    papers = normalise_zotero_items(raw_items)
+    print(f"  {len(papers)} academic items after type filter")
 
+    # Phase 2: OpenAlex enrichment (abstracts + OA PDF URLs)
+    if not args.no_enrich:
+        enrich_cache = cache_dir / "enriched.json"
+        if not args.refresh and enrich_cache.exists():
+            papers = json.loads(enrich_cache.read_text())
+            print(f"Loaded enriched data from cache")
+        else:
+            print(f"Enriching from OpenAlex …")
+            papers = enrich_from_openalex(papers, email)
+            enrich_cache.write_text(json.dumps(papers, ensure_ascii=False, indent=2))
+
+    with_abstract = sum(1 for p in papers if p["abstract"])
+    print(f"  {with_abstract}/{len(papers)} papers have an abstract")
+
+    to_process = [p for p in papers if p["abstract"]]
     if args.limit:
-        relevant = relevant[: args.limit]
-        print(f"  (limited to first {args.limit} for testing)")
+        to_process = to_process[:args.limit]
+        print(f"  (limited to first {args.limit})")
 
     print("-" * 60)
 
@@ -423,33 +478,30 @@ def main():
     n_processed = 0
     n_skipped = 0
 
-    for i, paper in enumerate(relevant):
+    for i, paper in enumerate(to_process):
         title_short = paper["title"][:65]
-        print(f"\n[{i+1}/{len(relevant)}] {title_short}")
-        print(f"  {paper['year']}  {paper['type']}  {paper['url']}")
+        print(f"\n[{i+1}/{len(to_process)}] {title_short}")
+        print(f"  {paper['year']}  {paper['item_type']}  {paper['url']}")
 
         relevant_passages: dict[str, str] = {}
 
         if not args.no_pdf and paper["oa_pdf_url"]:
-            slug = doi_slug(paper["doi"]) if paper["doi"] else doi_slug(paper["openalex_id"])
+            slug = paper_slug(paper)
             pdf_path = cache_dir / "pdfs" / f"{slug}.pdf"
-
-            downloaded = download_pdf(paper["oa_pdf_url"], pdf_path)
-            if downloaded and pdf_path.exists():
+            if download_pdf(paper["oa_pdf_url"], pdf_path):
                 full_text, sections = extract_text_sections(pdf_path)
                 if sections:
                     relevant_passages = extract_relevant_passages(sections, known_tools, known_collections)
                     print(f"  Extracted {len(sections)} sections; keeping {len(relevant_passages)}: {list(relevant_passages)[:5]}")
                 else:
-                    print(f"  No sections extracted (image-based PDF or parse failure)")
+                    print(f"  No sections extracted from PDF")
             else:
                 print(f"  PDF unavailable — using abstract only")
         elif not args.no_pdf:
             print(f"  No OA PDF URL — using abstract only")
 
-        # Generate summary
         summary = ""
-        if not args.no_generate and (paper["abstract"] or relevant_passages):
+        if not args.no_generate:
             print(f"  Generating summary with {gen_model} …")
             summary = generate_summary(paper, relevant_passages or {"abstract": paper["abstract"]}, gen_model)
             if summary:

@@ -145,17 +145,17 @@ questions:
 
   # ── Research publications ──────────────────────────────────────────────────
 
-  - question: "How have researchers used speech recognition in the Media Suite?"
+  - question: "How has the Media Suite been used for automatic enrichment of audiovisual collections?"
     category: answerable
     expected_urls:
-      - https://research.utwente.nl/en/publications/e08835da-324c-4295-8ac7-d7f7cff13094
-    notes: ASR research paper ranks well above documentation for this research-usage query
+      - https://www.scitepress.org/PublicationsDetail.aspx?ID=DgZjO6HYYTA=&t=1
+    notes: Automatic Annotations conference paper ranks #2 for this query
 
-  - question: "How was the Media Suite used to study WWII eyewitness testimonies?"
+  - question: "How has Media Suite research been used to study wartime radio propaganda?"
     category: answerable
     expected_urls:
-      - https://doi.org/10.18146/tmg.810
-    notes: CrossEWT paper — specific enough that the research example chunk dominates
+      - https://doi.org/10.18146/tmg.821
+    notes: Traces of a Media War — WWII Dutch-language broadcasts study, ranks #1
 
   - question: "What is known about using the Media Suite to study propaganda in Dutch media?"
     category: answerable
@@ -163,14 +163,14 @@ questions:
       - https://doi.org/10.18146/view.306
     notes: Audio on Paper — WWII Dutch media propaganda study
 
-  - question: "Has the Media Suite been used to analyze public debate in Dutch media?"
+  - question: "How have researchers used the Media Suite for developing data stories?"
     category: answerable
     expected_urls:
-      - https://dspace.library.uu.nl/handle/1874/385019
-    notes: Operationalizing public debates paper ranks #1 for this query
+      - https://doi.org/10.5281/zenodo.7501190
+    notes: Developing Data Stories paper ranks #1 for this query
 
-  - question: "How have researchers used the Media Suite to annotate film archive collections?"
+  - question: "How have researchers used the Media Suite for video annotation research?"
     category: answerable
     expected_urls:
-      - https://doi.org/10.18146/tmg.811
-    notes: MIMEHIST paper — annotation of Eye's Jean Desmet Collection
+      - https://www.uni-marburg.de/en/fb09/institutes/media-studies/research/research-projects/digitalfilmhistoriography/events/conference_program
+    notes: Visions of a Timeline — tool-critical perspective on Media Suite video annotation, ranks #4
