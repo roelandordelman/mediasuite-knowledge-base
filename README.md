@@ -18,9 +18,13 @@ flowchart LR
         src1["Jekyll docs\n(mediasuite-website)"]
         src2["data.beeldengeluid.nl\n(GitHub repo)"]
         src3["Research publications\n(Zotero group + OpenAlex)"]
+        src4["Data Stories\n(data-stories GitHub)"]
+        src5["Community site\n(media-suite-community)"]
         ingest1["ingest_mediasuite.py"]
         ingest2["ingest_dataplatform.py"]
         ingest3["ingest_publications.py"]
+        ingest4["ingest_datastories.py"]
+        ingest5["ingest_community.py"]
         json["*.json chunks"]
         embed["build_index.py\n(nomic-embed-text via Ollama)"]
         chroma[("ChromaDB\nHTTP server")]
@@ -28,6 +32,8 @@ flowchart LR
         src1 --> ingest1 --> json
         src2 --> ingest2 --> json
         src3 --> ingest3 --> json
+        src4 --> ingest4 --> json
+        src5 --> ingest5 --> json
         json --> embed --> chroma
     end
 
@@ -72,7 +78,11 @@ From [beeldengeluid/data.beeldengeluid.nl](https://github.com/beeldengeluid/data
 ### Research publications
 From [Zotero group 2288915](https://www.zotero.org/groups/2288915) (the Media Suite community publications list), enriched via OpenAlex for abstracts and open-access PDFs. Each paper gets a generated summary of how the Media Suite was used, chunked alongside abstract and relevant extracted passages. High-relevance papers not in Zotero can be added via `supplementary_dois` in `config.yaml`.
 
-Planned additions: GitHub Issues, Jupyter notebooks, workshop materials.
+### Data Stories
+From [beeldengeluid/data-stories](https://github.com/beeldengeluid/data-stories) — enhanced publication format combining Jupyter Notebook analyses with narrative. 7 English stories on quantitative Media Suite research (gender representation, TV news, election coverage, pandemic media). Dutch-only stories excluded. Each story is chunked by section; bilingual stories prefer the `index.en.md` source.
+
+### Community site (SANE documentation)
+From [roelandordelman/media-suite-community](https://github.com/roelandordelman/media-suite-community) — SANE (Secure Analysis Environment) workflow documentation and available NISV collection descriptions. Covers how researchers work with sensitive audiovisual data that cannot leave the secure environment.
 
 ---
 
@@ -90,16 +100,22 @@ chroma run --path ./stores/chroma_db
 # Use full clone (no --depth) to get accurate per-file modified_date from git log.
 git clone https://github.com/beeldengeluid/mediasuite-website.git /tmp/mediasuite-website
 git clone https://github.com/beeldengeluid/data.beeldengeluid.nl.git /tmp/data.beeldengeluid.nl
+git clone --depth=1 https://github.com/beeldengeluid/data-stories.git /tmp/data-stories
+git clone --depth=1 https://github.com/roelandordelman/media-suite-community.git /tmp/media-suite-community
 
-# 2. Ingest → JSON  (run all three; each produces its own JSON file)
+# 2. Ingest → JSON  (run all; each produces its own JSON file)
 python pipelines/ingest/ingest_mediasuite.py
 python pipelines/ingest/ingest_dataplatform.py
 python pipelines/ingest/ingest_publications.py   # fetches Zotero + OpenAlex; see flags below
+python pipelines/ingest/ingest_datastories.py
+python pipelines/ingest/ingest_community.py
 
 # 3. Embed → ChromaDB  (incremental — skips already-indexed chunks)
 python pipelines/embed/build_index.py --input knowledge_base.json
 python pipelines/embed/build_index.py --input data_platform.json
 python pipelines/embed/build_index.py --input publications.json
+python pipelines/embed/build_index.py --input data_stories.json
+python pipelines/embed/build_index.py --input community.json
 ```
 
 **Publications pipeline flags:**
@@ -120,6 +136,8 @@ chroma run --path ./stores/chroma_db   # restart in a separate terminal
 python pipelines/embed/build_index.py --input knowledge_base.json
 python pipelines/embed/build_index.py --input data_platform.json
 python pipelines/embed/build_index.py --input publications.json
+python pipelines/embed/build_index.py --input data_stories.json
+python pipelines/embed/build_index.py --input community.json
 ```
 
 All paths and connection details are configured in `config.yaml`.
@@ -216,6 +234,13 @@ Hit@10:  26/27  (96%)   MRR: 0.673
 One known failure: "What is the GTAA?" — short "What is X?" questions embed
 close to tutorial introductions rather than the reference page. Tracked in
 `test_questions.yaml`.
+
+**v0.4, April 2026** (+ data stories + SANE community docs, 37 scored questions):
+```
+Hit@10:  28/31  (90%)   MRR: 0.634
+2,568 total chunks across 5 sources
+```
+Three failures: (1) "Has the Media Suite been used for quantitative analysis of television news?" — data stories are narrative/result-focused; the phrase "quantitative analysis" doesn't appear prominently in chunk bodies; (2) "How can I use SANE?" — acronym embeds as the English adjective; descriptive phrasing retrieves correctly; (3) "What is the GTAA?" — persistent known failure. The MRR drop from v0.3 reflects the new harder questions added to the test set rather than a regression in retrieval quality.
 
 ### Expanding the test set
 
@@ -395,7 +420,10 @@ mediasuite-knowledge-base/
 │   ├── ingest/
 │   │   ├── ingest_mediasuite.py      # mediasuite-website → knowledge_base.json
 │   │   ├── ingest_dataplatform.py    # data.beeldengeluid.nl → data_platform.json
-│   │   └── ingest_publications.py    # Zotero + OpenAlex + PDFs → publications.json
+│   │   ├── ingest_publications.py    # Zotero + OpenAlex + PDFs → publications.json
+│   │   ├── ingest_datastories.py     # data-stories repo → data_stories.json
+│   │   ├── ingest_community.py       # media-suite-community → community.json
+│   │   └── ingest_local_docs.py      # local PDFs → local_docs.json (for non-public docs)
 │   └── embed/
 │       └── build_index.py            # JSON chunks → ChromaDB (incremental)
 ├── evaluate/
@@ -407,7 +435,9 @@ mediasuite-knowledge-base/
 ├── requirements.txt
 ├── knowledge_base.json     # gitignored — generated by ingest_mediasuite.py
 ├── data_platform.json      # gitignored — generated by ingest_dataplatform.py
-└── publications.json       # gitignored — generated by ingest_publications.py
+├── publications.json       # gitignored — generated by ingest_publications.py
+├── data_stories.json       # gitignored — generated by ingest_datastories.py
+└── community.json          # gitignored — generated by ingest_community.py
 ```
 
 ---
@@ -472,6 +502,9 @@ that make it significantly more useful to researchers.
 - [~] ~~Ingest Jupyter notebook markdown cells from Media Suite example notebooks~~ — evaluated [`beeldengeluid/task-oriented-notebooks`](https://github.com/beeldengeluid/task-oriented-notebooks) (only notebook repo in org); markdown cells are too thin (mostly section headers) for useful chunking; useful for technical users interested in API/SPARQL access but content is better covered by `data.beeldengeluid.nl` API docs; revisit if a richer notebook repo emerges
 - [x] Ingest data platform documentation from `data.beeldengeluid.nl` — 12 collection pages + 3 API pages; requires web scraper (`ingest_dataplatform.py`)
 - [x] Ingest Zenodo CLARIAH community publications — 72 records checked; tutorial/lesson content excluded as already covered by mediasuite-website ingestion; 5 new DOIs added to `supplementary_dois` (2014–2024 brochure, requirement analysis, DH Benelux paper, ASR workshop, metadata workshop)
+- [x] Ingest Data Stories from [beeldengeluid/data-stories](https://github.com/beeldengeluid/data-stories) — 7 English stories, 369 chunks; closes gap on quantitative research use cases; Dutch-only story (mediaoorlog) excluded
+- [x] Ingest SANE documentation from [roelandordelman/media-suite-community](https://github.com/roelandordelman/media-suite-community) — 18 chunks covering SANE workflow and available NISV collections; "SANE" acronym vocabulary gap remains (chatbot-side fix needed)
+- [~] ~~Ingest internal planning documents (Dutch)~~ — attempted with `ingest_local_docs.py`; the Media Suite Jaarplan 2026 is in Dutch, which the embedding model doesn't bridge to English queries; `ingest_local_docs.py` remains available for future English-language local docs
 - [ ] Ingest workshop and tutorial materials (PDFs, slide decks) — partially addressed via Zenodo supplementary_dois
 - [ ] Expand `known_tools` and `known_collections` lists in `config.yaml` based on corpus analysis
 - [ ] Validate entity extraction quality — check `tools_mentioned` / `collections_mentioned` for false positives
@@ -569,3 +602,6 @@ Updated as the project progresses.
 | 2026-04-28 | Brochure/report PDFs use all-caps branded chapter names (COLLABORATE, DATASETS, SEARCH…) — HEADING_RE only matched academic section names, so all content fell into a single preamble blob | Added ALL_CAPS_HEADING_RE and boilerplate line detection; 2014–2024 brochure went from 6 to 50 chunks |
 | 2026-04-28 | `ollama.embeddings` (old single API) returns unnormalized vectors (magnitude ~21.6); `ollama.embed` (batch API) returns unit-normalized vectors — using the wrong API for query embedding silently corrupts ranking | Always use `ollama.embed` for both indexing and querying |
 | 2026-04-28 | `chunk_title_overrides` alone cannot fix vocabulary mismatch when the chunk body is dominated by specialist terminology — the Similarity page (VisXP, visual keyframes) didn't embed near "computer vision" despite the title fix | Vocabulary gaps need either tag embedding in `build_index.py` or query expansion; title overrides help but don't substitute for body vocabulary |
+| 2026-04-28 | "SANE" as a bare acronym embeds as the common English adjective (mentally healthy), not as "Secure Analysis Environment" — SANE documentation ranks outside top 30 for "How can I use SANE?" but correctly at #2 for descriptive phrasing | Acronym-heavy queries need chatbot-side query expansion; title override to full name partially helps but doesn't fully bridge the gap |
+| 2026-04-28 | Data stories are narrative/result-focused — terms like "quantitative analysis" don't appear prominently in chunk bodies even when the story is literally a quantitative analysis | Research output content needs either tag embedding or query expansion to match methodological vocabulary; story titles alone carry this vocabulary |
+| 2026-04-28 | Internal planning documents in Dutch (Jaarplan 2026) don't surface for English queries despite correct section extraction — nomic-embed-text doesn't reliably bridge Dutch content to English queries | Dutch-language sources require translation/summarisation before indexing; `ingest_local_docs.py` is ready for English-language local docs |

@@ -2,6 +2,9 @@
 knowledge_base.json
 data_platform.json
 publications.json
+local_docs.json
+data_stories.json
+community.json
 stores/
 __pycache__/
 *.pyc

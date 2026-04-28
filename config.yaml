@@ -84,6 +84,29 @@ publications:
     - "10.5281/zenodo.18712971"  # CLARIAH Media Suite Workshop: ASR (lecturer manual + handout)
     - "10.5281/zenodo.18712838"  # CLARIAH Media Suite Workshop: Zoeken en/in Metadata
 
+data_stories:
+  repo_path: /tmp/data-stories
+  output: "data_stories.json"
+  url_prefix: "https://mediasuitedatastories.clariah.nl"
+  content_type: "Data Story"
+  skip_slugs:
+    - mediaoorlog  # Dutch-only story
+
+community_site:
+  repo_path: /tmp/media-suite-community
+  output: "community.json"
+  base_url: "https://roelandordelman.github.io/media-suite-community"
+  pages:
+    - file: sane.md
+      content_type: "SANE Documentation"
+  collections:
+    _sane-collections:
+      content_type: "SANE Documentation"
+      url_prefix: "https://roelandordelman.github.io/media-suite-community/sane/collections"
+  # Override chunk title prefixes to bridge acronym vocabulary gaps
+  title_overrides:
+    sane: "SANE — Secure Analysis Environment for Sensitive Audiovisual Research Data"
+
 data_platform:
   repo_path: /tmp/data.beeldengeluid.nl
   output: "data_platform.json"
