@@ -75,9 +75,14 @@ publications:
   # DOIs to always include regardless of Zotero membership.
   # Use this for high-relevance papers not yet added to the Zotero group.
   supplementary_dois:
-    - "10.18146/tmg.810"   # CrossEWT — WW2 eyewitness testimonies
-    - "10.18146/tmg.811"   # MIMEHIST — annotation of Jean Desmet Collection
-    - "10.18146/tmg.813"   # Comparative Search in Newspaper and AV Archives
+    - "10.18146/tmg.810"         # CrossEWT — WW2 eyewitness testimonies
+    - "10.18146/tmg.811"         # MIMEHIST — annotation of Jean Desmet Collection
+    - "10.18146/tmg.813"         # Comparative Search in Newspaper and AV Archives
+    - "10.5281/zenodo.12517693"  # CLARIAH Media Suite: from 2014 to 2024 (brochure/report)
+    - "10.5281/zenodo.10691620"  # Requirement analysis — Viewing and Listening Rates use case
+    - "10.5281/zenodo.7624998"   # Moving Beyond Tool-Oriented Teaching (DH Benelux 2022 paper)
+    - "10.5281/zenodo.18712971"  # CLARIAH Media Suite Workshop: ASR (lecturer manual + handout)
+    - "10.5281/zenodo.18712838"  # CLARIAH Media Suite Workshop: Zoeken en/in Metadata
 
 data_platform:
   repo_path: /tmp/data.beeldengeluid.nl
