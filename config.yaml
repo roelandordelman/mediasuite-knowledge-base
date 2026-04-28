@@ -59,39 +59,19 @@ known_collections:
   - Open Beelden Natuurbeelden
 
 data_platform:
+  repo_path: /tmp/data.beeldengeluid.nl
   output: "data_platform.json"
-  pages:
-    - url: "https://data.beeldengeluid.nl/datasets/amateurfilms"
+  collections:
+    datasets:
       content_type: "Collection Documentation"
-    - url: "https://data.beeldengeluid.nl/datasets/barend-en-van-dorp"
-      content_type: "Collection Documentation"
-    - url: "https://data.beeldengeluid.nl/datasets/gtaa"
-      content_type: "Collection Documentation"
-    - url: "https://data.beeldengeluid.nl/datasets/muziekopnamen-zendgemachtigden"
-      content_type: "Collection Documentation"
-      title_override: "MOZ collection — Music Recordings (Muziekopnamen Zendgemachtigden)"
-    - url: "https://data.beeldengeluid.nl/datasets/natuurbeelden"
-      content_type: "Collection Documentation"
-    - url: "https://data.beeldengeluid.nl/datasets/nisv-media-catalog"
-      content_type: "Collection Documentation"
-    - url: "https://data.beeldengeluid.nl/datasets/nsb-propagandafilms"
-      content_type: "Collection Documentation"
-    - url: "https://data.beeldengeluid.nl/datasets/open-beelden"
-      content_type: "Collection Documentation"
-    - url: "https://data.beeldengeluid.nl/datasets/open-beelden-op-europeana-sounds"
-      content_type: "Collection Documentation"
-    - url: "https://data.beeldengeluid.nl/datasets/radio-de-brandaris"
-      content_type: "Collection Documentation"
-    - url: "https://data.beeldengeluid.nl/datasets/radio-herrijzend-nederland"
-      content_type: "Collection Documentation"
-    - url: "https://data.beeldengeluid.nl/datasets/radio-oranje"
-      content_type: "Collection Documentation"
-    - url: "https://data.beeldengeluid.nl/apis/gtaa"
+      url_prefix: "https://data.beeldengeluid.nl/datasets"
+    apis:
       content_type: "API Documentation"
-    - url: "https://data.beeldengeluid.nl/apis/nisv-media-catalog"
-      content_type: "API Documentation"
-    - url: "https://data.beeldengeluid.nl/apis/open-images"
-      content_type: "API Documentation"
+      url_prefix: "https://data.beeldengeluid.nl/apis"
+  # Override context-prefix titles for pages with Dutch-dominant titles
+  # to improve retrieval for English queries.
+  title_overrides:
+    muziekopnamen-zendgemachtigden: "MOZ collection — Music Recordings (Muziekopnamen Zendgemachtigden)"
 
 collections:
   _help:

@@ -1,19 +1,21 @@
 """
 Ingest data.beeldengeluid.nl into the knowledge base.
 
-Scrapes dataset and API documentation pages from the Sound & Vision data platform
-and converts them to the same chunk format used by the rest of the pipeline.
+Clones/reads the beeldengeluid/data.beeldengeluid.nl GitHub repo and converts
+the Markdown content files (content/en/datasets/, content/en/apis/) into the
+same chunk format used by the rest of the pipeline.
 
-The site is server-side rendered Nuxt.js. Content lives between
-id="article-heading" and id="teleports" in the raw HTML.
+This is preferable to web scraping: clean Markdown + YAML front matter,
+git metadata for freshness tracking, no dependency on the site's HTML structure.
 
 Usage:
     python pipelines/ingest/ingest_dataplatform.py
-    python pipelines/ingest/ingest_dataplatform.py --output data_platform.json
+    python pipelines/ingest/ingest_dataplatform.py --repo /tmp/data.beeldengeluid.nl
     python pipelines/ingest/ingest_dataplatform.py --config /path/to/config.yaml
 
 Requirements:
-    pip install requests beautifulsoup4
+    pip install python-frontmatter pyyaml
+    (same dependencies as ingest_mediasuite.py — no extra installs needed)
 """
 
 from __future__ import annotations
@@ -22,17 +24,14 @@ import argparse
 import hashlib
 import json
 import re
+import subprocess
 import sys
-import time
 from pathlib import Path
-from urllib.parse import urlparse
 
-import requests
+import frontmatter
 import yaml
-from bs4 import BeautifulSoup
 
 CONFIG_PATH = Path(__file__).parents[2] / "config.yaml"
-CRAWL_DELAY = 1.0  # seconds between requests
 
 
 def load_config(path: Path) -> dict:
@@ -40,118 +39,53 @@ def load_config(path: Path) -> dict:
         return yaml.safe_load(f)
 
 
-def fetch_page(url: str) -> str | None:
+def get_git_file_info(repo_path: Path, filepath: Path) -> tuple[str, str]:
     try:
-        resp = requests.get(url, timeout=15, headers={"User-Agent": "mediasuite-kb-bot/1.0"})
-        resp.raise_for_status()
-        return resp.text
-    except Exception as e:
-        print(f"  ERROR fetching {url}: {e}", file=sys.stderr)
-        return None
+        relative = filepath.relative_to(repo_path)
+        result = subprocess.run(
+            ["git", "log", "-1", "--format=%H %ad", "--date=short", "--", str(relative)],
+            cwd=str(repo_path),
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            commit_hash, date = result.stdout.strip().split(" ", 1)
+            return date, commit_hash
+    except Exception:
+        pass
+    return "", ""
 
 
-def _slug_acronym(url: str, title: str) -> str:
-    """If the URL's last path component is a short all-alpha slug (e.g. 'gtaa')
-    that doesn't already appear in the title, append it as an acronym."""
-    slug = urlparse(url).path.rstrip("/").split("/")[-1]
-    if slug.isalpha() and len(slug) <= 6:
-        acronym = slug.upper()
-        if acronym.lower() not in title.lower():
-            return f"{title} ({acronym})"
-    return title
+def clean_markdown(text: str) -> str:
+    text = re.sub(r"!\[.*?\]\(.*?\)", "", text)
+    text = re.sub(r"\[([^\]]+)\]\([^\)]+\)", r"\1", text)
+    text = re.sub(r"<[^>]+>", "", text)
+    text = re.sub(r"\*{1,3}([^*]+)\*{1,3}", r"\1", text)
+    text = re.sub(r"_{1,3}([^_]+)_{1,3}", r"\1", text)
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    return text.strip()
 
 
-def extract_content(html: str, url: str) -> tuple[str, list[tuple[str, str]]]:
-    """Parse the article content from a data.beeldengeluid.nl page.
-
-    Returns (title, [(section_heading, section_text), ...]).
-    Content lives between id="article-heading" and id="teleports".
-    """
-    soup = BeautifulSoup(html, "html.parser")
-
-    heading_div = soup.find(id="article-heading")
-    teleports_div = soup.find(id="teleports")
-
-    if not heading_div:
-        print(f"  WARNING: no article-heading found for {url}", file=sys.stderr)
-        return "", []
-
-    # Collect all elements from article-heading up to (but not including) teleports
-    content_elements = []
-    current = heading_div
-    while current:
-        if current == teleports_div:
-            break
-        content_elements.append(current)
-        current = current.next_sibling
-
-    combined_html = "".join(str(el) for el in content_elements)
-    content_soup = BeautifulSoup(combined_html, "html.parser")
-
-    # Remove nav/footer/script/style noise
-    for tag in content_soup(["script", "style", "nav", "footer", "button"]):
-        tag.decompose()
-
-    # Extract title: h1 in the heading area is the real collection/API name.
-    # (h3 just contains the page-type label "Dataset" / "API".)
-    title = ""
-    heading_soup = BeautifulSoup(str(heading_div), "html.parser")
-    h1 = heading_soup.find("h1")
-    if h1:
-        title = h1.get_text(" ", strip=True)
-    if not title:
-        # Fall back to <title> element
-        title_el = soup.find("title")
-        if title_el:
-            title = title_el.get_text(strip=True)
-
-    # Append URL slug as acronym hint when it's short and not already in the title
-    # e.g. /datasets/gtaa → "Common Thesaurus Audiovisual Archives (GTAA)"
-    title = _slug_acronym(url, title)
-
-    # Split by h3/h4 section headings
-    sections: list[tuple[str, str]] = []
+def split_into_sections(body: str) -> list[tuple[str, str]]:
+    # Match h2, h3, and h4 headings (data.beeldengeluid.nl uses all three)
+    pattern = re.compile(r"^(#{2,4})\s+(.+)$", re.MULTILINE)
+    sections = []
+    last_end = 0
     current_heading = ""
-    current_parts: list[str] = []
 
-    _NAV_LABELS = {"home", "datasets", "apis", "showcases", "about", "nl", "dataset", "api"}
+    for match in pattern.finditer(body):
+        chunk_text = body[last_end : match.start()].strip()
+        if chunk_text:
+            sections.append((current_heading, chunk_text))
+        current_heading = match.group(2).strip()
+        last_end = match.end()
 
-    for el in content_soup.find_all(["h1", "h2", "h3", "h4", "p", "ul", "ol", "pre", "code", "hr"]):
-        if el.name in ("h1", "h2", "h3", "h4"):
-            text = el.get_text(" ", strip=True)
-            # Skip nav labels and page-type labels ("Dataset", "API")
-            if text.lower() in _NAV_LABELS:
-                continue
-            # Skip the title heading itself
-            if text == title:
-                continue
-            # Save previous section
-            section_text = _clean_whitespace(" ".join(current_parts))
-            if section_text:
-                sections.append((current_heading, section_text))
-            current_heading = text
-            current_parts = []
-        else:
-            text = el.get_text(" ", strip=True)
-            if text:
-                current_parts.append(text)
+    remaining = body[last_end:].strip()
+    if remaining:
+        sections.append((current_heading, remaining))
 
-    # Flush last section
-    section_text = _clean_whitespace(" ".join(current_parts))
-    if section_text:
-        sections.append((current_heading, section_text))
-
-    # If no sections found at all, return the full text as one section
-    if not sections:
-        full_text = _clean_whitespace(content_soup.get_text(" ", strip=True))
-        if full_text:
-            sections = [("", full_text)]
-
-    return title, sections
-
-
-def _clean_whitespace(text: str) -> str:
-    return re.sub(r"\s+", " ", text).strip()
+    return sections
 
 
 def chunk_text(text: str, target: int, overlap: int) -> list[str]:
@@ -186,12 +120,6 @@ def chunk_text(text: str, target: int, overlap: int) -> list[str]:
     return chunks
 
 
-def slug_from_url(url: str) -> str:
-    parsed = urlparse(url)
-    # e.g. /datasets/amateurfilms → datasets-amateurfilms
-    return parsed.path.strip("/").replace("/", "-")
-
-
 def extract_mentioned(haystack: str, known: list[str]) -> list[str]:
     return [
         item for item in known
@@ -199,28 +127,47 @@ def extract_mentioned(haystack: str, known: list[str]) -> list[str]:
     ]
 
 
-def ingest_page(
-    url: str,
+def ingest_file(
+    filepath: Path,
     content_type: str,
+    url_prefix: str,
+    subdir: str,
     chunk_target: int,
     chunk_overlap: int,
     known_tools: list[str],
     known_collections: list[str],
-    title_override: str | None = None,
+    repo_path: Path,
+    title_overrides: dict[str, str] | None = None,
 ) -> list[dict]:
-    print(f"  Fetching {url} …")
-    html = fetch_page(url)
-    if not html:
+    try:
+        post = frontmatter.load(filepath)
+    except Exception as e:
+        print(f"  WARNING: could not parse {filepath}: {e}", file=sys.stderr)
         return []
 
-    title, sections = extract_content(html, url)
-    if title_override:
-        title = title_override
-    if not title and not sections:
-        print(f"  WARNING: no content extracted from {url}", file=sys.stderr)
+    modified_date, source_commit = get_git_file_info(repo_path, filepath)
+
+    slug = filepath.stem
+    url = f"{url_prefix}/{slug}"
+
+    title = (title_overrides or {}).get(slug) or str(post.get("title", slug))
+    subtitle = str(post.get("subtitle", ""))
+    tags = post.get("tags", []) or []
+    if isinstance(tags, str):
+        tags = [tags]
+
+    body = post.content or ""
+
+    # Prepend subtitle as intro text if it adds information not in the body
+    if subtitle and subtitle not in body:
+        body = subtitle + "\n\n" + body
+
+    body_clean = clean_markdown(body)
+    if not body_clean.strip():
         return []
 
-    slug = slug_from_url(url)
+    sections = split_into_sections(body_clean) or [("", body_clean)]
+
     records = []
     chunk_idx = 0
 
@@ -234,19 +181,19 @@ def ingest_page(
             search_text = full_text
 
             record = {
-                "id": f"data_platform/{slug}/{chunk_idx}",
+                "id": f"data_platform/{subdir}/{slug}/{chunk_idx}",
                 "title": title,
                 "section": section_heading,
                 "collection": "data_platform",
                 "content_type": content_type,
                 "url": url,
-                "tags": [],
+                "tags": tags,
                 "author": "",
                 "categories": [],
                 "tools_mentioned": extract_mentioned(search_text, known_tools),
                 "collections_mentioned": extract_mentioned(search_text, known_collections),
-                "modified_date": "",
-                "source_commit": "",
+                "modified_date": modified_date,
+                "source_commit": source_commit,
                 "content_hash": hashlib.sha256(full_text.encode("utf-8")).hexdigest(),
                 "text": full_text,
                 "char_count": len(full_text),
@@ -257,50 +204,109 @@ def ingest_page(
     return records
 
 
+def ingest_collection(
+    repo_path: Path,
+    subdir: str,
+    content_type: str,
+    url_prefix: str,
+    chunk_target: int,
+    chunk_overlap: int,
+    known_tools: list[str],
+    known_collections: list[str],
+    title_overrides: dict[str, str] | None = None,
+) -> tuple[list[dict], int]:
+    coll_dir = repo_path / "content" / "en" / subdir
+    if not coll_dir.exists():
+        print(f"  Skipping {subdir} (not found at {coll_dir})", file=sys.stderr)
+        return [], 0
+
+    files = sorted(coll_dir.glob("*.md"))
+    all_chunks = []
+
+    for f in files:
+        chunks = ingest_file(
+            f, content_type, url_prefix, subdir,
+            chunk_target, chunk_overlap,
+            known_tools, known_collections,
+            repo_path, title_overrides,
+        )
+        if chunks:
+            print(f"  {subdir}/{f.name}: {len(chunks)} chunks")
+        all_chunks.extend(chunks)
+
+    return all_chunks, len(files)
+
+
 def main():
-    parser = argparse.ArgumentParser(description="Ingest data.beeldengeluid.nl into the knowledge base")
+    parser = argparse.ArgumentParser(
+        description="Ingest data.beeldengeluid.nl GitHub repo into the knowledge base"
+    )
     parser.add_argument("--config", type=Path, default=CONFIG_PATH)
+    parser.add_argument("--repo", type=Path, help="Path to cloned repo (overrides config)")
     parser.add_argument("--output", type=Path, help="Output JSON file (overrides config)")
     args = parser.parse_args()
 
     cfg = load_config(args.config)
     dp_cfg = cfg.get("data_platform", {})
-    pages = dp_cfg.get("pages", [])
 
-    if not pages:
-        print("No pages configured under data_platform.pages in config.yaml")
-        sys.exit(1)
-
+    repo_path = args.repo or Path(dp_cfg.get("repo_path", "/tmp/data.beeldengeluid.nl"))
     output_path = args.output or (args.config.parent / dp_cfg.get("output", "data_platform.json"))
+
+    if not repo_path.exists():
+        print(f"Repo not found at {repo_path}. Cloning…")
+        subprocess.run(
+            ["git", "clone", "--depth=1",
+             "https://github.com/beeldengeluid/data.beeldengeluid.nl.git",
+             str(repo_path)],
+            check=True,
+        )
 
     chunk_target = cfg["chunking"]["target_chars"]
     chunk_overlap = cfg["chunking"]["overlap_chars"]
     known_tools = cfg.get("known_tools", [])
     known_collections = cfg.get("known_collections", [])
 
-    print(f"Ingesting {len(pages)} pages from data.beeldengeluid.nl")
+    collections_cfg = dp_cfg.get("collections", {
+        "datasets": {
+            "content_type": "Collection Documentation",
+            "url_prefix": "https://data.beeldengeluid.nl/datasets",
+        },
+        "apis": {
+            "content_type": "API Documentation",
+            "url_prefix": "https://data.beeldengeluid.nl/apis",
+        },
+    })
+
+    print(f"Ingesting from: {repo_path.resolve()}")
     print("-" * 60)
 
-    all_records: list[dict] = []
+    all_chunks: list[dict] = []
+    stats = {}
 
-    for i, page in enumerate(pages):
-        url = page["url"]
-        content_type = page.get("content_type", "Collection Documentation")
-        title_override = page.get("title_override")
-        records = ingest_page(url, content_type, chunk_target, chunk_overlap, known_tools, known_collections, title_override)
-        print(f"    → {len(records)} chunks  (title: {records[0]['title']!r})" if records else "    → 0 chunks")
-        all_records.extend(records)
+    title_overrides = dp_cfg.get("title_overrides", {})
 
-        if i < len(pages) - 1:
-            time.sleep(CRAWL_DELAY)
+    for subdir, conf in collections_cfg.items():
+        chunks, n_files = ingest_collection(
+            repo_path, subdir,
+            conf["content_type"], conf["url_prefix"],
+            chunk_target, chunk_overlap,
+            known_tools, known_collections,
+            title_overrides,
+        )
+        all_chunks.extend(chunks)
+        stats[subdir] = {"files": n_files, "chunks": len(chunks)}
 
     print("-" * 60)
-    print(f"\nTotal: {len(all_records)} chunks from {len(pages)} pages")
+    print("\nSummary:")
+    for subdir, s in stats.items():
+        print(f"  {subdir:20s} {s['files']:3d} files → {s['chunks']:4d} chunks")
+    print(f"  {'TOTAL':20s} {sum(s['files'] for s in stats.values()):3d} files → "
+          f"{len(all_chunks):4d} chunks")
 
     with open(output_path, "w", encoding="utf-8") as f:
-        json.dump(all_records, f, ensure_ascii=False, indent=2)
+        json.dump(all_chunks, f, ensure_ascii=False, indent=2)
 
-    print(f"Written to: {output_path.resolve()}")
+    print(f"\nWritten to: {output_path.resolve()}")
     print(f"File size:  {output_path.stat().st_size / 1024:.1f} KB")
     print(f"\nNext step: python pipelines/embed/build_index.py --input {output_path}")
 
