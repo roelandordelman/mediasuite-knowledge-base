@@ -15,13 +15,20 @@ Intentionally decoupled from any specific application. The first consumer is
 flowchart LR
     subgraph kb["mediasuite-knowledge-base (this repo)"]
         direction TB
-        src["Jekyll docs\n(mediasuite-website)"]
-        ingest["ingest_mediasuite.py"]
-        json["knowledge_base.json"]
+        src1["Jekyll docs\n(mediasuite-website)"]
+        src2["data.beeldengeluid.nl\n(GitHub repo)"]
+        src3["Research publications\n(Zotero group + OpenAlex)"]
+        ingest1["ingest_mediasuite.py"]
+        ingest2["ingest_dataplatform.py"]
+        ingest3["ingest_publications.py"]
+        json["*.json chunks"]
         embed["build_index.py\n(nomic-embed-text via Ollama)"]
         chroma[("ChromaDB\nHTTP server")]
 
-        src --> ingest --> json --> embed --> chroma
+        src1 --> ingest1 --> json
+        src2 --> ingest2 --> json
+        src3 --> ingest3 --> json
+        json --> embed --> chroma
     end
 
     subgraph chatbot["media-suite-learn-chatbot"]
@@ -42,7 +49,8 @@ flowchart LR
 
 ## Content sources
 
-All content comes from [beeldengeluid/mediasuite-website](https://github.com/beeldengeluid/mediasuite-website) (Jekyll/Markdown).
+### Media Suite website
+From [beeldengeluid/mediasuite-website](https://github.com/beeldengeluid/mediasuite-website) (Jekyll/Markdown):
 
 | Collection | Content type | URL base |
 |---|---|---|
@@ -58,7 +66,13 @@ All content comes from [beeldengeluid/mediasuite-website](https://github.com/bee
 | `_labo-help` | Labo Help | mediasuite.clariah.nl/labo/documentation |
 | `_release-notes` | Release Notes | mediasuite.clariah.nl/documentation/release-notes |
 
-Planned additions: GitHub Issues, research publications (via DOI), Jupyter notebooks, data platform documentation.
+### Data platform
+From [beeldengeluid/data.beeldengeluid.nl](https://github.com/beeldengeluid/data.beeldengeluid.nl): collection documentation and API documentation from `data.beeldengeluid.nl`.
+
+### Research publications
+From [Zotero group 2288915](https://www.zotero.org/groups/2288915) (the Media Suite community publications list), enriched via OpenAlex for abstracts and open-access PDFs. Each paper gets a generated summary of how the Media Suite was used, chunked alongside abstract and relevant extracted passages. High-relevance papers not in Zotero can be added via `supplementary_dois` in `config.yaml`.
+
+Planned additions: GitHub Issues, Jupyter notebooks, workshop materials.
 
 ---
 
@@ -69,19 +83,32 @@ Planned additions: GitHub Issues, research publications (via DOI), Jupyter noteb
 pip install -r requirements.txt
 ollama pull nomic-embed-text
 
-# 1. Clone the content source
-# Use full clone (no --depth) to get accurate per-file modified_date from git log.
-# A shallow clone works but all files will show the same date.
-git clone https://github.com/beeldengeluid/mediasuite-website.git /tmp/mediasuite-website
-
-# 2. Ingest → JSON
-python pipelines/ingest/ingest_mediasuite.py
-
-# 3. Start ChromaDB server (keep running in a separate terminal)
+# Start ChromaDB server (keep running in a separate terminal)
 chroma run --path ./stores/chroma_db
 
-# 4. Embed → ChromaDB
-python pipelines/embed/build_index.py
+# 1. Clone the content sources
+# Use full clone (no --depth) to get accurate per-file modified_date from git log.
+git clone https://github.com/beeldengeluid/mediasuite-website.git /tmp/mediasuite-website
+git clone https://github.com/beeldengeluid/data.beeldengeluid.nl.git /tmp/data.beeldengeluid.nl
+
+# 2. Ingest → JSON  (run all three; each produces its own JSON file)
+python pipelines/ingest/ingest_mediasuite.py
+python pipelines/ingest/ingest_dataplatform.py
+python pipelines/ingest/ingest_publications.py   # fetches Zotero + OpenAlex; see flags below
+
+# 3. Embed → ChromaDB  (incremental — skips already-indexed chunks)
+python pipelines/embed/build_index.py --input knowledge_base.json
+python pipelines/embed/build_index.py --input data_platform.json
+python pipelines/embed/build_index.py --input publications.json
+```
+
+**Publications pipeline flags:**
+```bash
+python pipelines/ingest/ingest_publications.py --help
+  --no-pdf        skip PDF download/extraction (abstract-only mode)
+  --no-generate   skip LLM summary generation
+  --refresh       re-fetch Zotero + OpenAlex data (clears API caches)
+  --limit N       process only the first N papers (for testing)
 ```
 
 To rebuild the index from scratch (e.g. after a schema change):
@@ -90,7 +117,9 @@ To rebuild the index from scratch (e.g. after a schema change):
 # Stop the chroma server, then:
 rm -rf ./stores/chroma_db
 chroma run --path ./stores/chroma_db   # restart in a separate terminal
-python pipelines/embed/build_index.py
+python pipelines/embed/build_index.py --input knowledge_base.json
+python pipelines/embed/build_index.py --input data_platform.json
+python pipelines/embed/build_index.py --input publications.json
 ```
 
 All paths and connection details are configured in `config.yaml`.
@@ -163,21 +192,25 @@ re-running the evaluation shows which gap questions have been resolved.
   counts, so the top-10 represents 10 distinct pages rather than 10 chunks from
   the same page.
 
-### Baseline results (v0.1, April 2026)
+### Results
 
+**v0.1, April 2026** (Media Suite website only, 7 questions):
 ```
-ANSWERABLE   6/6   (100%)   — after correcting initial test question URLs
-PARTIAL      0/1   (0%)     — ASR content not yet well covered
-GAP          0/N   (0%)     — as expected
-
-Hit@10:  6/7  (86%)
-MRR:     0.71
+Hit@10:  6/7  (86%)    MRR: 0.71
 ```
-
 The jump from an initial 43% to 86% came almost entirely from correcting the
 expected URLs in the test set rather than from changes to the retrieval system.
 This was an early lesson: **evaluation quality matters as much as retrieval
-quality**. A test set with wrong expected answers produces meaningless scores.
+quality**.
+
+**v0.2, April 2026** (+ data platform + release notes, 35 questions):
+```
+Hit@10:  25/26  (96%)   MRR: 0.688
+(gap questions excluded from scored metrics)
+```
+One known failure: "What is the GTAA?" — short "What is X?" questions embed
+close to tutorial introductions rather than the reference page. Tracked in
+`test_questions.yaml`.
 
 ### Expanding the test set
 
@@ -355,9 +388,11 @@ knowledge base was active when they used the chatbot.
 mediasuite-knowledge-base/
 ├── pipelines/
 │   ├── ingest/
-│   │   └── ingest_mediasuite.py
+│   │   ├── ingest_mediasuite.py      # mediasuite-website → knowledge_base.json
+│   │   ├── ingest_dataplatform.py    # data.beeldengeluid.nl → data_platform.json
+│   │   └── ingest_publications.py    # Zotero + OpenAlex + PDFs → publications.json
 │   └── embed/
-│       └── build_index.py
+│       └── build_index.py            # JSON chunks → ChromaDB (incremental)
 ├── evaluate/
 │   ├── eval_retrieval.py
 │   └── test_questions.yaml
@@ -365,7 +400,9 @@ mediasuite-knowledge-base/
 │   └── chroma_db/          # gitignored — regenerate via pipeline
 ├── config.yaml
 ├── requirements.txt
-└── knowledge_base.json     # gitignored — generated by ingest
+├── knowledge_base.json     # gitignored — generated by ingest_mediasuite.py
+├── data_platform.json      # gitignored — generated by ingest_dataplatform.py
+└── publications.json       # gitignored — generated by ingest_publications.py
 ```
 
 ---
@@ -421,11 +458,12 @@ that make it significantly more useful to researchers.
 
 - [~] ~~Ingest GitHub Issues from `beeldengeluid/mediasuite-website`~~ — evaluated and skipped; issues are mostly bug reports and dependency bumps, not useful Q&A content
 - [x] Ingest `_release-notes/` from `beeldengeluid/mediasuite-website` (24 files, v2–v7.5+) — 88 chunks of version changelogs; good retrieval for collection/feature history questions
-- [ ] Ingest research publications via DOIs
-  - [ ] Use Unpaywall API to find open access PDFs
-  - [ ] Filter for Media Suite relevance (two-pass: abstract scan → passage extraction)
-  - [ ] Generate per-paper summary of how the Media Suite was used
-  - [ ] Tag as `content_type: Research Example` with DOI as persistent identifier
+- [x] Ingest research publications
+  - [x] Use Zotero group 2288915 as primary source (~90 academic papers); OpenAlex for abstract + OA PDF enrichment
+  - [x] Filter for Media Suite relevance (two-pass: abstract scan → passage extraction from PDF)
+  - [x] Generate per-paper summary of how the Media Suite was used (Mistral via Ollama)
+  - [x] `supplementary_dois` config mechanism for high-relevance papers not yet in Zotero
+  - [x] Tag as `content_type: Research Publication` with DOI as persistent identifier
 - [~] ~~Ingest Jupyter notebook markdown cells from Media Suite example notebooks~~ — evaluated [`beeldengeluid/task-oriented-notebooks`](https://github.com/beeldengeluid/task-oriented-notebooks) (only notebook repo in org); markdown cells are too thin (mostly section headers) for useful chunking; useful for technical users interested in API/SPARQL access but content is better covered by `data.beeldengeluid.nl` API docs; revisit if a richer notebook repo emerges
 - [x] Ingest data platform documentation from `data.beeldengeluid.nl` — 12 collection pages + 3 API pages; requires web scraper (`ingest_dataplatform.py`)
 - [ ] Ingest workshop and tutorial materials (PDFs, slide decks)
@@ -437,7 +475,7 @@ that make it significantly more useful to researchers.
 The goal of this phase is to improve retrieval precision and recall based on
 what we learn from evaluation and real researcher questions.
 
-- [ ] Expand test question set to 30+ questions across all three categories
+- [x] Expand test question set to 30+ questions across all three categories (35 questions, April 2026)
 - [ ] Add end-to-end answer quality evaluation in the chatbot repo
 - [ ] Implement recency boost — favour recently modified chunks when scores are close
 - [ ] Implement staleness check — periodically compare live page content against ingested chunks
@@ -515,3 +553,6 @@ Updated as the project progresses.
 | 2026-04-25 | ChromaDB metadata only supports scalar values — lists must be JSON-encoded | Added note to chunk schema documentation; chatbot query layer must `json.loads()` list fields |
 | 2026-04-25 | Deduplication improved MRR from 0.333 to 0.357 — modest but meaningful | Post-retrieval deduplication by URL confirmed as standard step |
 | 2026-04-25 | LLM answer quality poor even when retrieval was correct | Retrieval and generation are separate failure modes — need separate evaluation |
+| 2026-04-28 | OpenAlex text search returned only 16 relevant papers; switching to Zotero group 2288915 gave ~90 academic papers | Zotero is the canonical source; OpenAlex is enrichment only |
+| 2026-04-28 | References/acknowledgments sections were inflating chunk counts (57 chunks from one paper) | Added `never_keep` filter; kept sections now capped at 3000 chars |
+| 2026-04-28 | 30 Zotero papers had no URL field — chatbot could not deep-link | Fixed by using `item["links"]["alternate"]["href"]` (Zotero web link) as fallback |
