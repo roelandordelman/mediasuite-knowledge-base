@@ -50,3 +50,95 @@ questions:
       - https://mediasuite.clariah.nl/learn/tool-tutorials/tutorial-searching-and-analysing-automatic-speech-recognition-asr-transcripts-as-data-layer-in-television-collections
       - https://mediasuite.clariah.nl/learn/tool-tutorials/tutorial-searching-and-analysing-the-sound-and-vision-radio-collection-using-automatic-speech-recognition
     notes: ASR / Speech Recognition feature — two tutorials are acceptable sources
+
+  - question: "How can I log into the Media Suite?"
+    category: answerable
+    expected_urls:
+      - https://mediasuite.clariah.nl/documentation/faq/who-can-access
+      - https://mediasuite.clariah.nl/documentation/howtos/login
+      - https://mediasuite.clariah.nl/learn/tool-tutorials/logging-in-workspace-and-creating-a-user-project
+
+  - question: "Can I download my annotations?"
+    category: partial
+    expected_urls:
+      - https://mediasuite.clariah.nl/learn/tool-tutorials/tutorial-sharing-media-suite-annotations-following-the-fair-principles
+      - https://mediasuite.clariah.nl/documentation/howtos/export
+
+  - question: "What types of annotations does the Media Suite support?"
+    category: answerable
+    expected_urls:
+      - https://mediasuite.clariah.nl/learn/tool-tutorials/tutorial-sharing-media-suite-annotations-following-the-fair-principles
+
+  - question: "I cannot find my institution when I want to login, why is that?"
+    category: answerable
+    expected_urls:
+      - https://mediasuite.clariah.nl/documentation/faq/who-can-access
+      - https://mediasuite.clariah.nl/documentation/howtos/login
+
+  - question: "How can I do quantitative analysis with Media Suite data with a Jupyter Notebook?"
+    category: gap
+
+  - question: "What does the FactRank tool do?"
+    category: gap
+
+  - question: "Why can I not view content?"
+    category: partial
+    expected_urls:
+      - https://mediasuite.clariah.nl/documentation/troubleshooting
+      - https://mediasuite.clariah.nl/documentation/faq/who-can-access
+
+  - question: "How can I use SANE?"
+    category: gap
+
+  - question: "How can I use computer vision in the Media Suite?"
+    category: gap
+
+  - question: "Can I add my own data to the Media Suite?"
+    category: gap
+
+  - question: "Who develops the Media Suite?"
+    category: partial
+    expected_urls:
+      - https://mediasuite.clariah.nl/documentation/faq/who-develops
+    notes: "\"Who is leading\" fails (vocabulary gap: leading vs develops); using more direct phrasing"
+
+  - question: "who funded the Media Suite?"
+    category: gap
+    notes: "should at some point say something like NWO via CLARIAH, for example in Large Scale Research Infrastructure (LSRI) projects."
+
+  - question: "Give me a list of researchers that worked with the Media Suite"
+    category: gap
+
+  - question: "What does the Reflexibity Tool do?"
+    category: gap
+
+  - question: "Can you tell me morte about the metadata of the NISV collection?"
+    category: partial
+    expected_urls:
+      - https://mediasuite.clariah.nl/documentation/faq/what-data
+      - https://data.beeldengeluid.nl/apis/nisv-media-catalog
+
+  - question: "How do I query the NISV media catalog with SPARQL?"
+    category: answerable
+    expected_urls:
+      - https://data.beeldengeluid.nl/apis/nisv-media-catalog
+      - https://mediasuite.clariah.nl/learn/tool-tutorials/tutorial-searching-and-exploring-with-linked-data-and-wikidata-in-the-media-suite
+
+  - question: "What does the MOZ collection contain?"
+    category: answerable
+    expected_urls:
+      - https://data.beeldengeluid.nl/datasets/muziekopnamen-zendgemachtigden
+
+  - question: "What is the difference between Open Beelden and Open Beelden op Europeana Sounds?"
+    category: gap
+
+  - question: "What open data license does Sound & Vision use?"
+    category: partial
+    expected_urls:
+      - https://data.beeldengeluid.nl/datasets/open-beelden
+
+  - question: "What is the GTAA?"
+    category: partial
+    expected_urls:
+      - https://data.beeldengeluid.nl/datasets/gtaa
+    notes: "Short 'What is X?' questions embed close to tutorial introductions rather than reference docs; GTAA page ranks ~18th. Known retrieval gap — revisit if re-ranking or metadata filtering is added."

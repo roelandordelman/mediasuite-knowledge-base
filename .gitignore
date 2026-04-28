@@ -1,5 +1,6 @@
 .DS_Store
 knowledge_base.json
+data_platform.json
 stores/
 __pycache__/
 *.pyc

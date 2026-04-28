@@ -1,4 +1,6 @@
+beautifulsoup4
 chromadb
 ollama
 python-frontmatter
 pyyaml
+requests

@@ -418,14 +418,15 @@ good enough to test retrieval quality and answer quality on real questions.
 The goal of this phase is to expand the knowledge base with additional sources
 that make it significantly more useful to researchers.
 
-- [ ] Ingest GitHub Issues from `beeldengeluid/mediasuite-website` as authentic Q&A
+- [~] ~~Ingest GitHub Issues from `beeldengeluid/mediasuite-website`~~ — evaluated and skipped; issues are mostly bug reports and dependency bumps, not useful Q&A content
+- [ ] Ingest `_release-notes/` from `beeldengeluid/mediasuite-website` (24 files, v2–v7.5+) — version changelogs documenting feature history per tool and collection
 - [ ] Ingest research publications via DOIs
   - [ ] Use Unpaywall API to find open access PDFs
   - [ ] Filter for Media Suite relevance (two-pass: abstract scan → passage extraction)
   - [ ] Generate per-paper summary of how the Media Suite was used
   - [ ] Tag as `content_type: Research Example` with DOI as persistent identifier
-- [ ] Ingest Jupyter notebook markdown cells from Media Suite example notebooks
-- [ ] Ingest data platform documentation from `data.beeldengeluid.nl`
+- [~] ~~Ingest Jupyter notebook markdown cells from Media Suite example notebooks~~ — evaluated [`beeldengeluid/task-oriented-notebooks`](https://github.com/beeldengeluid/task-oriented-notebooks) (only notebook repo in org); markdown cells are too thin (mostly section headers) for useful chunking; useful for technical users interested in API/SPARQL access but content is better covered by `data.beeldengeluid.nl` API docs; revisit if a richer notebook repo emerges
+- [x] Ingest data platform documentation from `data.beeldengeluid.nl` — 12 collection pages + 3 API pages; requires web scraper (`ingest_dataplatform.py`)
 - [ ] Ingest workshop and tutorial materials (PDFs, slide decks)
 - [ ] Expand `known_tools` and `known_collections` lists in `config.yaml` based on corpus analysis
 - [ ] Validate entity extraction quality — check `tools_mentioned` / `collections_mentioned` for false positives
