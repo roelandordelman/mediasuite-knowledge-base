@@ -206,7 +206,12 @@ quality**.
 **v0.2, April 2026** (+ data platform + release notes, 35 questions):
 ```
 Hit@10:  25/26  (96%)   MRR: 0.688
-(gap questions excluded from scored metrics)
+```
+
+**v0.3, April 2026** (+ research publications, Zenodo, chunk_title_overrides, 35 questions / 27 scored):
+```
+Hit@10:  26/27  (96%)   MRR: 0.673
+2,181 total chunks across mediasuite docs, data platform, and 52 publications
 ```
 One known failure: "What is the GTAA?" — short "What is X?" questions embed
 close to tutorial introductions rather than the reference page. Tracked in
@@ -466,7 +471,8 @@ that make it significantly more useful to researchers.
   - [x] Tag as `content_type: Research Publication` with DOI as persistent identifier
 - [~] ~~Ingest Jupyter notebook markdown cells from Media Suite example notebooks~~ — evaluated [`beeldengeluid/task-oriented-notebooks`](https://github.com/beeldengeluid/task-oriented-notebooks) (only notebook repo in org); markdown cells are too thin (mostly section headers) for useful chunking; useful for technical users interested in API/SPARQL access but content is better covered by `data.beeldengeluid.nl` API docs; revisit if a richer notebook repo emerges
 - [x] Ingest data platform documentation from `data.beeldengeluid.nl` — 12 collection pages + 3 API pages; requires web scraper (`ingest_dataplatform.py`)
-- [ ] Ingest workshop and tutorial materials (PDFs, slide decks)
+- [x] Ingest Zenodo CLARIAH community publications — 72 records checked; tutorial/lesson content excluded as already covered by mediasuite-website ingestion; 5 new DOIs added to `supplementary_dois` (2014–2024 brochure, requirement analysis, DH Benelux paper, ASR workshop, metadata workshop)
+- [ ] Ingest workshop and tutorial materials (PDFs, slide decks) — partially addressed via Zenodo supplementary_dois
 - [ ] Expand `known_tools` and `known_collections` lists in `config.yaml` based on corpus analysis
 - [ ] Validate entity extraction quality — check `tools_mentioned` / `collections_mentioned` for false positives
 
@@ -475,11 +481,15 @@ that make it significantly more useful to researchers.
 The goal of this phase is to improve retrieval precision and recall based on
 what we learn from evaluation and real researcher questions.
 
-- [x] Expand test question set to 30+ questions across all three categories (35 questions, April 2026)
+- [x] Expand test question set to 30+ questions across all three categories (35 questions including 8 publication research questions, April 2026)
+- [x] `chunk_title_overrides` config mechanism — override the `[Title]` prefix in chunk text for pages where the source title uses different vocabulary than researchers' queries (e.g. "Similarity" → "Similarity — Computer Vision Tool for Visual Image Search")
+- [x] All-caps chapter heading detection for PDF section extraction — fixes brochure/report PDFs that use branded chapter names instead of academic section names (abstract, methods, results, etc.)
+- [x] Boilerplate detection in PDF extraction — repeated page headers/footers (appearing on >30% of pages) are excluded from both heading detection and chunk content
 - [ ] Add end-to-end answer quality evaluation in the chatbot repo
+- [ ] Embed tags alongside chunk text in `build_index.py` — tags contain tool/collection names that don't always appear in the chunk body; embedding them would fix residual vocabulary mismatch (e.g. "Computer Vision" tag on Similarity page)
 - [ ] Implement recency boost — favour recently modified chunks when scores are close
 - [ ] Implement staleness check — periodically compare live page content against ingested chunks
-- [ ] Add re-ingestion pipeline that only re-embeds changed chunks (using `content_hash`)
+- [ ] Fix incremental re-indexing — `build_index.py` currently skips by chunk ID; changed chunks (e.g. after a title override) must be manually deleted before re-indexing
 - [ ] Enrich chunk context prefix with UI tool names to fix vocabulary mismatch (e.g. "Collection Inspector" vs "Inspect tool" in docs)
 - [ ] Investigate query expansion / rewriting to address vocabulary mismatch (e.g. "time periods" vs "date intervals")
   - [ ] Evaluate HyDE (Hypothetical Document Embedding) approach
@@ -556,3 +566,6 @@ Updated as the project progresses.
 | 2026-04-28 | OpenAlex text search returned only 16 relevant papers; switching to Zotero group 2288915 gave ~90 academic papers | Zotero is the canonical source; OpenAlex is enrichment only |
 | 2026-04-28 | References/acknowledgments sections were inflating chunk counts (57 chunks from one paper) | Added `never_keep` filter; kept sections now capped at 3000 chars |
 | 2026-04-28 | 30 Zotero papers had no URL field — chatbot could not deep-link | Fixed by using `item["links"]["alternate"]["href"]` (Zotero web link) as fallback |
+| 2026-04-28 | Brochure/report PDFs use all-caps branded chapter names (COLLABORATE, DATASETS, SEARCH…) — HEADING_RE only matched academic section names, so all content fell into a single preamble blob | Added ALL_CAPS_HEADING_RE and boilerplate line detection; 2014–2024 brochure went from 6 to 50 chunks |
+| 2026-04-28 | `ollama.embeddings` (old single API) returns unnormalized vectors (magnitude ~21.6); `ollama.embed` (batch API) returns unit-normalized vectors — using the wrong API for query embedding silently corrupts ranking | Always use `ollama.embed` for both indexing and querying |
+| 2026-04-28 | `chunk_title_overrides` alone cannot fix vocabulary mismatch when the chunk body is dominated by specialist terminology — the Similarity page (VisXP, visual keyframes) didn't embed near "computer vision" despite the title fix | Vocabulary gaps need either tag embedding in `build_index.py` or query expansion; title overrides help but don't substitute for body vocabulary |
