@@ -61,6 +61,10 @@ HEADING_RE = re.compile(
     re.IGNORECASE,
 )
 
+# Matches all-caps chapter headings found in brochures, reports, and deliverables
+# (e.g. "COLLABORATE", "ACCESSING DATA", "VIEW AND ANNOTATE")
+ALL_CAPS_HEADING_RE = re.compile(r"^[A-Z][A-Z\s&/()\-]{2,44}$")
+
 MAX_SECTION_CHARS = 3000
 
 SUMMARY_PROMPT = """\
@@ -330,6 +334,13 @@ def extract_text_sections(pdf_path: Path) -> tuple[str, dict[str, str]]:
     if len(full_text.strip()) < 200:
         return full_text, {}
 
+    # Detect repeated page headers/footers — lines appearing on >30% of pages
+    from collections import Counter
+    all_stripped = [l.strip() for p in pages_text for l in p.split("\n") if l.strip()]
+    freq = Counter(all_stripped)
+    n_pages = len(pages_text)
+    boilerplate = {line for line, count in freq.items() if count >= max(3, n_pages * 0.3)}
+
     lines = full_text.split("\n")
     sections: dict[str, list[str]] = {}
     current = "preamble"
@@ -337,10 +348,12 @@ def extract_text_sections(pdf_path: Path) -> tuple[str, dict[str, str]]:
 
     for line in lines:
         stripped = line.strip()
-        if not stripped:
+        if not stripped or stripped in boilerplate:
             continue
-        if HEADING_RE.match(stripped) and len(stripped) < 60:
-            current = stripped.lower().split()[0]
+        if len(stripped) < 60 and (
+            HEADING_RE.match(stripped) or ALL_CAPS_HEADING_RE.match(stripped)
+        ):
+            current = stripped.lower()
             if current not in sections:
                 sections[current] = []
         else:
