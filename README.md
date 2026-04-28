@@ -56,6 +56,7 @@ All content comes from [beeldengeluid/mediasuite-website](https://github.com/bee
 | `_learn_tool_criticism` | Tool Criticism | mediasuite.clariah.nl/learn/tool-criticism |
 | `_learn_example_projects` | Example Projects | mediasuite.clariah.nl/learn/example-projects |
 | `_labo-help` | Labo Help | mediasuite.clariah.nl/labo/documentation |
+| `_release-notes` | Release Notes | mediasuite.clariah.nl/documentation/release-notes |
 
 Planned additions: GitHub Issues, research publications (via DOI), Jupyter notebooks, data platform documentation.
 
@@ -419,7 +420,7 @@ The goal of this phase is to expand the knowledge base with additional sources
 that make it significantly more useful to researchers.
 
 - [~] ~~Ingest GitHub Issues from `beeldengeluid/mediasuite-website`~~ — evaluated and skipped; issues are mostly bug reports and dependency bumps, not useful Q&A content
-- [ ] Ingest `_release-notes/` from `beeldengeluid/mediasuite-website` (24 files, v2–v7.5+) — version changelogs documenting feature history per tool and collection
+- [x] Ingest `_release-notes/` from `beeldengeluid/mediasuite-website` (24 files, v2–v7.5+) — 88 chunks of version changelogs; good retrieval for collection/feature history questions
 - [ ] Ingest research publications via DOIs
   - [ ] Use Unpaywall API to find open access PDFs
   - [ ] Filter for Media Suite relevance (two-pass: abstract scan → passage extraction)

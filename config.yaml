@@ -114,3 +114,7 @@ collections:
     content_type: "Labo Help"
     url_prefix: "https://mediasuite.clariah.nl/labo/documentation"
     include: true
+  _release-notes:
+    content_type: "Release Notes"
+    url_prefix: "https://mediasuite.clariah.nl/documentation/release-notes"
+    include: true

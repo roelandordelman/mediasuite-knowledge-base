@@ -45,6 +45,7 @@ https://github.com/beeldengeluid/mediasuite-website (Jekyll/Siteleaf).
 | `_learn_tool_criticism` | Tool Criticism | mediasuite.clariah.nl/learn/tool-criticism |
 | `_learn_example_projects` | Example Projects | mediasuite.clariah.nl/learn/example-projects |
 | `_labo-help` | Labo Help | mediasuite.clariah.nl/labo/documentation |
+| `_release-notes` | Release Notes | mediasuite.clariah.nl/documentation/release-notes |
 
 ## Planned additional sources
 
