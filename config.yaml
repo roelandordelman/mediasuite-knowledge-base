@@ -99,6 +99,12 @@ data_platform:
   title_overrides:
     muziekopnamen-zendgemachtigden: "MOZ collection — Music Recordings (Muziekopnamen Zendgemachtigden)"
 
+# Override the [Title] context prefix in chunk text, keyed by URL slug.
+# Use when the page title uses different vocabulary than researchers would use
+# in queries (e.g. tool has a branded name but researchers search by concept).
+chunk_title_overrides:
+  similarity: "Similarity — Computer Vision Tool for Visual Image Search"
+
 collections:
   _help:
     content_type: "Help / Documentation"

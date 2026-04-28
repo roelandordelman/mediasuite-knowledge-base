@@ -91,7 +91,11 @@ questions:
     category: gap
 
   - question: "How can I use computer vision in the Media Suite?"
-    category: gap
+    category: answerable
+    expected_urls:
+      - https://mediasuite.clariah.nl/labo/documentation/similarity
+      - https://doi.org/10.5281/zenodo.12517693
+    notes: Similarity tool (VisXP) is the computer vision feature; vocabulary mismatch fixed via chunk_title_overrides in config.yaml
 
   - question: "Can I add my own data to the Media Suite?"
     category: gap

@@ -147,6 +147,7 @@ def ingest_file(
     known_tools: list[str],
     known_collections: list[str],
     repo_path: Path,
+    chunk_title_overrides: dict | None = None,
 ) -> list[dict]:
     try:
         post = frontmatter.load(filepath)
@@ -160,6 +161,8 @@ def ingest_file(
     url = build_url(conf["url_prefix"], slug)
 
     title = str(post.get("title", slug))
+    if chunk_title_overrides and slug in chunk_title_overrides:
+        title = chunk_title_overrides[slug]
     author = str(post.get("author", ""))
     tags = post.get("tags", [])
     if isinstance(tags, str):
@@ -225,6 +228,7 @@ def ingest_repo(
     chunk_overlap: int,
     known_tools: list[str],
     known_collections: list[str],
+    chunk_title_overrides: dict | None = None,
 ) -> tuple[list[dict], dict]:
     all_chunks = []
     stats = {}
@@ -247,6 +251,7 @@ def ingest_repo(
                 chunk_target, chunk_overlap,
                 known_tools, known_collections,
                 repo_path,
+                chunk_title_overrides=chunk_title_overrides,
             )
             file_chunks.extend(chunks)
             if chunks:
@@ -281,6 +286,7 @@ def main():
     chunk_overlap = cfg["chunking"]["overlap_chars"]
     known_tools = cfg.get("known_tools", [])
     known_collections = cfg.get("known_collections", [])
+    chunk_title_overrides = cfg.get("chunk_title_overrides", {})
 
     print(f"Ingesting from: {repo_path.resolve()}")
     print("-" * 60)
@@ -289,6 +295,7 @@ def main():
         repo_path, cfg["collections"],
         chunk_target, chunk_overlap,
         known_tools, known_collections,
+        chunk_title_overrides=chunk_title_overrides,
     )
 
     print("-" * 60)
