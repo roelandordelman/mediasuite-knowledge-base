@@ -58,6 +58,21 @@ known_collections:
   - NISV Art Collection
   - Open Beelden Natuurbeelden
 
+publications:
+  output: "publications.json"
+  cache_dir: "/tmp/publications_cache"
+  openalex_query: "clariah media suite"
+  openalex_email: "roeland.ordelman@pm.me"
+  generation_model: "mistral"
+  # Paper types to include (paratext, libguides, other excluded)
+  types_include:
+    - article
+    - book-chapter
+    - report
+    - preprint
+    - dissertation
+    - book
+
 data_platform:
   repo_path: /tmp/data.beeldengeluid.nl
   output: "data_platform.json"

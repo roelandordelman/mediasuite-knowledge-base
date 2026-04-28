@@ -1,4 +1,6 @@
 chromadb
 ollama
+pdfplumber
 python-frontmatter
 pyyaml
+requests

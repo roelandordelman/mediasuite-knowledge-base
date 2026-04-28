@@ -142,3 +142,35 @@ questions:
     expected_urls:
       - https://data.beeldengeluid.nl/datasets/gtaa
     notes: "Short 'What is X?' questions embed close to tutorial introductions rather than reference docs; GTAA page ranks ~18th. Known retrieval gap — revisit if re-ranking or metadata filtering is added."
+
+  # ── Research publications ──────────────────────────────────────────────────
+
+  - question: "How have researchers used speech recognition in the Media Suite?"
+    category: answerable
+    expected_urls:
+      - https://research.utwente.nl/en/publications/e08835da-324c-4295-8ac7-d7f7cff13094
+    notes: ASR research paper ranks well above documentation for this research-usage query
+
+  - question: "How was the Media Suite used to study WWII eyewitness testimonies?"
+    category: answerable
+    expected_urls:
+      - https://doi.org/10.18146/tmg.810
+    notes: CrossEWT paper — specific enough that the research example chunk dominates
+
+  - question: "What is known about using the Media Suite to study propaganda in Dutch media?"
+    category: answerable
+    expected_urls:
+      - https://doi.org/10.18146/view.306
+    notes: Audio on Paper — WWII Dutch media propaganda study
+
+  - question: "Has the Media Suite been used to analyze public debate in Dutch media?"
+    category: answerable
+    expected_urls:
+      - https://dspace.library.uu.nl/handle/1874/385019
+    notes: Operationalizing public debates paper ranks #1 for this query
+
+  - question: "How have researchers used the Media Suite to annotate film archive collections?"
+    category: answerable
+    expected_urls:
+      - https://doi.org/10.18146/tmg.811
+    notes: MIMEHIST paper — annotation of Eye's Jean Desmet Collection
