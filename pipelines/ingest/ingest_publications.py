@@ -223,6 +223,64 @@ def enrich_from_openalex(papers: list[dict], email: str) -> list[dict]:
     return papers
 
 
+def fetch_supplementary_papers(dois: list[str], email: str, existing_dois: set[str]) -> list[dict]:
+    """Fetch papers by DOI from OpenAlex for DOIs not already in the Zotero set."""
+    base = "https://api.openalex.org/works"
+    headers = {"User-Agent": f"mediasuite-kb-bot/1.0 (mailto:{email})"}
+    papers = []
+
+    for doi in dois:
+        doi = _norm_doi(doi)
+        if doi in existing_dois:
+            continue
+        try:
+            resp = requests.get(
+                f"{base}/https://doi.org/{doi}",
+                params={
+                    "select": (
+                        "id,title,doi,authorships,publication_year,type,"
+                        "abstract_inverted_index,open_access,best_oa_location"
+                    )
+                },
+                headers=headers,
+                timeout=15,
+            )
+            if resp.status_code == 404:
+                print(f"  WARNING: supplementary DOI not found on OpenAlex: {doi}", file=sys.stderr)
+                continue
+            resp.raise_for_status()
+            d = resp.json()
+
+            authors = "; ".join(
+                f"{a['author']['display_name']}"
+                for a in (d.get("authorships") or [])
+                if a.get("author", {}).get("display_name")
+            )
+            abstract = reconstruct_abstract(d.get("abstract_inverted_index") or {})
+            best_loc = d.get("best_oa_location") or {}
+            pdf_url = best_loc.get("pdf_url") or (d.get("open_access") or {}).get("oa_url") or ""
+            raw_doi = (d.get("doi") or "").replace("https://doi.org/", "")
+
+            papers.append({
+                "zotero_key": "",
+                "item_type": d.get("type", "journalArticle"),
+                "title": (d.get("title") or "").strip(),
+                "authors": authors,
+                "year": str(d.get("publication_year") or ""),
+                "doi": raw_doi,
+                "url": f"https://doi.org/{raw_doi}" if raw_doi else "",
+                "abstract": abstract,
+                "oa_pdf_url": pdf_url,
+                "openalex_id": d.get("id", ""),
+            })
+            print(f"  Fetched supplementary: {d.get('title', doi)[:60]}")
+            time.sleep(0.1)
+        except Exception as e:
+            print(f"  WARNING: could not fetch {doi}: {e}", file=sys.stderr)
+
+    return papers
+
+
 # ── PDF download and text extraction ───────────────────────────────────────
 
 def _id_slug(identifier: str) -> str:
@@ -463,6 +521,16 @@ def main():
             print(f"Enriching from OpenAlex …")
             papers = enrich_from_openalex(papers, email)
             enrich_cache.write_text(json.dumps(papers, ensure_ascii=False, indent=2))
+
+    # Phase 3: Supplementary papers (DOIs in config not in Zotero)
+    supplementary_dois = pub_cfg.get("supplementary_dois", [])
+    if supplementary_dois and not args.no_enrich:
+        existing_dois = {p["doi"] for p in papers if p["doi"]}
+        print(f"Fetching {len(supplementary_dois)} supplementary DOIs …")
+        extra = fetch_supplementary_papers(supplementary_dois, email, existing_dois)
+        papers.extend(extra)
+        if extra:
+            print(f"  Added {len(extra)} supplementary papers")
 
     with_abstract = sum(1 for p in papers if p["abstract"])
     print(f"  {with_abstract}/{len(papers)} papers have an abstract")

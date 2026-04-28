@@ -72,6 +72,12 @@ publications:
     - preprint
     - dissertation
     - book
+  # DOIs to always include regardless of Zotero membership.
+  # Use this for high-relevance papers not yet added to the Zotero group.
+  supplementary_dois:
+    - "10.18146/tmg.810"   # CrossEWT — WW2 eyewitness testimonies
+    - "10.18146/tmg.811"   # MIMEHIST — annotation of Jean Desmet Collection
+    - "10.18146/tmg.813"   # Comparative Search in Newspaper and AV Archives
 
 data_platform:
   repo_path: /tmp/data.beeldengeluid.nl

@@ -174,3 +174,22 @@ questions:
     expected_urls:
       - https://www.uni-marburg.de/en/fb09/institutes/media-studies/research/research-projects/digitalfilmhistoriography/events/conference_program
     notes: Visions of a Timeline — tool-critical perspective on Media Suite video annotation, ranks #4
+
+  - question: "How was the Media Suite used to study WWII eyewitness testimonies?"
+    category: answerable
+    expected_urls:
+      - https://doi.org/10.18146/tmg.810
+    notes: CrossEWT — supplementary paper (not in Zotero group, added via supplementary_dois)
+
+  - question: "Has the Media Suite been used to analyze public debate in Dutch media?"
+    category: partial
+    expected_urls:
+      - https://dspace.library.uu.nl/handle/1874/385019
+      - https://mediasuite.clariah.nl/learn/example-projects/debate-research-across-media-cross-media-research-of-public-debates-on-drugs-and-regulation-dream
+    notes: Operationalizing public debates paper has no DOI so cannot be fetched via supplementary_dois; example project page is an acceptable fallback
+
+  - question: "How have researchers used the Media Suite to annotate film archive collections?"
+    category: answerable
+    expected_urls:
+      - https://doi.org/10.18146/tmg.811
+    notes: MIMEHIST — supplementary paper (not in Zotero group, added via supplementary_dois)
