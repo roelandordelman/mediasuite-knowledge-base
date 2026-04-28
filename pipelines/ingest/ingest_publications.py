@@ -357,6 +357,7 @@ def extract_relevant_passages(
     known_collections: list[str],
 ) -> dict[str, str]:
     always_keep = {"abstract", "conclusion", "summary", "preamble"}
+    never_keep = {"references", "acknowledgment", "acknowledgments", "bibliography"}
     ms_terms_lower = (
         ["media suite", "mediasuite", "clariah media"]
         + [t.lower() for t in known_tools]
@@ -364,6 +365,8 @@ def extract_relevant_passages(
     )
     kept = {}
     for name, text in sections.items():
+        if any(k in name for k in never_keep):
+            continue
         if any(k in name for k in always_keep):
             kept[name] = text[:MAX_SECTION_CHARS]
         elif any(term in text.lower() for term in ms_terms_lower):
@@ -535,7 +538,12 @@ def main():
     with_abstract = sum(1 for p in papers if p["abstract"])
     print(f"  {with_abstract}/{len(papers)} papers have an abstract")
 
-    to_process = [p for p in papers if p["abstract"]]
+    pdf_dir = cache_dir / "pdfs"
+    # Include papers without an abstract if a local PDF has been placed in the cache dir
+    to_process = [
+        p for p in papers
+        if p["abstract"] or (pdf_dir / f"{paper_slug(p)}.pdf").exists()
+    ]
     if args.limit:
         to_process = to_process[:args.limit]
         print(f"  (limited to first {args.limit})")
@@ -553,10 +561,13 @@ def main():
 
         relevant_passages: dict[str, str] = {}
 
-        if not args.no_pdf and paper["oa_pdf_url"]:
-            slug = paper_slug(paper)
-            pdf_path = cache_dir / "pdfs" / f"{slug}.pdf"
-            if download_pdf(paper["oa_pdf_url"], pdf_path):
+        slug = paper_slug(paper)
+        pdf_path = pdf_dir / f"{slug}.pdf"
+        # Use local PDF if present (even if no oa_pdf_url and no abstract yet)
+        if not args.no_pdf and (paper["oa_pdf_url"] or pdf_path.exists()):
+            if not pdf_path.exists():
+                download_pdf(paper["oa_pdf_url"], pdf_path)
+            if pdf_path.exists():
                 full_text, sections = extract_text_sections(pdf_path)
                 if sections:
                     relevant_passages = extract_relevant_passages(sections, known_tools, known_collections)
@@ -569,9 +580,10 @@ def main():
             print(f"  No OA PDF URL — using abstract only")
 
         summary = ""
-        if not args.no_generate:
+        content_for_summary = relevant_passages or ({"abstract": paper["abstract"]} if paper["abstract"] else {})
+        if not args.no_generate and content_for_summary:
             print(f"  Generating summary with {gen_model} …")
-            summary = generate_summary(paper, relevant_passages or {"abstract": paper["abstract"]}, gen_model)
+            summary = generate_summary(paper, content_for_summary, gen_model)
             if summary:
                 print(f"  Summary: {summary[:100]}…")
 
