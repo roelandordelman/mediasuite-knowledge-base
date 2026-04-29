@@ -564,6 +564,12 @@ ms:GWStep1 a schema:HowToStep ;
     tadirah:activity tadirah:Searching ;
     schema:result ms:SearchResult .
 
+ms:GWStep2 a schema:HowToStep ;
+    schema:position 2 ;
+    schema:instrument ms:AnnotationTool ;
+    tadirah:activity tadirah:Annotating ;
+    schema:result ms:AnnotatedCorpus .
+
 ms:GWStep3 a schema:HowToStep ;
     schema:position 3 ;
     schema:instrument <https://sane.surf.nl/> ;  # external tool
