@@ -454,6 +454,145 @@ knowledge_base:
 
 ---
 
+## Entity model and vocabulary
+
+The knowledge base is designed to support a structured data layer (Phase 4)
+alongside the vector store. This section documents the entity model and
+vocabulary alignment so that Phase 3 preparation work builds toward a coherent
+Phase 4 graph.
+
+### The problem
+
+The word "tool" is overloaded in research infrastructure. The Media Suite is
+simultaneously a research environment (a hosted platform), a bundle of
+user-facing functionalities (Search Tool, Annotation Tool…), a consumer of
+underlying infrastructure services (ASR, Computer Vision), and a participant in
+cross-environment research workflows (data registry → Media Suite → publication
+platform). Treating all of these as "tools" collapses distinctions that matter
+both for retrieval and for alignment with CLARIAH infrastructure vocabularies.
+
+### Five entity types
+
+| Entity type | What it describes | Media Suite example |
+|---|---|---|
+| `ResearchEnvironment` | A hosted platform that bundles tools and collection access | The Media Suite |
+| `ComponentTool` | A user-facing functionality within an environment, directly operated by researchers | Search Tool, Annotation Tool, Compare Tool |
+| `InfrastructureService` | An underlying technical service; researchers consume its outputs, not the service itself | ASR, Computer Vision / VisXP |
+| `Workflow` | An ordered sequence of tool uses, within or across environments | search → annotate → export → publish to Zenodo |
+| `DataProduct` | A collection, enrichment output, or intermediate research artifact | Sound & Vision Archive, ASR transcripts, annotation sets |
+
+### Vocabulary alignment
+
+| Vocabulary | Namespace | Used for |
+|---|---|---|
+| schema.org | `schema:` | Core software and resource properties |
+| CodeMeta | `codemeta:` | Software development metadata |
+| softwaretypes | `softwaretypes:` (`w3id.org/software-types`) | Tool type classification |
+| softwareiodata | `softwareiodata:` (`w3id.org/software-iodata`) | Input/output data type descriptions |
+| TaDiRaH | `tadirah:` (`vocabs.dariah.eu/tadirah`) | Research activities (Searching, Annotating, Comparing…) |
+| DCAT | `dcat:` | Dataset and collection descriptions |
+| GTAA | — | Subject terms for audiovisual collections (aligns with `data.beeldengeluid.nl`) |
+| PROV-O | `prov:` | Workflow provenance and step ordering |
+| Custom | `clariah:` | `ResearchEnvironment`, `InfrastructureService`, `deploysService`, `enriches` |
+
+Two custom terms are needed because no existing vocabulary covers the
+distinction between a research platform and the tools or infrastructure services
+it bundles. These are candidates for contribution to the tools.clariah.nl
+vocabulary stack, since other CLARIAH infrastructures face the same modelling
+problem.
+
+### Relationships
+
+```
+ResearchEnvironment
+  ├── schema:hasPart ──────────────► ComponentTool
+  │                                       ├── tadirah:researchActivity ──► tadirah:Searching etc.
+  │                                       ├── softwareiodata:hasInput ───► DataProduct
+  │                                       └── softwareiodata:hasOutput ──► DataProduct
+  └── clariah:deploysService ───────► InfrastructureService
+                                          ├── softwareiodata:hasInput ───► DataProduct (raw media)
+                                          ├── softwareiodata:hasOutput ──► DataProduct (transcripts)
+                                          └── clariah:enriches ──────────► dcat:Dataset (collection)
+
+Workflow
+  └── schema:step (ordered) ────────► WorkflowStep
+                                          ├── schema:instrument ─────────► ComponentTool (or external)
+                                          ├── tadirah:activity ──────────► tadirah:Concept
+                                          └── schema:result ─────────────► DataProduct
+```
+
+### Turtle sketch
+
+```turtle
+@prefix clariah:        <https://w3id.org/clariah/vocab#> .
+@prefix ms:             <https://mediasuite.clariah.nl/vocab#> .
+@prefix schema:         <http://schema.org/> .
+@prefix tadirah:        <https://vocabs.dariah.eu/tadirah/> .
+@prefix softwareiodata: <https://w3id.org/software-iodata#> .
+@prefix dcat:           <http://www.w3.org/ns/dcat#> .
+
+# Research environment
+ms:MediaSuite a schema:WebApplication, clariah:ResearchEnvironment ;
+    schema:name "CLARIAH Media Suite" ;
+    schema:url <https://mediasuite.clariah.nl> ;
+    schema:hasPart ms:SearchTool, ms:AnnotationTool, ms:CompareTool ;
+    clariah:deploysService ms:ASRService, ms:ComputerVisionService .
+
+# Component tool
+ms:SearchTool a schema:WebApplication, clariah:ComponentTool ;
+    schema:name "Search Tool" ;
+    schema:isPartOf ms:MediaSuite ;
+    tadirah:researchActivity tadirah:Searching, tadirah:Browsing ;
+    softwareiodata:hasInput ms:AudiovisualCollection ;
+    softwareiodata:hasOutput ms:SearchResult .
+
+# Infrastructure service
+ms:ASRService a schema:SoftwareApplication, clariah:InfrastructureService ;
+    schema:name "Automatic Speech Recognition" ;
+    softwareiodata:hasInput ms:AudioRecording ;
+    softwareiodata:hasOutput ms:Transcript ;
+    clariah:enriches <https://data.beeldengeluid.nl/datasets/nisv-media-catalog> .
+
+# Cross-environment workflow (drawn from gender data story)
+ms:GenderWorkflow a schema:HowTo ;
+    schema:name "Gender representation analysis using Media Suite and SANE" ;
+    schema:step ms:GWStep1, ms:GWStep2, ms:GWStep3, ms:GWStep4 .
+
+ms:GWStep1 a schema:HowToStep ;
+    schema:position 1 ;
+    schema:instrument ms:SearchTool ;
+    tadirah:activity tadirah:Searching ;
+    schema:result ms:SearchResult .
+
+ms:GWStep3 a schema:HowToStep ;
+    schema:position 3 ;
+    schema:instrument <https://sane.surf.nl/> ;  # external tool
+    tadirah:activity tadirah:Analyzing ;
+    schema:result ms:AnalysisDataset .
+
+ms:GWStep4 a schema:HowToStep ;
+    schema:position 4 ;
+    schema:instrument <https://zenodo.org> ;      # external platform
+    tadirah:activity tadirah:Publishing ;
+    schema:result ms:Publication .
+```
+
+### Alignment with tools.clariah.nl and the SSHOC Marketplace
+
+The Media Suite is registered in tools.clariah.nl (flows through to the SSHOC
+Open Marketplace). The entity model above extends the current registration by
+adding `ComponentTool` and `InfrastructureService` descriptions and first-class
+`Workflow` objects. The two custom vocabulary terms are candidates for
+contribution to the tools.clariah.nl vocabulary so that other CLARIAH
+infrastructures facing the same modelling challenge can align.
+
+Workflows referencing tools from multiple environments (Media Suite + SANE +
+Zenodo) are exactly what the SSHOC Marketplace workflow model is designed for
+— the Turtle representation above can be submitted as a structured workflow
+entry there once finalised.
+
+---
+
 ## Roadmap
 
 This roadmap tracks the development of the knowledge base from local prototype
@@ -509,10 +648,13 @@ that make it significantly more useful to researchers.
 - [ ] Expand `known_tools` and `known_collections` lists in `config.yaml` based on corpus analysis
 - [ ] Validate entity extraction quality — check `tools_mentioned` / `collections_mentioned` for false positives
 
-### Phase 3 — Retrieval quality improvements
+### Phase 3 — Retrieval quality improvements + vocabulary preparation
 
 The goal of this phase is to improve retrieval precision and recall based on
-what we learn from evaluation and real researcher questions.
+what we learn from evaluation and real researcher questions, and to lay the
+vocabulary groundwork for the structured data layer in Phase 4.
+
+**Retrieval quality**
 
 - [x] Expand test question set to 30+ questions across all three categories (35 questions including 8 publication research questions, April 2026)
 - [x] `chunk_title_overrides` config mechanism — override the `[Title]` prefix in chunk text for pages where the source title uses different vocabulary than researchers' queries (e.g. "Similarity" → "Similarity — Computer Vision Tool for Visual Image Search")
@@ -530,19 +672,53 @@ what we learn from evaluation and real researcher questions.
 - [ ] Tune chunk size and overlap based on retrieval evaluation results
 - [ ] Investigate re-ranking — use a cross-encoder to re-rank top-k results before generation
 
+**Vocabulary preparation (groundwork for Phase 4)**
+
+- [ ] Define a `clariah-vocab.ttl` file with custom terms not covered by existing vocabularies:
+  `clariah:ResearchEnvironment`, `clariah:ComponentTool`, `clariah:InfrastructureService`,
+  `clariah:deploysService`, `clariah:enriches` — with `rdfs:label`, `rdfs:comment`, and
+  alignment links to `codemeta:`, `softwaretypes:`, `schema:`, `tadirah:`
+- [ ] Map `known_tools` list in `config.yaml` to TaDiRaH activity URIs
+  (e.g. `SearchTool` → `tadirah:Searching`, `AnnotationTool` → `tadirah:Annotating`) — these
+  mappings become the basis for structured activity tagging in Phase 4
+- [ ] Write Media Suite entity descriptions in Turtle — one named individual per entity
+  (MediaSuite as `clariah:ResearchEnvironment`, each tool as `clariah:ComponentTool`,
+  ASR/VisXP as `clariah:InfrastructureService`, collections as `dcat:Dataset`)
+- [ ] Write 3–5 representative workflow descriptions in Turtle — e.g. gender analysis
+  workflow (search → filter → annotate → export), SANE workflow (access secure environment →
+  analyse sensitive material → export results), search-annotate-export workflow
+- [ ] Share vocabulary sketch with tools.clariah.nl maintainers for feedback on alignment
+  with existing CodeMeta + TaDiRaH + softwaretypes descriptors
+
 ### Phase 4 — Structured data and knowledge graph
 
 The goal of this phase is to add a structured layer alongside the vector store,
 enabling precise relational queries that semantic search cannot answer well.
+The entity model and vocabulary are designed in Phase 3; this phase implements
+them in a triplestore and connects the graph layer to retrieval.
 
-- [ ] Define entity model: Tool, Collection, Tutorial, ResearchExample, Researcher
-- [ ] Extract entities and relations from chunks using local LLM
-- [ ] Build RDF graph from extracted entities
-- [ ] Store in Apache Jena Fuseki triplestore with SPARQL endpoint
-- [ ] Align entity vocabulary with existing CLARIAH linked data vocabularies
-- [ ] Implement hybrid retrieval — combine vector search and SPARQL for complex queries
+The five entity types (see "Entity model and vocabulary" section above):
+**ResearchEnvironment** · **ComponentTool** · **InfrastructureService** · **Workflow** · **DataProduct**
+
+- [ ] Set up Apache Jena Fuseki triplestore locally — load `clariah-vocab.ttl` and the
+  Media Suite entity Turtle files from Phase 3 into a named graph
+- [ ] Add `entity_uri` field to the chunk schema — each chunk carries the URI of the
+  entity it describes (e.g. `ms:SearchTool`); enables SPARQL → chunk lookup for
+  structural queries ("what tools support annotating?")
+- [ ] Write SPARQL queries for structural retrieval patterns:
+  - list all `clariah:ComponentTool` instances with their `tadirah:` activity links
+  - list all `clariah:InfrastructureService` instances and which tools `clariah:deploysService` them
+  - retrieve all `dcat:Dataset` instances accessible via a given tool
+  - retrieve all `clariah:Workflow` instances that include a given tool as a step
+- [ ] Extract entities and relations from chunks using local LLM (Mistral) — augment
+  Turtle descriptions with relations inferred from chunk text (e.g. "SearchTool enriches
+  Sound & Vision Archive" from a chunk about the Search tool applied to NISV collections)
+- [ ] Implement hybrid retrieval — route queries to SPARQL for structural/relational
+  questions ("what tools exist for annotation?") and to vector search for how-to and
+  narrative questions ("how do I create an annotation?")
 - [ ] Evaluate when graph retrieval outperforms vector retrieval and vice versa
-- [ ] Export knowledge graph as Turtle/RDF for reuse beyond the chatbot
+- [ ] Export knowledge graph as Turtle/RDF for reuse beyond the chatbot —
+  align final export with tools.clariah.nl descriptor format for potential contribution
 
 ### Phase 5 — Source persistence and provenance
 
