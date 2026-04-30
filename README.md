@@ -583,6 +583,75 @@ ms:GWStep4 a schema:HowToStep ;
     schema:result ms:Publication .
 ```
 
+### Workflow granularity and standards grounding
+
+#### The inflation problem
+
+Defining workflows at the level of individual tool operations ("export annotations",
+"share fragment via IIIF") produces a large and fragmented list that does not scale
+to CLARIAH as a whole. The risk is dozens of Media Suite-specific micro-workflows
+that cannot be compared or composed with workflows from other CLARIAH infrastructures.
+
+#### Two levels of granularity
+
+The solution — grounded in established workflow representation standards — is to
+distinguish two levels:
+
+**Top-level workflows** are scoped to a *research method or goal*. A researcher
+would say "I am doing X kind of research." They are the right unit for discovery,
+comparison, and cross-infrastructure reuse. Examples: "Quantitative analysis of
+broadcast media", "Fact-checking research on television talk shows."
+
+**Sub-workflows** are reusable operational patterns that appear as steps inside
+top-level workflows. Examples: "Export annotations in FAIR format", "Cite a media
+fragment via IIIF." These are modelled as `schema:hasPart` of a top-level workflow
+rather than as standalone instances, keeping the top-level list manageable.
+
+#### Standards grounding
+
+The two-level distinction is standard in every major workflow representation system:
+
+| Standard | Relevance | Sub-workflow support |
+|---|---|---|
+| **Common Workflow Language (CWL)** | De facto standard for computational research workflows; endorsed by EOSC and ReSA | Core feature — a workflow step can itself be a workflow |
+| **WFDESC** (Workflow Description Ontology, Taverna/myGrid, Manchester) | Semantic web vocabulary closest to what we are building | Explicit `wfdesc:Workflow` / `wfdesc:Process` composition |
+| **PROV-O** (W3C Provenance Ontology) | Used in RO-Crate, the current EOSC standard for packaging research workflows with data | Activity composition via `prov:wasInformedBy` |
+| **RO-Crate** (Research Object Crate) | EOSC packaging standard; combines CWL + schema.org + PROV-O | Inherits from CWL |
+| **BPMN** (Business Process Model and Notation) | Foundational workflow modelling standard; process/sub-process distinction is textbook | Sub-process is a first-class concept |
+
+The **scoping advice** — that top-level workflows should map to research methods
+rather than tool-operation sequences — is a design principle, not a citable standard.
+It derives from:
+- The TaDiRaH approach (Borek et al., *DHQ* 2016): activity-level taxonomies over
+  tool-level ones; activities map to methods, not operations
+- Ontology design pattern literature (Gangemi, Presutti): avoiding proliferation
+  through appropriate abstraction levels
+- Practical experience in DARIAH and CLARIN tool registries, where operation-level
+  workflow definitions caused fragmentation and poor cross-infrastructure reusability
+
+There is no single published source that prescribes "scope top-level workflows to
+research question types." For CLARIAH documentation, this is best framed as
+"aligned with CWL/WFDESC/PROV-O practice; proposed as a design principle for
+community discussion."
+
+#### Implications for CLARIAH infrastructure
+
+A CLARIAH-level workflow model should be built on **RO-Crate + CWL + PROV-O**,
+which together cover packaging, composition, and provenance. WFDESC adds semantic
+richness for the description layer. The `clariah:Workflow` class defined in
+`clariah-vocab.ttl` is a lightweight starting point; for production use it should
+be aligned with or replaced by these standards.
+
+Key open questions for the CLARIAH roadmap:
+- Does SSHOC-NL's DAB/ODRL work include a position on workflow granularity?
+  If so, the `clariah:Workflow` model should align with it.
+- How should the SSHOC Marketplace workflow model relate to CWL/WFDESC?
+  The Marketplace has a workflow concept but its formal grounding is not
+  well-documented; clarifying this would benefit interoperability.
+- At what level of abstraction should CLARIAH-wide workflow templates be defined —
+  research method (generalises across tools), or research environment (Media Suite-
+  specific)? The two-level model proposed here answers "both, but keep them separate."
+
 ### Alignment with tools.clariah.nl and the SSHOC Marketplace
 
 The Media Suite is registered in tools.clariah.nl (flows through to the SSHOC
