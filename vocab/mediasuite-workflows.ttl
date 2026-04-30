@@ -37,6 +37,9 @@ ms:DataStory          a dcat:Dataset ; rdfs:label "Data Story"@en ;
     # not optional for this format — it is structural. This makes Data Stories a model
     # for how enhanced publications could/should handle provenance and citation more broadly.
 
+ms:SavedQuerySet      a dcat:Dataset ; rdfs:label "Saved Query Set"@en ;
+    schema:description "A set of named search queries saved to the Workspace project, ready for comparison in the Compare Tool. Distinct from a corpus (saved items) — the saved query is the search definition, not the result set. The Compare Tool operates on saved queries, not on item sets."@en .
+
 ms:ComparisonResult   a dcat:Dataset ; rdfs:label "Comparison Result"@en ;
     schema:description "Visualised comparison of multiple search queries or corpora over time."@en .
 
@@ -273,21 +276,29 @@ ms:CrossCollectionComparativeWorkflow
     schema:name "Cross-collection comparative analysis"@en ;
     schema:description "Comparing search query results across collections and over time to identify trends, differences, and patterns in media coverage."@en ;
     clariah:workflowStatus "Fully supported" ;
-    schema:step ms:CCA1, ms:CCA2, ms:CCA3 .
+    schema:step ms:CCA1, ms:CCA2, ms:CCA3, ms:CCA4 .
 
 ms:CCA1 a schema:HowToStep ; schema:position 1 ;
-    schema:name "Search across multiple collections"@en ;
+    schema:name "Define and run query per collection"@en ;
+    schema:description "Search each collection individually with a query that defines the data to be compared. Cross-collection simultaneous search is not supported — each collection must be searched separately. Repeat this step for each collection or query variant."@en ;
     schema:instrument ms:SearchTool ;
     clariah:researchActivity tadirah:searching, tadirah:querying ;
     schema:result ms:SearchResult .
 
 ms:CCA2 a schema:HowToStep ; schema:position 2 ;
-    schema:name "Compare queries over time"@en ;
+    schema:name "Save queries to Workspace"@en ;
+    schema:description "Save each query definition to the Workspace project. The Compare Tool operates on saved query definitions, not on item sets — this step is the bridge between search and comparison."@en ;
+    schema:instrument ms:Workspace ;
+    clariah:researchActivity tadirah:collecting ;
+    schema:result ms:SavedQuerySet .
+
+ms:CCA3 a schema:HowToStep ; schema:position 3 ;
+    schema:name "Compare saved queries over time"@en ;
     schema:instrument ms:CompareTool, ms:StatisticalAnalysis ;
     clariah:researchActivity tadirah:comparing, tadirah:dataVisualization ;
     schema:result ms:ComparisonResult .
 
-ms:CCA3 a schema:HowToStep ; schema:position 3 ;
+ms:CCA4 a schema:HowToStep ; schema:position 4 ;
     schema:name "Export findings"@en ;
     schema:instrument ms:Workspace ;
     clariah:researchActivity tadirah:dataIngestion ;
