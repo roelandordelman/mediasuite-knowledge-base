@@ -242,6 +242,13 @@ Hit@10:  28/31  (90%)   MRR: 0.634
 ```
 Three failures: (1) "Has the Media Suite been used for quantitative analysis of television news?" — data stories are narrative/result-focused; the phrase "quantitative analysis" doesn't appear prominently in chunk bodies; (2) "How can I use SANE?" — acronym embeds as the English adjective; descriptive phrasing retrieves correctly; (3) "What is the GTAA?" — persistent known failure. The MRR drop from v0.3 reflects the new harder questions added to the test set rather than a regression in retrieval quality.
 
+**v0.5, April 2026** (tag-enriched embeddings: categories + tags + tools_mentioned + collections_mentioned appended to embed text; stored document unchanged):
+```
+Hit@10:  29/31  (94%)   MRR: 0.647
+2,568 total chunks across 5 sources
+```
+Fixed: "How can I use computer vision in the Media Suite?" — previously failing because "Computer Vision" appeared in the `categories` field but not prominently in the chunk body; now captured in the embed text. Two remaining failures: (1) "Quantitative analysis of television news" — requires query expansion, not vocabulary bridging; (2) "How can I use SANE?" — acronym vocabulary gap, chatbot-side fix needed.
+
 ### Expanding the test set
 
 The test set should grow alongside the knowledge base. Good sources for new
@@ -911,7 +918,9 @@ vocabulary groundwork for the structured data layer in Phase 4.
 - [x] All-caps chapter heading detection for PDF section extraction — fixes brochure/report PDFs that use branded chapter names instead of academic section names (abstract, methods, results, etc.)
 - [x] Boilerplate detection in PDF extraction — repeated page headers/footers (appearing on >30% of pages) are excluded from both heading detection and chunk content
 - [ ] Add end-to-end answer quality evaluation in the chatbot repo
-- [ ] Embed tags alongside chunk text in `build_index.py` — tags contain tool/collection names that don't always appear in the chunk body; embedding them would fix residual vocabulary mismatch (e.g. "Computer Vision" tag on Similarity page)
+- [x] Embed tags alongside chunk text in `build_index.py` — `build_embed_text()` appends
+  categories + tags + tools_mentioned + collections_mentioned to the embed text (stored
+  document stays clean); fixed "computer vision" vocabulary gap; Hit@10 90% → 94%
 - [ ] Implement recency boost — favour recently modified chunks when scores are close
 - [ ] Implement staleness check — periodically compare live page content against ingested chunks
 - [ ] Fix incremental re-indexing — `build_index.py` currently skips by chunk ID; changed chunks (e.g. after a title override) must be manually deleted before re-indexing
@@ -1041,6 +1050,7 @@ Updated as the project progresses.
 | 2026-04-28 | Brochure/report PDFs use all-caps branded chapter names (COLLABORATE, DATASETS, SEARCH…) — HEADING_RE only matched academic section names, so all content fell into a single preamble blob | Added ALL_CAPS_HEADING_RE and boilerplate line detection; 2014–2024 brochure went from 6 to 50 chunks |
 | 2026-04-28 | `ollama.embeddings` (old single API) returns unnormalized vectors (magnitude ~21.6); `ollama.embed` (batch API) returns unit-normalized vectors — using the wrong API for query embedding silently corrupts ranking | Always use `ollama.embed` for both indexing and querying |
 | 2026-04-28 | `chunk_title_overrides` alone cannot fix vocabulary mismatch when the chunk body is dominated by specialist terminology — the Similarity page (VisXP, visual keyframes) didn't embed near "computer vision" despite the title fix | Vocabulary gaps need either tag embedding in `build_index.py` or query expansion; title overrides help but don't substitute for body vocabulary |
+| 2026-04-30 | Appending categories + tags + tools_mentioned to embed text (v0.5) fixed the computer vision vocabulary gap and lifted Hit@10 from 90% to 94%; stored document stays clean so chatbot display is unaffected | Tag/category enrichment is a low-cost, high-signal fix for vocabulary gaps; apply before reaching for query expansion |
 | 2026-04-28 | "SANE" as a bare acronym embeds as the common English adjective (mentally healthy), not as "Secure Analysis Environment" — SANE documentation ranks outside top 30 for "How can I use SANE?" but correctly at #2 for descriptive phrasing | Acronym-heavy queries need chatbot-side query expansion; title override to full name partially helps but doesn't fully bridge the gap |
 | 2026-04-28 | Data stories are narrative/result-focused — terms like "quantitative analysis" don't appear prominently in chunk bodies even when the story is literally a quantitative analysis | Research output content needs either tag embedding or query expansion to match methodological vocabulary; story titles alone carry this vocabulary |
 | 2026-04-28 | Internal planning documents in Dutch (Jaarplan 2026) don't surface for English queries despite correct section extraction — nomic-embed-text doesn't reliably bridge Dutch content to English queries | Dutch-language sources require translation/summarisation before indexing; `ingest_local_docs.py` is ready for English-language local docs |

@@ -59,6 +59,34 @@ def _list_to_json(value: list) -> str:
     return json.dumps(value, ensure_ascii=False)
 
 
+def build_embed_text(chunk: dict) -> str:
+    """Return the text to embed: original text enriched with tag/category/entity vocabulary.
+
+    The stored document stays as chunk["text"] so the chatbot returns clean text.
+    The embedding captures vocabulary that lives in metadata but not the body —
+    e.g. categories=["ASR", "Compare Tool"] on a tutorial page, or
+    tags=["Television History"] on a data story.
+    """
+    vocab: list[str] = []
+    for field in ("categories", "tags", "tools_mentioned", "collections_mentioned"):
+        items = chunk.get(field, [])
+        if isinstance(items, str):
+            items = json.loads(items) if items else []
+        vocab.extend(items)
+
+    # Deduplicate preserving order, case-insensitive
+    seen: set[str] = set()
+    unique: list[str] = []
+    for v in vocab:
+        if v.lower() not in seen:
+            seen.add(v.lower())
+            unique.append(v)
+
+    if unique:
+        return chunk["text"] + "\nKeywords: " + ", ".join(unique)
+    return chunk["text"]
+
+
 def build_index(input_path: Path, cfg: dict) -> None:
     vs = cfg["vector_store"]
     embed_cfg = cfg["embedding"]
@@ -88,15 +116,16 @@ def build_index(input_path: Path, cfg: dict) -> None:
 
     for i in range(0, len(new_chunks), batch_size):
         batch = new_chunks[i : i + batch_size]
-        texts = [c["text"] for c in batch]
+        embed_texts = [build_embed_text(c) for c in batch]  # enriched: text + keywords
+        doc_texts = [c["text"] for c in batch]              # clean: stored for chatbot display
 
-        response = ollama.embed(model=embed_cfg["model"], input=texts)
+        response = ollama.embed(model=embed_cfg["model"], input=embed_texts)
         embeddings = response["embeddings"]
 
         collection.add(
             ids=[c["id"] for c in batch],
             embeddings=embeddings,
-            documents=texts,
+            documents=doc_texts,
             metadatas=[
                 {
                     "title": c.get("title", ""),
