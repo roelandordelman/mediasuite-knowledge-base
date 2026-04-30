@@ -1,9 +1,21 @@
 # Retrieval evaluation questions
 #
 # Each entry has:
-#   question:      what a researcher would actually type
-#   expected_urls: list of acceptable source URLs — PASS if any appears in top-k
-#   notes:         optional — why this question is useful as a test case
+#   question:        what a researcher would actually type
+#   category:        answerable | partial | gap | structural (see below)
+#   expected_urls:   list of acceptable source URLs — PASS if any appears in top-k
+#                    (answerable / partial / gap only)
+#   expected_answer: ground-truth answer text for end-to-end answer evaluation
+#                    (structural only — no single URL; answer comes from SPARQL)
+#   notes:           optional — why this question is useful as a test case
+#
+# Categories:
+#   answerable  content exists and URL is known; should PASS — a FAIL means fix retrieval
+#   partial     content exists but spread across pages or answer is implicit; may FAIL
+#   gap         content does not yet exist; should FAIL — an unexpected PASS is a warning
+#   structural  answer comes from the knowledge graph (SPARQL), not vector search;
+#               skipped by eval_retrieval.py (no URL to check); used by the chatbot
+#               repo's end-to-end answer evaluator once the router is built
 #
 # Add new questions here as the knowledge base grows.
 # Run: python evaluate/eval_retrieval.py
@@ -221,3 +233,59 @@ questions:
     expected_urls:
       - https://doi.org/10.18146/tmg.811
     notes: MIMEHIST — supplementary paper (not in Zotero group, added via supplementary_dois)
+
+  # ── Structural questions (SPARQL router) ───────────────────────────────────
+  # These are skipped by eval_retrieval.py. The expected_answer is the ground
+  # truth for end-to-end answer evaluation in the chatbot repo. Vector search
+  # cannot reliably answer these: they require enumeration, ordered traversal,
+  # or structured property filtering over the knowledge graph.
+
+  - question: "What tools does the Media Suite have?"
+    category: structural
+    expected_answer: "Search Tool, Collection Inspector, Explore Tool, Compare Tool, Resource Viewer, Annotation Tool, Workspace, Statistical Analysis Tool, Similarity Tool, FactRank Tool, Reflexivity Tool, Fragment Cutter"
+    notes: "SPARQL: all_tools query. Vector search returns top-k similar chunks — not a complete enumeration."
+
+  - question: "Which collections can I access without logging in?"
+    category: structural
+    expected_answer: "Open Beelden (CC0), Open Beelden Natuurbeelden (CC0), Radio Oranje (Public Domain), DANS Oral History Archive (open), Tweede Kamer Archive (public)"
+    notes: "SPARQL: open_collections query filtering by euright:PUBLIC. Vector search may miss collections not prominently discussed in docs."
+
+  - question: "Which tools support annotation?"
+    category: structural
+    expected_answer: "Annotation Tool (visual and audio annotation, segmenting), Resource Viewer (annotation via timeline), Fragment Cutter (planned — segmenting)"
+    notes: "SPARQL: tools_by_activity for tadirah:visualAnnotation and tadirah:audioAnnotation. Note: router must map 'annotation' to both TaDiRaH concepts, not tadirah:annotating (which returns 0 results)."
+
+  - question: "What are the steps of the SANE workflow in order?"
+    category: structural
+    expected_answer: "1. Search and sample corpus in Media Suite (Search Tool) → Selected Corpus. 2. Export selection for SANE (Workspace) → Exported Data. 3. Analyse in SANE (SANE environment) → Analysis Dataset. 4. Deposit and cite research output (optional) → Deposited Research Output."
+    notes: "SPARQL: workflow_steps for ms:RestrictedDataSANEWorkflow. Step ordering and optional flag are graph properties not reliably extractable from chunk text."
+
+  - question: "Which workflows are not yet possible in the Media Suite?"
+    category: structural
+    expected_answer: "Fragment citation via IIIF, Oral history ASR and Media Suite ingestion, Replication and provenance tracing from research publication, Researcher-triggered enrichment on demand"
+    notes: "SPARQL: all_workflows filtered by clariah:workflowStatus 'Aspirational'. No single chunk covers all four."
+
+  - question: "Which tools are experimental or not yet released?"
+    category: structural
+    expected_answer: "Similarity Tool (experimental — limited archive coverage), FactRank Tool (experimental — limited to Dutch talk shows), Fragment Cutter (planned — not yet available), Explore Tool (outdated — revamp in progress)"
+    notes: "SPARQL: ComponentTools with schema:releaseNotes. Vector search may retrieve tool documentation without surfacing the status flag."
+
+  - question: "What backend service powers the Similarity Tool?"
+    category: structural
+    expected_answer: "The Visual Similarity Service (also known as VisXP) — extracts visual keyframe embeddings from video for similarity-based retrieval."
+    notes: "SPARQL: services_by_tool via clariah:deploysService. Pure graph relationship not described in any single chunk."
+
+  - question: "Which workflows use the Search Tool?"
+    category: structural
+    expected_answer: "Cross-collection comparative analysis, Formalising access to SANE, Gender representation analysis, Quantitative analysis on-premise, Quantitative analysis via SANE, Replication and provenance tracing, Research using ASR transcripts, Researcher-triggered enrichment, Search annotate and export, Similarity-based visual corpus building"
+    notes: "SPARQL: workflows_by_tool for ms:SearchTool. Requires traversing workflow → step → instrument relationships."
+
+  - question: "Can I use Radio Oranje data commercially?"
+    category: structural
+    expected_answer: "Yes — Radio Oranje is in the Public Domain under Dutch law (Public Domain Mark 1.0), so there are no reuse restrictions."
+    notes: "SPARQL: dcterms:license for ms:RadioOranje. The license URI (creativecommons.org/publicdomain/mark/1.0/) is a structured fact, not prominent in documentation chunks."
+
+  - question: "Is fragment citation currently supported in the Media Suite?"
+    category: structural
+    expected_answer: "No — the Fragment Cutter tool is planned but not yet available. Fragment citation via IIIF is also aspirational. Bookmarking fragments for personal use is supported via the Workspace."
+    notes: "SPARQL: schema:releaseNotes on ms:FragmentCutter + clariah:workflowStatus on ms:FragmentCitationSubWorkflow. Status flags are graph properties."
