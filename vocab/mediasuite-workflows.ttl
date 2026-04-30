@@ -133,7 +133,7 @@ ms:SAE4 a schema:HowToStep ; schema:position 4 ;
 ms:OpenDataAnalysisWorkflow
     a clariah:Workflow ;
     schema:name "Quantitative analysis of open data via API"@en ;
-    schema:description "Programmatic retrieval of open collection data via the Open Images API or SPARQL endpoint, followed by analysis in a Jupyter notebook."@en ;
+    schema:description "Programmatic retrieval of open collection data via the Open Images API or SPARQL endpoint, followed by analysis in a computational notebook."@en ;
     clariah:workflowStatus "Fully supported" ;
     schema:step ms:ODA1, ms:ODA2, ms:ODA3 .
 
@@ -144,7 +144,8 @@ ms:ODA1 a schema:HowToStep ; schema:position 1 ;
     schema:result ms:SelectedCorpus .
 
 ms:ODA2 a schema:HowToStep ; schema:position 2 ;
-    schema:name "Analyse in Jupyter notebook"@en ;
+    schema:name "Analyse in computational notebook"@en ;
+    schema:description "Programmatic analysis of retrieved data in a notebook environment. Jupyter is the most common implementation in the Media Suite context; RStudio, Google Colab, and similar environments are equally applicable."@en ;
     schema:instrument <https://jupyter.org> ;
     clariah:researchActivity tadirah:analyzing, tadirah:dataMining ;
     schema:result ms:AnalysisDataset .
