@@ -126,6 +126,13 @@ clariah:researchActivity
     # a TaDiRaH concept as a predicate. The correct pattern is:
     #   clariah:researchActivity tadirah:searching .
 
+clariah:optional
+    a owl:DatatypeProperty ;
+    rdfs:label "optional"@en ;
+    rdfs:comment "Marks a schema:HowToStep as optional — the workflow's primary goal can be achieved without it. Analogous to optional steps in CWL (conditional execution) and BPMN (optional activities). Absence of this property means the step is required."@en ;
+    rdfs:domain schema:HowToStep ;
+    rdfs:range  <http://www.w3.org/2001/XMLSchema#boolean> .
+
 clariah:workflowStatus
     a owl:DatatypeProperty ;
     rdfs:label "workflow status"@en ;

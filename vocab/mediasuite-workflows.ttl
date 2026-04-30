@@ -58,7 +58,7 @@ ms:GenderWorkflow
     schema:description "Studying gender representation in Dutch broadcast media, combining Media Suite search and annotation with secure analysis in SANE."@en ;
     clariah:workflowStatus "Fully supported" ;
     dcterms:source <https://mediasuitedatastories.clariah.nl/gender-research-intro/> ;
-    schema:step ms:GW1, ms:GW2, ms:GW3, ms:GW4 .
+    schema:step ms:GW1, ms:GW2, ms:GW3, ms:GW4, ms:GW5 .
 
 ms:GW1 a schema:HowToStep ; schema:position 1 ;
     schema:name "Search collections"@en ;
@@ -67,18 +67,25 @@ ms:GW1 a schema:HowToStep ; schema:position 1 ;
     schema:result ms:SearchResult .
 
 ms:GW2 a schema:HowToStep ; schema:position 2 ;
+    schema:name "Select corpus"@en ;
+    schema:instrument ms:Workspace ;
+    clariah:researchActivity clariah:Sampling, tadirah:collecting ;
+    schema:result ms:SelectedCorpus .
+
+ms:GW3 a schema:HowToStep ; schema:position 3 ;
     schema:name "Annotate selected items"@en ;
     schema:instrument ms:AnnotationTool ;
     clariah:researchActivity tadirah:visualAnnotation, tadirah:audioAnnotation ;
+    clariah:optional true ;
     schema:result ms:AnnotatedCorpus .
 
-ms:GW3 a schema:HowToStep ; schema:position 3 ;
+ms:GW4 a schema:HowToStep ; schema:position 4 ;
     schema:name "Analyse in secure environment"@en ;
     schema:instrument <https://sane.surf.nl/> ;
     clariah:researchActivity tadirah:analyzing ;
     schema:result ms:AnalysisDataset .
 
-ms:GW4 a schema:HowToStep ; schema:position 4 ;
+ms:GW5 a schema:HowToStep ; schema:position 5 ;
     schema:name "Publish results"@en ;
     schema:instrument <https://zenodo.org> ;
     clariah:researchActivity tadirah:academicPublishing ;
@@ -110,12 +117,14 @@ ms:SAE3 a schema:HowToStep ; schema:position 3 ;
     schema:name "Annotate items and segments"@en ;
     schema:instrument ms:AnnotationTool, ms:ResourceViewer ;
     clariah:researchActivity tadirah:visualAnnotation, tadirah:audioAnnotation, tadirah:segmenting ;
+    clariah:optional true ;
     schema:result ms:AnnotatedCorpus .
 
 ms:SAE4 a schema:HowToStep ; schema:position 4 ;
     schema:name "Export annotations and metadata"@en ;
     schema:instrument ms:Workspace ;
     clariah:researchActivity tadirah:dataIngestion ;
+    clariah:optional true ;
     schema:result ms:ExportedData .
 
 # ── Workflow 3: Quantitative analysis — open data ─────────────────────────────
@@ -143,6 +152,7 @@ ms:ODA3 a schema:HowToStep ; schema:position 3 ;
     schema:name "Publish results"@en ;
     schema:instrument <https://zenodo.org> ;
     clariah:researchActivity tadirah:academicPublishing ;
+    clariah:optional true ;
     schema:result ms:Publication .
 
 # ── Workflow 4: Quantitative analysis — restricted data via SANE ─────────────
@@ -176,6 +186,7 @@ ms:RDS4 a schema:HowToStep ; schema:position 4 ;
     schema:name "Publish results"@en ;
     schema:instrument <https://zenodo.org> ;
     clariah:researchActivity tadirah:academicPublishing ;
+    clariah:optional true ;
     schema:result ms:Publication .
 
 # ── Workflow 5: Quantitative analysis — on-premise ───────────────────────────
@@ -230,12 +241,14 @@ ms:ASR3 a schema:HowToStep ; schema:position 3 ;
     schema:name "Annotate speech segments"@en ;
     schema:instrument ms:AnnotationTool ;
     clariah:researchActivity tadirah:audioAnnotation, tadirah:segmenting ;
+    clariah:optional true ;
     schema:result ms:AnnotatedCorpus .
 
 ms:ASR4 a schema:HowToStep ; schema:position 4 ;
     schema:name "Export annotations for analysis"@en ;
     schema:instrument ms:Workspace ;
     clariah:researchActivity tadirah:dataIngestion ;
+    clariah:optional true ;
     schema:result ms:ExportedData .
 
 # ── Workflow 7: Cross-collection comparative analysis ─────────────────────────
@@ -263,6 +276,7 @@ ms:CCA3 a schema:HowToStep ; schema:position 3 ;
     schema:name "Export and publish findings"@en ;
     schema:instrument ms:Workspace ;
     clariah:researchActivity tadirah:academicPublishing ;
+    clariah:optional true ;
     schema:result ms:Publication .
 
 # ── Workflow 8: Fact-checking research ───────────────────────────────────────
@@ -291,12 +305,14 @@ ms:FCR3 a schema:HowToStep ; schema:position 3 ;
     schema:name "Annotate findings"@en ;
     schema:instrument ms:AnnotationTool ;
     clariah:researchActivity tadirah:visualAnnotation, tadirah:audioAnnotation ;
+    clariah:optional true ;
     schema:result ms:AnnotatedCorpus .
 
 ms:FCR4 a schema:HowToStep ; schema:position 4 ;
     schema:name "Publish findings"@en ;
     schema:instrument <https://zenodo.org> ;
     clariah:researchActivity tadirah:academicPublishing ;
+    clariah:optional true ;
     schema:result ms:Publication .
 
 # ── Workflow 9: Similarity-based corpus building ──────────────────────────────
@@ -325,6 +341,7 @@ ms:SCB3 a schema:HowToStep ; schema:position 3 ;
     schema:name "Annotate visual patterns"@en ;
     schema:instrument ms:AnnotationTool ;
     clariah:researchActivity tadirah:visualAnnotation ;
+    clariah:optional true ;
     schema:result ms:AnnotatedCorpus .
 
 # ── Workflow 10: Linked data exploration ─────────────────────────────────────
@@ -353,6 +370,7 @@ ms:LDE3 a schema:HowToStep ; schema:position 3 ;
     schema:name "Save and annotate discovered items"@en ;
     schema:instrument ms:Workspace, ms:AnnotationTool ;
     clariah:researchActivity tadirah:collecting, tadirah:visualAnnotation ;
+    clariah:optional true ;
     schema:result ms:AnnotatedCorpus .
 
 # ── Workflow 11: Replicate from publication ───────────────────────────────────
@@ -381,12 +399,14 @@ ms:REP3 a schema:HowToStep ; schema:position 3 ;
     schema:name "Compare reconstructed results with original"@en ;
     schema:instrument ms:CompareTool ;
     clariah:researchActivity tadirah:comparing ;
+    clariah:optional true ;
     schema:result ms:ComparisonResult .
 
 ms:REP4 a schema:HowToStep ; schema:position 4 ;
     schema:name "Document methodology and deviations"@en ;
     schema:instrument ms:ReflexivityTool ;
     clariah:researchActivity tadirah:defining ;
+    clariah:optional true ;
     schema:result ms:MethodologyRecord .
 
 # ── Sub-workflow A: FAIR annotation sharing ───────────────────────────────────
