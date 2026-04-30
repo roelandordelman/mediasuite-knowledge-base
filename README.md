@@ -652,6 +652,34 @@ Key open questions for the CLARIAH roadmap:
   research method (generalises across tools), or research environment (Media Suite-
   specific)? The two-level model proposed here answers "both, but keep them separate."
 
+#### TaDiRaH gap: administrative and procedural steps
+
+TaDiRaH 2.0 covers scholarly research activities well but has almost no vocabulary
+for the **administrative and procedural steps** that precede or frame analysis in
+practice — access requests, data-use agreement signing, environment provisioning,
+job submission, output review. These appear concretely in at least two workflows in
+this model: `ms:SANEAccessSubWorkflow` (access formalization) and
+`ms:OnDemandEnrichmentWorkflow` (job submission and access verification). The closest
+available concept is `tadirah:managing`, used as a pragmatic fallback with inline
+comments flagging the mismatch.
+
+This is a gap with broad implications: any infrastructure that involves data access
+negotiation, ethics review, compute allocation, or onboarding will hit the same
+ceiling. It is a candidate for a clariah: extension concept set, alongside
+`clariah:Sampling` (Unsworth scholarly primitive not carried into TaDiRaH 2.0) and
+visual analysis in the computer vision sense (existing `tadirah:visualAnalysis` has
+only a German label and no definition). All three should be proposed to the TaDiRaH
+maintainers (github.com/dhtaxonomy/TaDiRAH) as gaps.
+
+#### Modeling convention: steps without `schema:result`
+
+Not every workflow step produces a data artifact. Steps that are administrative
+(waiting for approval), infrastructure-side (SURF configures an environment), or
+purely transitional carry no `schema:result` in this model. This is intentional —
+omitting `schema:result` is a signal that the step is process-oriented rather than
+data-producing, not an oversight. Steps with `schema:result` are those where the
+researcher produces or receives a named intermediate data product.
+
 #### Where infrastructure ends: the deposit/publication boundary
 
 A recurring modelling decision is where research infrastructure workflows stop and

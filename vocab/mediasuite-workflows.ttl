@@ -55,6 +55,9 @@ ms:ExplorationPath    a dcat:Dataset ; rdfs:label "Exploration Path"@en ;
 ms:MethodologyRecord  a dcat:Dataset ; rdfs:label "Methodology Record"@en ;
     schema:description "Documented record of methodological choices, search strategies, and interpretive decisions."@en .
 
+ms:Transcript         a dcat:Dataset ; rdfs:label "ASR Transcript"@en ;
+    schema:description "Raw automatic speech recognition output for a set of audio or audiovisual items — text with timestamps, before manual correction or annotation. Distinct from ms:AnnotatedCorpus (which has been reviewed and enriched by a researcher)."@en .
+
 ms:CollectionProfile  a dcat:Dataset ; rdfs:label "Collection Profile"@en ;
     schema:description "Statistical overview of metadata field completeness, enrichment coverage (e.g. proportion of items with ASR transcripts, subject tags, face recognition), and temporal patterns in annotation practice, produced by the Collection Inspector. Represents the data quality context for a research workflow — making 'data fractures' visible: gaps and inconsistencies arising from different annotation methods, temporal shifts in cataloguing practice, or uneven resource allocation across collection segments."@en .
 
@@ -563,3 +566,94 @@ ms:CI2 a schema:HowToStep ; schema:position 2 ;
     clariah:researchActivity tadirah:qualityAssurance, tadirah:defining ;
     clariah:optional true ;
     schema:result ms:MethodologyRecord .
+
+# ── Workflow 12: Researcher-triggered enrichment on demand ────────────────────
+# Aspirational — documents a widely expressed researcher need: triggering
+# processing services (ASR, computer vision, NER) on a self-defined corpus
+# when the required enrichment is absent or incomplete. Generalises to a
+# researcher-facing processing service catalogue backed by compute infrastructure
+# and a payment/access-allocation mechanism.
+# Administrative steps use tadirah:managing as a pragmatic fallback; see README
+# for discussion of the TaDiRaH gap for procedural/administrative workflow steps.
+
+ms:OnDemandEnrichmentWorkflow
+    a clariah:Workflow ;
+    schema:name "Researcher-triggered enrichment on demand"@en ;
+    schema:description "A researcher identifies a corpus in the Media Suite that lacks sufficient enrichment (e.g. no ASR transcripts for items they want to analyse for spoken content) and triggers a processing service from a researcher-facing catalogue — ASR, computer vision, named entity recognition — on their selected corpus. They are notified when processing is complete and can access the enriched data for further analysis. Generalises to a catalogue of processing services available on demand, backed by compute infrastructure (local, SURF, EU Cloud) and a payment or access-allocation mechanism (institutional affiliation, CLARIAH membership, NWO project budget)."@en ;
+    clariah:workflowStatus "Aspirational" ;
+    schema:releaseNotes "Requires: (1) a researcher-facing processing service catalogue; (2) on-demand compute infrastructure (SURF HPC, EU Cloud); (3) a payment or access-allocation mechanism for compute; (4) an asynchronous job notification mechanism; (5) re-ingestion of enriched data into the Media Suite collection layer."@en ;
+    schema:step ms:ODE1, ms:ODE2, ms:ODE3, ms:ODE4 .
+
+ms:ODE1 a schema:HowToStep ; schema:position 1 ;
+    schema:name "Inspect collection and define corpus"@en ;
+    schema:description "Use the Collection Inspector to assess current enrichment coverage (e.g. what proportion of items in the target date range or genre have ASR transcripts). Build a personal corpus of items that lack the required enrichment and save to the Workspace."@en ;
+    schema:instrument ms:CollectionInspector, ms:SearchTool, ms:Workspace ;
+    clariah:researchActivity tadirah:browsing, tadirah:dataVisualization,
+                             tadirah:qualityAssurance, clariah:Sampling ;
+    schema:result ms:SelectedCorpus .
+
+ms:ODE2 a schema:HowToStep ; schema:position 2 ;
+    schema:name "Select processing service from catalogue"@en ;
+    schema:description "Choose a processing service (ASR, computer vision, NER, etc.) from a researcher-facing service catalogue. Configure parameters (language model, resolution, etc.) and specify the target corpus. This catalogue does not yet exist as a Media Suite or CLARIAH feature."@en ;
+    clariah:researchActivity tadirah:managing .
+    # NOTE: the concept of a researcher-facing processing service catalogue is
+    # closely related to the EOSC notion of research services, and to ongoing
+    # work in CLARIAH on making infrastructure services accessible to researchers
+    # beyond platform-internal processing pipelines.
+
+ms:ODE3 a schema:HowToStep ; schema:position 3 ;
+    schema:name "Submit job and verify access entitlement"@en ;
+    schema:description "Submit the processing job. The system verifies the researcher's access entitlement and compute allocation — institutional affiliation, CLARIAH membership, or NWO project budget. Job is queued for execution on available compute infrastructure."@en ;
+    clariah:researchActivity tadirah:managing .
+
+ms:ODE4 a schema:HowToStep ; schema:position 4 ;
+    schema:name "Receive notification and access enriched corpus"@en ;
+    schema:description "Researcher is notified (email or in-platform message) when processing is complete. Enriched data (transcripts, embeddings, annotations) is available in the Media Suite as a new data layer on the selected corpus, ready for further research workflows such as ms:ASRTranscriptResearchWorkflow or ms:OpenDataAnalysisWorkflow."@en ;
+    clariah:researchActivity tadirah:dataIngestion ;
+    schema:result ms:AnnotatedCorpus .
+
+# ── Workflow 13: Oral history ASR, annotation, deposit, and ingestion ─────────
+# Aspirational — documents the need of oral history researchers to have locally
+# held interview recordings enriched by a Media Suite ASR service, corrected
+# locally, deposited at DANS, and made accessible via the Media Suite.
+# Two steps are aspirational: exposing the ASR service for researcher-supplied
+# audio (currently NISV-internal only), and automated harvesting of new researcher
+# deposits from DANS.
+
+ms:OralHistoryIngestionWorkflow
+    a clariah:Workflow ;
+    schema:name "Oral history ASR, annotation, deposit, and Media Suite ingestion"@en ;
+    schema:description "Oral historians bring locally held interview recordings to the Media Suite ASR service for transcription, correct the transcript locally, deposit the interview and transcript at DANS, and the collection becomes accessible and searchable via the Media Suite after automated harvesting. Addresses the specific need of oral history researchers to have their own data enriched by CLARIAH infrastructure, preserved in a certified repository, and made discoverable alongside institutionally held collections."@en ;
+    clariah:workflowStatus "Aspirational" ;
+    schema:releaseNotes "Two steps are currently aspirational: (1) the Media Suite ASR service (ms:ASRService) is applied to NISV archive collections internally and is not yet available as a web service for researcher-supplied audio; (2) the Media Suite does not yet automatically harvest new researcher deposits from DANS — the ms:DANSOralHistory collection is currently manually maintained."@en ;
+    schema:step ms:OHI1, ms:OHI2, ms:OHI3, ms:OHI4, ms:OHI5 .
+
+ms:OHI1 a schema:HowToStep ; schema:position 1 ;
+    schema:name "Prepare local interview recordings"@en ;
+    schema:description "Prepare locally held interview recordings (audio or video) in a format compatible with the ASR service. Collect and structure accompanying metadata: interviewer, interviewee, date, language, context. This step is fully supported with existing tools."@en ;
+    clariah:researchActivity tadirah:managing .
+
+ms:OHI2 a schema:HowToStep ; schema:position 2 ;
+    schema:name "Submit recordings to Media Suite ASR service"@en ;
+    schema:description "Upload recordings to the Media Suite ASR service for automatic transcription. Aspirational: ms:ASRService currently operates as an internal NISV pipeline; exposing it as a web service for researcher-supplied audio requires a separate API endpoint, authentication, and compute allocation mechanism. When implemented, language selection and model configuration should be researcher-controllable."@en ;
+    schema:instrument ms:ASRService ;
+    clariah:researchActivity tadirah:speechRecognizing ;
+    schema:result ms:Transcript .
+
+ms:OHI3 a schema:HowToStep ; schema:position 3 ;
+    schema:name "Annotate and correct transcript locally"@en ;
+    schema:description "Review and correct the ASR transcript using a local or web-based annotation tool (e.g. ELAN, Transcriber, or — if transcript editing is supported — the Media Suite Annotation Tool). Oral history researchers typically do detailed annotation: speaker identification, non-verbal cues, ASR error correction, thematic segments."@en ;
+    clariah:researchActivity tadirah:audioAnnotation, tadirah:transcribing ;
+    schema:result ms:AnnotatedCorpus .
+
+ms:OHI4 a schema:HowToStep ; schema:position 4 ;
+    schema:name "Deposit interview and transcript at DANS"@en ;
+    schema:description "Deposit the interview recording and corrected transcript at DANS SSH Data Station with appropriate license and access conditions. The deposit URI (DOI) becomes the authoritative persistent identifier for this interview."@en ;
+    schema:instrument <https://ssh.datastations.nl/> ;
+    clariah:researchActivity tadirah:archiving ;
+    schema:result ms:DepositedOutput .
+
+ms:OHI5 a schema:HowToStep ; schema:position 5 ;
+    schema:name "Media Suite harvests deposit and makes collection accessible"@en ;
+    schema:description "The Media Suite automatically harvests metadata and transcripts from the DANS deposit, making the interview searchable and playable via the Media Suite interface alongside institutionally held oral history collections. Aspirational: Media Suite does not yet automatically harvest new researcher deposits from DANS; ms:DANSOralHistory is currently manually maintained. When implemented, this closes the loop between researcher-produced data and infrastructure-level discoverability."@en ;
+    clariah:researchActivity tadirah:dataIngestion .
