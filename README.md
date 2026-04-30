@@ -966,11 +966,13 @@ The five entity types (see "Entity model and vocabulary" section above):
   single-tool, and single-collection heuristics; `build_index.py` assigns `entity_uri`
   on new chunks automatically; hybrid retrieval verified end-to-end (SPARQL → entity URIs
   → ChromaDB filter → chunks)
-- [ ] Write SPARQL queries for structural retrieval patterns:
-  - list all `clariah:ComponentTool` instances with their `tadirah:` activity links
-  - list all `clariah:InfrastructureService` instances and which tools `clariah:deploysService` them
-  - retrieve all `dcat:Dataset` instances accessible via a given tool
-  - retrieve all `clariah:Workflow` instances that include a given tool as a step
+- [x] Write SPARQL queries for structural retrieval patterns — 10 named query templates
+  in `pipelines/graph/sparql_queries.py`: all tools + activities, tools by activity,
+  services by tool, collections by access rights, open collections only, workflows by
+  tool, all workflows, workflow steps, entity description, activities by tool.
+  All verified against live Fuseki. Note: TaDiRaH uses `visualAnnotation` /
+  `audioAnnotation` not `annotating` — chatbot router needs natural-language→TaDiRaH
+  mapping to bridge this.
 - [ ] Extract entities and relations from chunks using local LLM (Mistral) — augment
   Turtle descriptions with relations inferred from chunk text (e.g. "SearchTool enriches
   Sound & Vision Archive" from a chunk about the Search tool applied to NISV collections)
