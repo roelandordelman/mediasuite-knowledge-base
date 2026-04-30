@@ -117,7 +117,7 @@ ms:SearchAnnotateExportWorkflow
     schema:name "Search, annotate, and export"@en ;
     schema:description "The core Media Suite research loop: search collections, sample items into a personal corpus, annotate, and export results."@en ;
     clariah:workflowStatus "Fully supported" ;
-    schema:hasPart ms:FAIRAnnotationSharing ;
+    schema:hasPart ms:FAIRAnnotationSharing, ms:ReflexivitySubWorkflow ;
     schema:step ms:SAE1, ms:SAE2, ms:SAE3, ms:SAE4 .
 
 ms:SAE1 a schema:HowToStep ; schema:position 1 ;
@@ -657,3 +657,46 @@ ms:OHI5 a schema:HowToStep ; schema:position 5 ;
     schema:name "Media Suite harvests deposit and makes collection accessible"@en ;
     schema:description "The Media Suite automatically harvests metadata and transcripts from the DANS deposit, making the interview searchable and playable via the Media Suite interface alongside institutionally held oral history collections. Aspirational: Media Suite does not yet automatically harvest new researcher deposits from DANS; ms:DANSOralHistory is currently manually maintained. When implemented, this closes the loop between researcher-produced data and infrastructure-level discoverability."@en ;
     clariah:researchActivity tadirah:dataIngestion .
+
+# ── Sub-workflow E: Methodological reflexivity documentation ──────────────────
+# Operational pattern — runs alongside any research workflow, not as a
+# standalone sequence. Models the continuous practice of documenting query
+# choices, corpus decisions, and interpretive choices using the Reflexivity Tool.
+# Added as schema:hasPart of SearchAnnotateExportWorkflow (the most general
+# core workflow); applicable to any workflow involving corpus construction
+# or analysis.
+# NOTE on TaDiRaH: methodological self-documentation and reflexivity are not
+# adequately covered by TaDiRaH 2.0; tadirah:defining is used as the closest
+# available concept. This is a fourth candidate for a TaDiRaH submission or
+# clariah: extension concept (alongside clariah:Sampling, visual analysis,
+# and administrative/procedural steps).
+
+ms:ReflexivitySubWorkflow
+    a clariah:Workflow ;
+    schema:name "Methodological reflexivity documentation"@en ;
+    schema:description "Continuous documentation of methodological choices, search strategies, corpus decisions, and interpretive judgements throughout a research workflow, using the Reflexivity Tool. This sub-workflow runs alongside other workflows rather than as a discrete sequential phase — researchers document choices at the moment they are made, not retrospectively. The resulting methodology record supports tool criticism, replication, and FAIR data practices, and can be shared or deposited alongside the research output."@en ;
+    clariah:workflowStatus "Fully supported" ;
+    schema:step ms:RFX1, ms:RFX2, ms:RFX3 .
+
+ms:RFX1 a schema:HowToStep ; schema:position 1 ;
+    schema:name "Document search strategy and query choices"@en ;
+    schema:description "Record why specific search terms, Boolean operators, date ranges, and metadata filters were chosen — and which alternatives were tried and rejected. This is the minimum reflexivity documentation for any corpus-based study."@en ;
+    schema:instrument ms:ReflexivityTool ;
+    clariah:researchActivity tadirah:defining ;
+    schema:result ms:MethodologyRecord .
+
+ms:RFX2 a schema:HowToStep ; schema:position 2 ;
+    schema:name "Document corpus selection rationale and tool limitations"@en ;
+    schema:description "Record why items were included or excluded from the personal corpus, note data fractures observed (gaps in metadata completeness, ASR coverage limitations, collection biases), and document how these limitations affect the research conclusions."@en ;
+    schema:instrument ms:ReflexivityTool ;
+    clariah:researchActivity tadirah:defining, tadirah:qualityAssurance ;
+    clariah:optional true ;
+    schema:result ms:MethodologyRecord .
+
+ms:RFX3 a schema:HowToStep ; schema:position 3 ;
+    schema:name "Export and share methodology record"@en ;
+    schema:description "Export the methodology record from the Workspace and deposit it alongside the research output. A shared methodology record enables replication, peer review of method, and community-level tool criticism."@en ;
+    schema:instrument ms:Workspace ;
+    clariah:researchActivity tadirah:dataIngestion ;
+    clariah:optional true ;
+    schema:result ms:ExportedData .
