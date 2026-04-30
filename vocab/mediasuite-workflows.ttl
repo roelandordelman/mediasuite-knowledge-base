@@ -96,8 +96,8 @@ ms:GW4 a schema:HowToStep ; schema:position 4 ;
 
 ms:GW5 a schema:HowToStep ; schema:position 5 ;
     schema:name "Deposit and cite research output"@en ;
-    schema:description "Archive the analysis dataset and any annotated corpus in a repository (e.g. Zenodo, DANS) to obtain a DOI. Cite the collections, tools, and infrastructure used. The full writing and journal submission workflow is outside the scope of the research infrastructure model."@en ;
-    schema:instrument <https://zenodo.org> ;
+    schema:description "Archive the analysis dataset and annotated corpus in a certified repository to obtain a DOI. Repository options: (1) Zenodo (zenodo.org) — general-purpose, EOSC-aligned, free; deposit in the CLARIAH community (zenodo.org/communities/clariah/) for discoverability within CLARIAH; (2) DANS SSH Data Station (ssh.datastations.nl) — Dutch SSH-specific, FAIR-certified, preferred when the funder requires a certified repository; (3) institutional DataverseNL repositories — check funder requirements. Cite the collections, tools, and infrastructure used. The scholarly writing and journal submission workflow is outside the scope of the research infrastructure model."@en ;
+    schema:instrument <https://zenodo.org>, <https://ssh.datastations.nl/> ;
     clariah:researchActivity tadirah:academicPublishing ;
     schema:result ms:DepositedOutput .
 
@@ -162,8 +162,8 @@ ms:ODA2 a schema:HowToStep ; schema:position 2 ;
 
 ms:ODA3 a schema:HowToStep ; schema:position 3 ;
     schema:name "Deposit and cite research output"@en ;
-    schema:description "Archive the analysis dataset or notebook in a repository (e.g. Zenodo) to obtain a DOI. Cite the Open Images API or SPARQL endpoint and the source collection."@en ;
-    schema:instrument <https://zenodo.org> ;
+    schema:description "Archive the analysis dataset or computational notebook in a certified repository to obtain a DOI. Zenodo with the CLARIAH community tag (zenodo.org/communities/clariah/) is the natural choice for open data; DANS SSH Data Station (ssh.datastations.nl) for Dutch SSH deposits requiring a certified repository. Cite the Open Images API or SPARQL endpoint and the source collection."@en ;
+    schema:instrument <https://zenodo.org>, <https://ssh.datastations.nl/> ;
     clariah:researchActivity tadirah:academicPublishing ;
     clariah:optional true ;
     schema:result ms:DepositedOutput .
@@ -198,8 +198,8 @@ ms:RDS3 a schema:HowToStep ; schema:position 3 ;
 
 ms:RDS4 a schema:HowToStep ; schema:position 4 ;
     schema:name "Deposit and cite research output"@en ;
-    schema:description "Archive the analysis dataset in a repository to obtain a DOI. Note: data provider agreements and SANE terms of use govern what derived data may be deposited publicly; verify before export."@en ;
-    schema:instrument <https://zenodo.org> ;
+    schema:description "Archive the analysis dataset in a certified repository to obtain a DOI. Repository options: Zenodo with CLARIAH community tag (zenodo.org/communities/clariah/); DANS SSH Data Station (ssh.datastations.nl) — preferred for structured Dutch SSH research data and when funder requires a certified repository; institutional DataverseNL for university compliance. Important: data provider agreements and SANE terms of use govern what derived data may be deposited publicly — verify with the data owner before export."@en ;
+    schema:instrument <https://zenodo.org>, <https://ssh.datastations.nl/> ;
     clariah:researchActivity tadirah:academicPublishing ;
     clariah:optional true ;
     schema:result ms:DepositedOutput .
@@ -325,7 +325,7 @@ ms:FCR3 a schema:HowToStep ; schema:position 3 ;
 
 ms:FCR4 a schema:HowToStep ; schema:position 4 ;
     schema:name "Deposit findings"@en ;
-    schema:instrument <https://zenodo.org> ;
+    schema:instrument <https://zenodo.org>, <https://ssh.datastations.nl/> ;
     clariah:researchActivity tadirah:academicPublishing ;
     clariah:optional true ;
     schema:result ms:DepositedOutput .
@@ -444,7 +444,8 @@ ms:FAIR1 a schema:HowToStep ; schema:position 1 ;
 
 ms:FAIR2 a schema:HowToStep ; schema:position 2 ;
     schema:name "Deposit in FAIR repository"@en ;
-    schema:instrument <https://zenodo.org> ;
+    schema:description "Deposit the exported annotations in a FAIR-compliant repository. DANS SSH Data Station (ssh.datastations.nl) is the preferred choice for Dutch SSH research data and for deposits requiring a certified trustworthy repository. Zenodo with the CLARIAH community tag (zenodo.org/communities/clariah/) is suitable for open annotation sets. Note: annotations derived from open (CC0) collections may be freely deposited; annotations linked to restricted-access material require data provider agreement."@en ;
+    schema:instrument <https://zenodo.org>, <https://ssh.datastations.nl/> ;
     clariah:researchActivity tadirah:academicPublishing ;
     schema:result ms:DepositedOutput .
 
