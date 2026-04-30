@@ -987,8 +987,10 @@ The five entity types (see "Entity model and vocabulary" section above):
   Sound & Vision Archive" from a chunk about the Search tool applied to NISV collections)
 - [ ] Implement hybrid retrieval — route queries to SPARQL for structural/relational
   questions ("what tools exist for annotation?") and to vector search for how-to and
-  narrative questions ("how do I create an annotation?")
-- [ ] Evaluate when graph retrieval outperforms vector retrieval and vice versa
+  narrative questions ("how do I create an annotation?") — **router lives in the chatbot
+  repo**; knowledge base side is done (`sparql_queries.py` + `entity_uri` on chunks)
+- [ ] Evaluate when graph retrieval outperforms vector retrieval and vice versa —
+  **driven by chatbot evaluation results**
 - [ ] Export knowledge graph as Turtle/RDF for reuse beyond the chatbot —
   align final export with tools.clariah.nl descriptor format for potential contribution
 
