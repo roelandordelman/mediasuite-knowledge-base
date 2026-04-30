@@ -7,6 +7,29 @@
 @prefix owl:     <http://www.w3.org/2002/07/owl#> .
 @prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
 @prefix foaf:    <http://xmlns.com/foaf/0.1/> .
+@prefix euright: <http://publications.europa.eu/resource/authority/access-right/> .
+
+# ── Licensing notes ───────────────────────────────────────────────────────────
+# Two properties are used in combination following DCAT-AP 3.0:
+#
+#   dcterms:accessRights  — machine-readable access class (EU Publications Office
+#                           access-right vocabulary: PUBLIC / RESTRICTED / NON_PUBLIC).
+#                           DCAT-AP mandates a URI value here; literals are a common
+#                           but non-standard shortcut.
+#
+#   schema:conditionsOfAccess — human-readable prose describing the specific access
+#                           conditions (which institutions, login routes, etc.).
+#
+#   dcterms:license       — the reuse license as a URI (CC0, Public Domain Mark, etc.).
+#                           Added only where the license is confirmed and collection-wide.
+#                           Item-level licenses (common in mixed collections) are available
+#                           from the publisher's LOD endpoint and are not duplicated here.
+#                           Restricted collections carry no dcterms:license because
+#                           IPR-protected content has no open reuse license to declare.
+#
+# CC URIs used:
+#   CC0 1.0 Universal:   https://creativecommons.org/publicdomain/zero/1.0/
+#   Public Domain Mark:  https://creativecommons.org/publicdomain/mark/1.0/
 
 # ── Intended architecture (partially implemented) ─────────────────────────────
 #
@@ -62,7 +85,8 @@ ms:NISVArchive
     skos:altLabel "Beeld & Geluid archief"@nl ;
     schema:description "The main audiovisual archive of the Netherlands Institute for Sound & Vision (NISV), covering Dutch television, radio, and related media from the 1890s to the present."@en ;
     dcterms:publisher <https://www.beeldengeluid.nl/> ;
-    dcterms:accessRights "Restricted — access to IPR-protected content requires affiliation with a rights-holding institution via SURFconext."@en ;
+    dcterms:accessRights euright:RESTRICTED ;
+    schema:conditionsOfAccess "Restricted — access to IPR-protected content requires affiliation with a rights-holding institution via SURFconext."@en ;
     schema:url <https://data.beeldengeluid.nl/datasets/nisv-media-catalog> ;
     dcterms:modified "2026-04-30" ;
     dcterms:source <https://data.beeldengeluid.nl/datasets/nisv-media-catalog> ;
@@ -76,7 +100,7 @@ ms:SoundVisionTelevisionArchive
     a dcat:Dataset ;
     rdfs:label "Sound & Vision Television Archive"@en ;
     dcterms:publisher <https://www.beeldengeluid.nl/> ;
-    dcterms:accessRights "Restricted"@en ;
+    dcterms:accessRights euright:RESTRICTED ;
     dcterms:isPartOf ms:NISVArchive ;
     dcterms:modified "2026-04-30" ;
     dcterms:source <https://data.beeldengeluid.nl/datasets> ;
@@ -87,7 +111,7 @@ ms:SoundVisionRadioArchive
     a dcat:Dataset ;
     rdfs:label "Sound & Vision Radio Archive"@en ;
     dcterms:publisher <https://www.beeldengeluid.nl/> ;
-    dcterms:accessRights "Restricted"@en ;
+    dcterms:accessRights euright:RESTRICTED ;
     dcterms:isPartOf ms:NISVArchive ;
     dcterms:modified "2026-04-30" ;
     dcterms:source <https://data.beeldengeluid.nl/datasets> ;
@@ -97,9 +121,11 @@ ms:SoundVisionRadioArchive
 ms:OpenBeelden
     a dcat:Dataset ;
     rdfs:label "Open Beelden"@en ;
-    schema:description "Openly licensed historical audiovisual material from Sound & Vision, including Polygoon newsreels and early 20th-century films. 7,092 items under Creative Commons Zero (Public Domain)."@en ;
+    schema:description "Openly licensed historical audiovisual material from Sound & Vision, including Polygoon newsreels and early 20th-century films. 7,092 items."@en ;
     dcterms:publisher <https://www.beeldengeluid.nl/> ;
-    dcterms:accessRights "Open — CC0 (Public Domain)"@en ;
+    dcterms:accessRights euright:PUBLIC ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    # License confirmed from http://data.beeldengeluid.nl/id/dataset/0002 (authoritative LOD source)
     dcterms:isPartOf ms:NISVArchive ;
     dcterms:hasPart ms:Natuurbeelden ;
     schema:url <https://data.beeldengeluid.nl/datasets/open-beelden> ;
@@ -115,7 +141,9 @@ ms:Natuurbeelden
     rdfs:label "Open Beelden Natuurbeelden"@en ;
     schema:description "Open collection of nature video fragments (4,000+ items) from Sound & Vision, accessible via the Open Beelden API."@en ;
     dcterms:publisher <https://www.beeldengeluid.nl/> ;
-    dcterms:accessRights "Open — Creative Commons licensed"@en ;
+    dcterms:accessRights euright:PUBLIC ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    # License inferred from parent dataset ms:OpenBeelden (CC0 per data.beeldengeluid.nl); verify against individual item metadata if needed
     dcterms:isPartOf ms:OpenBeelden ;
     dcat:accessService ms:OpenImagesAPI ;
     dcterms:modified "2026-04-30" ;
@@ -128,7 +156,10 @@ ms:RadioOranje
     rdfs:label "Radio Oranje"@en ;
     schema:description "NISV collection of Dutch-language wartime radio broadcasts (1940–1945). Public Domain under Dutch law."@en ;
     dcterms:publisher <https://www.beeldengeluid.nl/> ;
-    dcterms:accessRights "Open — Public Domain"@en ;
+    dcterms:accessRights euright:PUBLIC ;
+    dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> ;
+    # Confirmed Public Domain: "According to Dutch law these recordings are in the Public Domain"
+    # (data.beeldengeluid.nl/datasets/radio-oranje)
     dcterms:isPartOf ms:NISVArchive ;
     schema:url <https://data.beeldengeluid.nl/datasets/radio-oranje> ;
     dcterms:modified "2026-04-30" ;
@@ -140,7 +171,7 @@ ms:NISVArtCollection
     a dcat:Dataset ;
     rdfs:label "NISV Art Collection"@en ;
     dcterms:publisher <https://www.beeldengeluid.nl/> ;
-    dcterms:accessRights "Restricted"@en ;
+    dcterms:accessRights euright:RESTRICTED ;
     dcterms:isPartOf ms:NISVArchive ;
     dcterms:modified "2026-04-30" ;
     dcterms:source <https://data.beeldengeluid.nl/datasets> ;
@@ -151,7 +182,7 @@ ms:AmateurFilmCollection
     a dcat:Dataset ;
     rdfs:label "Amateur Film Collection"@en ;
     dcterms:publisher <https://www.beeldengeluid.nl/> ;
-    dcterms:accessRights "Restricted"@en ;
+    dcterms:accessRights euright:RESTRICTED ;
     dcterms:isPartOf ms:NISVArchive ;
     dcterms:modified "2026-04-30" ;
     dcterms:source <https://data.beeldengeluid.nl/datasets> ;
@@ -162,7 +193,7 @@ ms:DutchProgramGuides
     a dcat:Dataset ;
     rdfs:label "Dutch Program Guides"@en ;
     dcterms:publisher <https://www.beeldengeluid.nl/> ;
-    dcterms:accessRights "Restricted"@en ;
+    dcterms:accessRights euright:RESTRICTED ;
     dcterms:isPartOf ms:NISVArchive ;
     dcterms:modified "2026-04-30" ;
     dcterms:source <https://data.beeldengeluid.nl/datasets> ;
@@ -174,7 +205,7 @@ ms:KijkLuistercijfers
     rdfs:label "Kijk & Luistercijfers"@en ;
     skos:altLabel "Dutch Audience Ratings"@en ;
     dcterms:publisher <https://www.beeldengeluid.nl/> ;
-    dcterms:accessRights "Restricted"@en ;
+    dcterms:accessRights euright:RESTRICTED ;
     dcterms:isPartOf ms:NISVArchive ;
     dcterms:modified "2026-04-30" ;
     dcterms:source <https://data.beeldengeluid.nl/datasets> ;
@@ -188,7 +219,9 @@ ms:DANSOralHistory
     rdfs:label "DANS Oral History Archive"@en ;
     schema:description "Oral history interview collections archived at DANS, including the Getuigenverhalen (Witness Testimonies) collection of ~500 interviews (2006–2010)."@en ;
     dcterms:publisher <https://dans.knaw.nl/> ;
-    dcterms:accessRights "Open — DANS Open Data"@en ;
+    dcterms:accessRights euright:PUBLIC ;
+    schema:conditionsOfAccess "Open — DANS Open Data; specific license varies by dataset deposit."@en ;
+    # [NO_LICENSE_URI] — DANS open datasets use various licenses; verify per deposit at easy.dans.knaw.nl
     schema:url <https://easy.dans.knaw.nl/ui/datasets/id/easy-dataset:50198> ;
     dcterms:modified "2026-04-30" ;
     dcterms:source <https://easy.dans.knaw.nl/ui/datasets/id/easy-dataset:50198> ;
@@ -201,7 +234,9 @@ ms:KBNewspapers
     skos:altLabel "Delpher Newspapers"@en ;
     schema:description "Digitised Dutch newspapers (1618–1995) from the Koninklijke Bibliotheek (KB). Open Domain for pre-1879 material; restricted for later dates."@en ;
     dcterms:publisher <https://www.kb.nl/> ;
-    dcterms:accessRights "Mixed — open (pre-1879), restricted (post-1879)"@en ;
+    dcterms:accessRights euright:NON_PUBLIC ;
+    schema:conditionsOfAccess "Mixed — pre-1879 material is Public Domain; post-1879 access is restricted."@en ;
+    # [NO_LICENSE_URI] — license differs by date range; item-level license info available from data.bibliotheken.nl
     schema:url <https://www.kb.nl/en/research-find/datasets/delpher-newspapers> ;
     dcterms:modified "2026-04-30" ;
     dcterms:source <https://www.kb.nl/en/research-find/datasets/delpher-newspapers> ;
@@ -214,7 +249,7 @@ ms:EYEFilmCollection
     rdfs:label "EYE Film Collection"@en ;
     schema:description "Film heritage collections from the EYE Filmmuseum, including 54,000+ films and archival materials."@en ;
     dcterms:publisher <https://www.eyefilm.nl/> ;
-    dcterms:accessRights "Restricted"@en ;
+    dcterms:accessRights euright:RESTRICTED ;
     schema:url <https://filmdatabase.eyefilm.nl/en> ;
     dcterms:modified "2026-04-30" ;
     dcterms:source <https://filmdatabase.eyefilm.nl/en> ;
@@ -226,7 +261,8 @@ ms:TweedeKamerArchive
     rdfs:label "Tweede Kamer Archive"@en ;
     skos:altLabel "Dutch Parliament Archive"@en ;
     dcterms:publisher <https://www.tweedekamer.nl/> ;
-    dcterms:accessRights "Open"@en ;
+    dcterms:accessRights euright:PUBLIC ;
+    # [NO_LICENSE_URI] — parliamentary proceedings are publicly accessible; specific reuse license not confirmed
     dcterms:modified "2026-04-30" ;
     dcterms:source <https://www.tweedekamer.nl/> ;
     clariah:partOf ms:MediaSuite .
@@ -238,7 +274,9 @@ ms:MeertensDialectDB
     skos:altLabel "Nederlandse Dialectenbank"@nl ;
     schema:description "1,000+ hours of Dutch dialect recordings. Anonymised transcriptions are open; full transcripts are restricted."@en ;
     dcterms:publisher <https://www.meertens.knaw.nl/> ;
-    dcterms:accessRights "Mixed — anonymised transcriptions open, full transcripts restricted"@en ;
+    dcterms:accessRights euright:NON_PUBLIC ;
+    schema:conditionsOfAccess "Mixed — anonymised transcriptions open, full transcripts restricted."@en ;
+    # [NO_LICENSE_URI] — license differs by access tier; verify at DANS deposit doi:10.17026/dans-zx8-52x3
     schema:url <https://www.meertens.knaw.nl/soundbites/> ;
     dcterms:modified "2026-04-30" ;
     dcterms:source <https://ssh.datastations.nl/dataset.xhtml?persistentId=doi:10.17026/dans-zx8-52x3> ;

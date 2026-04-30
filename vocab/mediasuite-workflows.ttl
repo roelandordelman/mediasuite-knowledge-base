@@ -21,7 +21,7 @@ ms:AnnotatedCorpus    a dcat:Dataset ; rdfs:label "Annotated Corpus"@en ;
     schema:description "Media items enriched with researcher annotations (segments, tags, notes)."@en .
 
 ms:ExportedData       a dcat:Dataset ; rdfs:label "Exported Data"@en ;
-    schema:description "Data exported from the Media Suite for use in an external analysis environment."@en .
+    schema:description "Data exported from the Media Suite for use in an external analysis environment. The reuse license of exported data follows the source collection: only CC0-licensed metadata may be freely redistributed; metadata from IPR-restricted collections cannot be exported for reuse."@en .
 
 ms:AnalysisDataset    a dcat:Dataset ; rdfs:label "Analysis Dataset"@en ;
     schema:description "Processed dataset produced by quantitative or qualitative analysis."@en .
