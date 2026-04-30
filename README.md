@@ -517,7 +517,7 @@ ResearchEnvironment
 Workflow
   └── schema:step (ordered) ────────► WorkflowStep
                                           ├── schema:instrument ─────────► ComponentTool (or external)
-                                          ├── tadirah:activity ──────────► tadirah:Concept
+                                          ├── clariah:researchActivity ──► tadirah:Concept
                                           └── schema:result ─────────────► DataProduct
 ```
 
@@ -561,25 +561,25 @@ ms:GenderWorkflow a schema:HowTo ;
 ms:GWStep1 a schema:HowToStep ;
     schema:position 1 ;
     schema:instrument ms:SearchTool ;
-    tadirah:activity tadirah:Searching ;
+    clariah:researchActivity tadirah:searching ;
     schema:result ms:SearchResult .
 
 ms:GWStep2 a schema:HowToStep ;
     schema:position 2 ;
     schema:instrument ms:AnnotationTool ;
-    tadirah:activity tadirah:Annotating ;
+    clariah:researchActivity tadirah:annotating ;
     schema:result ms:AnnotatedCorpus .
 
 ms:GWStep3 a schema:HowToStep ;
     schema:position 3 ;
     schema:instrument <https://sane.surf.nl/> ;  # external tool
-    tadirah:activity tadirah:Analyzing ;
+    clariah:researchActivity tadirah:analyzing ;
     schema:result ms:AnalysisDataset .
 
 ms:GWStep4 a schema:HowToStep ;
     schema:position 4 ;
     schema:instrument <https://zenodo.org> ;      # external platform
-    tadirah:activity tadirah:Publishing ;
+    clariah:researchActivity tadirah:academicPublishing ;
     schema:result ms:Publication .
 ```
 
