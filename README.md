@@ -652,6 +652,47 @@ Key open questions for the CLARIAH roadmap:
   research method (generalises across tools), or research environment (Media Suite-
   specific)? The two-level model proposed here answers "both, but keep them separate."
 
+#### Where infrastructure ends: the deposit/publication boundary
+
+A recurring modelling decision is where research infrastructure workflows stop and
+the broader scholarly publication process begins. The `mediasuite-workflows.ttl`
+file makes this boundary explicit:
+
+**In scope — infrastructure-adjacent:**
+- **Deposit and cite research output:** archiving a dataset, annotated corpus, or
+  computational notebook in a repository (Zenodo, DANS, institutional repo) to obtain
+  a persistent identifier (DOI). This is the terminal step modelled in most workflows.
+  Citation of the tools, collections, and infrastructure used is part of this step —
+  something CLARIAH can actively support by providing citable DOIs and metadata for
+  tools and collections.
+- **Enhanced publications (Data Stories):** the CLARIAH Data Stories format combines
+  computational analysis, visualisation, and narrative within the infrastructure
+  ecosystem. This is the closest point where infrastructure and publication overlap —
+  provenance and citation are structural, not optional. Represented as `ms:DataStory`
+  in the vocabulary.
+
+**Out of scope — scholarly writing workflow:**
+- Writing the paper (LaTeX, Overleaf, Word)
+- Reference management (Zotero, Mendeley)
+- Journal submission and peer review
+- Filing at an institutional repository as the *publication* (as opposed to a *data*
+  deposit)
+
+This means that the terminal step "Deposit and cite research output" in these workflows
+represents the boundary, not the full publication. The `ms:DepositedOutput` data product
+type models what the infrastructure produces — a citable, archived artifact — not the
+paper that may cite it. This distinction matters for evaluation: a workflow ending in a
+deposited corpus is complete from an infrastructure perspective, even if the research
+it enables continues beyond it.
+
+**The citation relationship as infrastructure obligation:**
+Even out-of-scope scholarly publications maintain a relationship with the infrastructure
+through citation. Journals and funders increasingly require citation of datasets and
+tools used. CLARIAH can support this by maintaining citable identifiers for all
+infrastructure components (tools, collections, APIs) and surfacing them at the right
+moment in the workflow — e.g., the "Deposit and cite" step could eventually surface a
+pre-filled citation list based on which tools and collections were used in the project.
+
 ### Alignment with tools.clariah.nl and the SSHOC Marketplace
 
 The Media Suite is registered in tools.clariah.nl (flows through to the SSHOC

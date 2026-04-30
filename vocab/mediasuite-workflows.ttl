@@ -26,8 +26,16 @@ ms:ExportedData       a dcat:Dataset ; rdfs:label "Exported Data"@en ;
 ms:AnalysisDataset    a dcat:Dataset ; rdfs:label "Analysis Dataset"@en ;
     schema:description "Processed dataset produced by quantitative or qualitative analysis."@en .
 
-ms:Publication        a dcat:Dataset ; rdfs:label "Research Publication or Data Deposit"@en ;
-    schema:description "Final research output — a paper, data story, or deposited dataset."@en .
+ms:DepositedOutput    a dcat:Dataset ; rdfs:label "Deposited Research Output"@en ;
+    schema:description "A dataset, annotated corpus, or computational notebook deposited in a repository (Zenodo, DANS, institutional repo) to obtain a persistent identifier (DOI). Represents the infrastructure-adjacent endpoint of a workflow: archiving the research output and making it citable. The full scholarly publication workflow (writing, peer review, journal submission) is outside the scope of the research infrastructure model."@en .
+
+ms:DataStory          a dcat:Dataset ; rdfs:label "Data Story"@en ;
+    schema:description "An enhanced publication combining computational analysis, data visualisation, and scholarly narrative, hosted on the CLARIAH data stories platform (mediasuitedatastories.clariah.nl). A CLARIAH-specific output format that bridges the gap between raw research output and traditional scholarly publication. Requires citation of the collections, tools, and infrastructure used — a case where the research environment has a direct stake in the publication output."@en .
+    # NOTE: Data Stories represent the closest point where research infrastructure and
+    # scholarly publishing overlap. They are produced using Media Suite tools and data,
+    # and are hosted within the CLARIAH ecosystem. Citation of tools and datasets is
+    # not optional for this format — it is structural. This makes Data Stories a model
+    # for how enhanced publications could/should handle provenance and citation more broadly.
 
 ms:ComparisonResult   a dcat:Dataset ; rdfs:label "Comparison Result"@en ;
     schema:description "Visualised comparison of multiple search queries or corpora over time."@en .
@@ -58,6 +66,7 @@ ms:GenderWorkflow
     schema:description "Studying gender representation in Dutch broadcast media, combining Media Suite search and annotation with secure analysis in SANE."@en ;
     clariah:workflowStatus "Fully supported" ;
     dcterms:source <https://mediasuitedatastories.clariah.nl/gender-research-intro/> ;
+    schema:result ms:DataStory ;  # this workflow is documented as a CLARIAH Data Story
     schema:step ms:GW1, ms:GW2, ms:GW3, ms:GW4, ms:GW5 .
 
 ms:GW1 a schema:HowToStep ; schema:position 1 ;
@@ -86,10 +95,11 @@ ms:GW4 a schema:HowToStep ; schema:position 4 ;
     schema:result ms:AnalysisDataset .
 
 ms:GW5 a schema:HowToStep ; schema:position 5 ;
-    schema:name "Publish results"@en ;
+    schema:name "Deposit and cite research output"@en ;
+    schema:description "Archive the analysis dataset and any annotated corpus in a repository (e.g. Zenodo, DANS) to obtain a DOI. Cite the collections, tools, and infrastructure used. The full writing and journal submission workflow is outside the scope of the research infrastructure model."@en ;
     schema:instrument <https://zenodo.org> ;
     clariah:researchActivity tadirah:academicPublishing ;
-    schema:result ms:Publication .
+    schema:result ms:DepositedOutput .
 
 # ── Workflow 2: Search → annotate → export ────────────────────────────────────
 
@@ -151,11 +161,12 @@ ms:ODA2 a schema:HowToStep ; schema:position 2 ;
     schema:result ms:AnalysisDataset .
 
 ms:ODA3 a schema:HowToStep ; schema:position 3 ;
-    schema:name "Publish results"@en ;
+    schema:name "Deposit and cite research output"@en ;
+    schema:description "Archive the analysis dataset or notebook in a repository (e.g. Zenodo) to obtain a DOI. Cite the Open Images API or SPARQL endpoint and the source collection."@en ;
     schema:instrument <https://zenodo.org> ;
     clariah:researchActivity tadirah:academicPublishing ;
     clariah:optional true ;
-    schema:result ms:Publication .
+    schema:result ms:DepositedOutput .
 
 # ── Workflow 4: Quantitative analysis — restricted data via SANE ─────────────
 
@@ -185,11 +196,12 @@ ms:RDS3 a schema:HowToStep ; schema:position 3 ;
     schema:result ms:AnalysisDataset .
 
 ms:RDS4 a schema:HowToStep ; schema:position 4 ;
-    schema:name "Publish results"@en ;
+    schema:name "Deposit and cite research output"@en ;
+    schema:description "Archive the analysis dataset in a repository to obtain a DOI. Note: data provider agreements and SANE terms of use govern what derived data may be deposited publicly; verify before export."@en ;
     schema:instrument <https://zenodo.org> ;
     clariah:researchActivity tadirah:academicPublishing ;
     clariah:optional true ;
-    schema:result ms:Publication .
+    schema:result ms:DepositedOutput .
 
 # ── Workflow 5: Quantitative analysis — on-premise ───────────────────────────
 
@@ -275,11 +287,11 @@ ms:CCA2 a schema:HowToStep ; schema:position 2 ;
     schema:result ms:ComparisonResult .
 
 ms:CCA3 a schema:HowToStep ; schema:position 3 ;
-    schema:name "Export and publish findings"@en ;
+    schema:name "Export findings"@en ;
     schema:instrument ms:Workspace ;
-    clariah:researchActivity tadirah:academicPublishing ;
+    clariah:researchActivity tadirah:dataIngestion ;
     clariah:optional true ;
-    schema:result ms:Publication .
+    schema:result ms:ExportedData .
 
 # ── Workflow 8: Fact-checking research ───────────────────────────────────────
 
@@ -311,11 +323,11 @@ ms:FCR3 a schema:HowToStep ; schema:position 3 ;
     schema:result ms:AnnotatedCorpus .
 
 ms:FCR4 a schema:HowToStep ; schema:position 4 ;
-    schema:name "Publish findings"@en ;
+    schema:name "Deposit findings"@en ;
     schema:instrument <https://zenodo.org> ;
     clariah:researchActivity tadirah:academicPublishing ;
     clariah:optional true ;
-    schema:result ms:Publication .
+    schema:result ms:DepositedOutput .
 
 # ── Workflow 9: Similarity-based corpus building ──────────────────────────────
 
@@ -433,7 +445,7 @@ ms:FAIR2 a schema:HowToStep ; schema:position 2 ;
     schema:name "Deposit in FAIR repository"@en ;
     schema:instrument <https://zenodo.org> ;
     clariah:researchActivity tadirah:academicPublishing ;
-    schema:result ms:Publication .
+    schema:result ms:DepositedOutput .
 
 # ── Sub-workflow B: Fragment citation via IIIF ────────────────────────────────
 # Operational pattern — aspirational pending Fragment Cutter implementation.
