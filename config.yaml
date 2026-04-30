@@ -251,6 +251,18 @@ data_platform:
 chunk_title_overrides:
   similarity: "Similarity — Computer Vision Tool for Visual Image Search"
 
+graph:
+  fuseki_url: "http://localhost:3030"
+  dataset: "mediasuite"
+  named_graph: "https://mediasuite.clariah.nl/graph"
+  admin_user: "admin"
+  admin_password: "admin"
+  turtle_files:
+    - "vocab/clariah-vocab.ttl"
+    - "vocab/mediasuite-entities.ttl"
+    - "vocab/mediasuite-collections.ttl"
+    - "vocab/mediasuite-workflows.ttl"
+
 collections:
   _help:
     content_type: "Help / Documentation"

@@ -10,3 +10,4 @@ __pycache__/
 *.pyc
 .env
 export_to_knowledge_base/
+stores/fuseki_data/
