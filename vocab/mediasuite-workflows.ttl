@@ -122,6 +122,7 @@ ms:SAE3 a schema:HowToStep ; schema:position 3 ;
 
 ms:SAE4 a schema:HowToStep ; schema:position 4 ;
     schema:name "Export annotations and metadata"@en ;
+    schema:description "Export researcher annotations and collection metadata from the Workspace. Note: only CC0-licensed metadata may be exported; metadata for IPR-restricted items cannot be redistributed."@en ;
     schema:instrument ms:Workspace ;
     clariah:researchActivity tadirah:dataIngestion ;
     clariah:optional true ;
