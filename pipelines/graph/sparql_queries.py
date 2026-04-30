@@ -79,16 +79,32 @@ WHERE {{
 ORDER BY ?label ?activity
 """
 
+# Q2b: All component tools with release status
+# Answers: "Which tools are experimental?", "Which tools are not yet released?", "What tools have known limitations?"
+QUERIES["tools_with_status"] = PREFIXES + """
+SELECT ?uri ?label ?description ?status
+WHERE {{
+  GRAPH <{graph}> {{
+    ?uri a clariah:ComponentTool ;
+         rdfs:label ?label .
+    OPTIONAL {{ ?uri schema:description ?description }}
+    OPTIONAL {{ ?uri schema:releaseNotes ?status }}
+  }}
+}}
+ORDER BY ?label
+"""
+
 # Q3: Infrastructure services and the tools that expose them
 # Answers: "What powers the Similarity Tool?", "What backend services exist?"
 QUERIES["services_by_tool"] = PREFIXES + """
-SELECT ?toolLabel ?serviceUri ?serviceLabel ?serviceDesc
+SELECT ?toolLabel ?serviceUri ?serviceLabel ?altLabel ?serviceDesc
 WHERE {{
   GRAPH <{graph}> {{
     ?tool a clariah:ComponentTool ;
           rdfs:label ?toolLabel ;
           clariah:deploysService ?serviceUri .
     ?serviceUri rdfs:label ?serviceLabel .
+    OPTIONAL {{ ?serviceUri skos:altLabel ?altLabel }}
     OPTIONAL {{ ?serviceUri schema:description ?serviceDesc }}
   }}
 }}
@@ -302,6 +318,7 @@ def main() -> None:
     else:
         # Run all queries with default parameters
         run("all_tools")
+        run("tools_with_status")
         run("tools_by_activity", activity_uri=tadirah_uri("searching"))
         run("tools_by_activity", activity_uri=tadirah_uri("annotating"))
         run("services_by_tool")
