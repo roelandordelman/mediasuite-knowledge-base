@@ -757,7 +757,7 @@ in the registries above. They will lag reality. How to manage this:
 | Phase 4 | When Fuseki is running, updating the graph is a single file reload — no re-embedding needed. The `entity_uri` field in chunks keeps chunks linked to current descriptions. |
 | Long term | SPARQL federation against NDE and publisher endpoints at query time, rather than static copies. Requires upstream systems to be stable and consistently available. |
 | Long term | NDE change notifications — when the NDE change log mechanism matures, subscribe to it for NISV-related datasets to trigger graph updates automatically. |
-| Long term | DAB + ODRL (SSHOC-NL, in development) — when the Data Access Broker is in place, access rights flow from the registry into the VRE; the manual `dcterms:accessRights` strings in the entity graph become redundant. |
+| Long term | DAB + ODRL (SSHOC-NL, in development) — when the Data Access Broker is in place, access rights flow from the registry into the VRE; the manual `dcterms:accessRights` strings in the entity graph become redundant. DAB/ODRL also directly impacts workflow execution: step `ms:RDS2` ("Export selection for SANE") is currently a manual bottleneck requiring a data owner representative to transfer the researcher's corpus to SANE. DAB/ODRL would replace or semi-automate this transfer based on machine-readable ODRL policies, with a small manual approval check remaining. This is the most concrete near-term workflow change that DAB/ODRL will enable. |
 
 Collection metadata changes slowly in normal operations, but can change faster
 during active registry cleanup or when new collections are onboarded. The `[NO_NDE_URI]`

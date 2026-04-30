@@ -185,6 +185,7 @@ ms:RDS1 a schema:HowToStep ; schema:position 1 ;
 
 ms:RDS2 a schema:HowToStep ; schema:position 2 ;
     schema:name "Export selection for SANE"@en ;
+    schema:description "Transfer the selected corpus from the Media Suite to the SANE environment. Current mechanism: a representative of the data owner (e.g. NISV) manually exports the researcher's selection and makes it available in SANE — this step is not self-service and requires coordination with the data owner. Planned replacement: the DAB (Data Access Broker) + ODRL mechanism under development in SSHOC-NL would automate or semi-automate this transfer based on machine-readable access policies, with a small manual approval check by the data owner remaining. Until DAB/ODRL is in place, this step is the primary bottleneck in the restricted-data analysis workflow."@en ;
     schema:instrument ms:Workspace ;
     clariah:researchActivity tadirah:dataIngestion ;
     schema:result ms:ExportedData .
