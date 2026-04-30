@@ -444,7 +444,7 @@ def make_chunks(
             "title": title,
             "section": section_label,
             "collection": "publications",
-            "content_type": "Research Example",
+            "content_type": "Research Example",  # TODO: rename to "Research Publication" — misleading; sounds like _learn_example_projects ("Example Project"). Change here + re-ingest + re-index when next publications run is needed anyway.
             "url": url,
             "tags": tags,
             "author": paper["authors"],
