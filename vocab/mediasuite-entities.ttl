@@ -1,0 +1,247 @@
+@prefix ms:       <https://mediasuite.clariah.nl/vocab#> .
+@prefix clariah:  <https://roelandordelman.github.io/mediasuite-knowledge-base/vocab#> .
+@prefix tadirah:  <https://vocabs.dariah.eu/tadirah/> .
+@prefix schema:   <https://schema.org/> .
+@prefix dcat:     <http://www.w3.org/ns/dcat#> .
+@prefix skos:     <http://www.w3.org/2004/02/skos/core#> .
+@prefix rdfs:     <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms:  <http://purl.org/dc/terms/> .
+@prefix owl:      <http://www.w3.org/2002/07/owl#> .
+
+# ── Research Environment ──────────────────────────────────────────────────────
+
+ms:MediaSuite
+    a clariah:ResearchEnvironment ;
+    schema:name "CLARIAH Media Suite"@en ;
+    schema:description "An online research environment for scholars working with Dutch audiovisual and other media collections, developed and maintained within the CLARIAH infrastructure."@en ;
+    schema:url <https://mediasuite.clariah.nl/> ;
+    schema:codeRepository <https://github.com/beeldengeluid/mediasuite-website> ;
+    schema:license <https://opensource.org/licenses/MIT> ;
+    schema:maintainer <https://www.beeldengeluid.nl/> ;
+    skos:closeMatch <https://tools.clariah.nl/#mediasuite-website> .
+
+# ── Component Tools ───────────────────────────────────────────────────────────
+# These are user-facing tools within the Media Suite. Each is linked to one or
+# more TaDiRaH research activities via clariah:researchActivity.
+
+ms:SearchTool
+    a clariah:ComponentTool ;
+    rdfs:label "Search Tool"@en ;
+    schema:description "Enables querying across Media Suite collections using keyword search, Boolean operators, and metadata filters."@en ;
+    schema:url <https://mediasuite.clariah.nl/documentation/howtos/search> ;
+    clariah:partOf ms:MediaSuite ;
+    clariah:researchActivity tadirah:searching, tadirah:querying, tadirah:dataVisualization,
+                             clariah:Sampling .
+
+ms:CollectionInspector
+    a clariah:ComponentTool ;
+    rdfs:label "Collection Inspector"@en ;
+    schema:description "Provides statistical overviews and faceted browsing of collection metadata, including field completeness and value distributions."@en ;
+    schema:url <https://mediasuite.clariah.nl/documentation/howtos/inspect-collections> ;
+    clariah:partOf ms:MediaSuite ;
+    clariah:researchActivity tadirah:browsing, tadirah:exploration .
+
+ms:ExploreTool
+    a clariah:ComponentTool ;
+    rdfs:label "Explore Tool"@en ;
+    schema:description "Supports open-ended, serendipitous discovery by browsing entities — media objects, people, locations, and concepts — extracted from archived resources and connected via linked data relationships. An exploration path panel tracks the navigation journey and supports bookmarking and annotation. Currently covers Sound & Vision, EYE Film Museum, and Natuurbeelden collections."@en ;
+    schema:url <https://mediasuite.clariah.nl/documentation/howtos/explore> ;
+    clariah:partOf ms:MediaSuite ;
+    clariah:researchActivity tadirah:browsing, tadirah:exploration, tadirah:linkedOpenData ;
+    schema:releaseNotes "Currently outdated; revamp in progress. Focuses on linked data-based browsing of open collections." .
+
+ms:CompareTool
+    a clariah:ComponentTool ;
+    rdfs:label "Compare Tool"@en ;
+    schema:description "Visualises and compares the results of multiple search queries over time, supporting trend analysis across collections."@en ;
+    schema:url <https://mediasuite.clariah.nl/documentation/howtos/compare-queries> ;
+    clariah:partOf ms:MediaSuite ;
+    clariah:researchActivity tadirah:comparing, tadirah:dataVisualization .
+
+ms:ResourceViewer
+    a clariah:ComponentTool ;
+    rdfs:label "Resource Viewer"@en ;
+    schema:description "Enables playback and exploration of individual media items with an interactive zoomable timeline showing ASR transcripts and manual annotations as data layers. Supports bookmarking, fragment annotation, and access to item metadata."@en ;
+    schema:url <https://mediasuite.clariah.nl/documentation/howtos/view-resources> ;
+    clariah:partOf ms:MediaSuite ;
+    clariah:researchActivity tadirah:browsing, tadirah:segmenting,
+                             tadirah:visualAnnotation, tadirah:audioAnnotation .
+
+ms:AnnotationTool
+    a clariah:ComponentTool ;
+    rdfs:label "Annotation Tool"@en ;
+    schema:description "Allows researchers to create, edit, and export annotations on media items and segments, stored in personal user projects."@en ;
+    schema:url <https://mediasuite.clariah.nl/documentation/howtos/annotate> ;
+    clariah:partOf ms:MediaSuite ;
+    clariah:researchActivity tadirah:visualAnnotation, tadirah:audioAnnotation, tadirah:segmenting .
+
+ms:FragmentCutter
+    a clariah:ComponentTool ;
+    rdfs:label "Fragment Cutter"@en ;
+    schema:description "Planned tool to enable researchers to define, save, and cite temporal segments of audiovisual items. Implementation under consideration using IIIF (International Image Interoperability Framework) for interoperable fragment addressing."@en ;
+    schema:url <https://mediasuite.clariah.nl/documentation> ;
+    clariah:partOf ms:MediaSuite ;
+    clariah:researchActivity tadirah:segmenting, tadirah:videoEditing ;
+    schema:releaseNotes "Planned — not yet available in the Media Suite." .
+
+ms:StatisticalAnalysis
+    a clariah:ComponentTool ;
+    rdfs:label "Statistical Analysis Tool"@en ;
+    schema:description "Provides built-in aggregate statistics and visualisations over search results within the Media Suite interface, including frequency distributions and co-occurrence patterns. Note: this covers in-platform statistical views only. Full quantitative analysis — running Jupyter notebooks against the API, or analysing restricted data in SANE or on-premise — is a workflow pattern involving multiple tools and environments, not a single tool."@en ;
+    schema:url <https://mediasuite.clariah.nl/documentation> ;
+    clariah:partOf ms:MediaSuite ;
+    clariah:researchActivity tadirah:dataVisualization, tadirah:dataMining .
+
+ms:OpenImagesAPI
+    a clariah:InfrastructureService, dcat:DataService ;
+    rdfs:label "Open Images API"@en ;
+    schema:description "Programmatic interface for open access audiovisual content from the Sound & Vision archive. Enables Jupyter notebook-based quantitative analysis without authentication restrictions."@en ;
+    dcat:endpointURL <https://www.openimages.eu/api> ;
+    dcat:endpointDescription <https://www.openimages.eu/api> ;
+    dcat:servesDataset ms:OpenBeeldenCollection ;
+    clariah:partOf ms:MediaSuite ;
+    clariah:researchActivity tadirah:querying, tadirah:dataIngestion .
+
+ms:SoundVisionSPARQL
+    a clariah:InfrastructureService, dcat:DataService ;
+    rdfs:label "Sound & Vision Catalog SPARQL Endpoint"@en ;
+    schema:description "SPARQL endpoint providing linked data access to the Sound & Vision media catalog for structured querying and computational research."@en ;
+    dcat:endpointURL <https://cat.apis.beeldengeluid.nl/sparql> ;
+    dcat:endpointDescription <https://data.beeldengeluid.nl/apis/nisv-media-catalog> ;
+    dcat:servesDataset ms:SoundVisionCollection ;
+    clariah:researchActivity tadirah:querying, tadirah:linkedOpenData .
+    # NOTE: full description of this endpoint lives in the data.beeldengeluid.nl
+    # knowledge base (data_platform.json). This entity cross-references it from
+    # the Media Suite entity graph.
+    # NOTE on quantitative analysis workflows: the Media Suite supports three patterns
+    # for quantitative analysis, captured in mediasuite-workflows.ttl:
+    #   1. Open data:        OpenImagesAPI or SoundVisionSPARQL → Jupyter notebook
+    #   2. Restricted/SANE:  SearchTool + Workspace (clariah:Sampling) → export → SANE
+    #   3. On-premise:       SearchTool + Workspace → local analysis environment
+    #                        (embedded researchers only, by arrangement with Sound & Vision)
+
+ms:Workspace
+    a clariah:ComponentTool ;
+    rdfs:label "Workspace"@en ;
+    schema:description "Personal research workspace where researchers manage user projects, save bookmarked items, and store annotations. Subsumes the Bookmarking and User Project functionalities."@en ;
+    schema:url <https://mediasuite.clariah.nl/documentation/howtos/bookmark> ;
+    clariah:partOf ms:MediaSuite ;
+    clariah:researchActivity tadirah:collecting, tadirah:managing, clariah:Sampling .
+
+ms:ReflexivityTool
+    a clariah:ComponentTool ;
+    rdfs:label "Reflexivity Tool"@en ;
+    schema:description "Supports researchers in documenting and reflecting on their methodological choices, search strategies, and interpretive decisions."@en ;
+    schema:url <https://mediasuite.clariah.nl/documentation> ;
+    clariah:partOf ms:MediaSuite ;
+    clariah:researchActivity tadirah:defining .  # closest TaDiRaH concept; methodological reflection is not yet in TaDiRaH
+
+ms:SimilarityTool
+    a clariah:ComponentTool ;
+    rdfs:label "Similarity Tool"@en ;
+    skos:altLabel "Computer Vision Tool"@en ;
+    schema:description "Experimental tool for finding visually similar audiovisual content within the Sound & Vision collection using keyframe images. Accessed via the 'Only resources with keyframes' filter in the Search Tool; results are then inspected in the Similarity Tool. Coverage is limited to the portion of the archive that has been processed for keyframes, which requires significant compute."@en ;
+    schema:url <https://mediasuite.clariah.nl/documentation/howtos/search> ;
+    clariah:partOf ms:MediaSuite ;
+    clariah:deploysService ms:VisualSimilarityService ;
+    clariah:researchActivity tadirah:patternRecognition, tadirah:informationRetrieval ;
+    schema:releaseNotes "Experimental — limited archive coverage; entry point is the Search Tool keyframe filter." .
+
+# ── Infrastructure Services ───────────────────────────────────────────────────
+# Backend computational services that enrich collections or power tool features.
+# Not directly operated by researchers; exposed through ComponentTools.
+
+ms:ASRService
+    a clariah:InfrastructureService ;
+    rdfs:label "Automatic Speech Recognition Service"@en ;
+    skos:altLabel "ASR Service"@en ;
+    schema:description "Generates automatic speech transcripts for audiovisual items in the Sound & Vision collections, creating a searchable text data layer. The underlying speech recognition engine is upgraded regularly as better models become available: started with KALDI_NL (2014), upgraded to Whisper (2023)."@en ;
+    clariah:partOf ms:MediaSuite ;
+    clariah:enriches ms:SoundVisionCollection ;
+    clariah:researchActivity tadirah:speechRecognizing .
+
+ms:VisualSimilarityService
+    a clariah:InfrastructureService ;
+    rdfs:label "Visual Similarity Service"@en ;
+    skos:altLabel "VisXP"@en ;
+    skos:altLabel "Computer Vision Service"@en ;
+    schema:description "Extracts visual keyframe embeddings from video and enables similarity-based retrieval across the audiovisual archive. Powers the Similarity Tool."@en ;
+    clariah:partOf ms:MediaSuite ;
+    clariah:enriches ms:SoundVisionCollection ;
+    clariah:researchActivity tadirah:patternRecognition .
+    # NOTE on TaDiRaH gap: tadirah:visualAnalysis exists in the vocabulary but has
+    # a German prefLabel ("Visualisierung") and no English definition — likely a data
+    # quality issue. tadirah:dataVisualization covers creating visual representations
+    # of data, not analysing visual content. Neither adequately describes computer
+    # vision analysis of image/video content. tadirah:patternRecognition is used here
+    # as the closest available concept. 'Visual Analysis' (in the computer vision sense)
+    # is a candidate for a clariah: extension concept, similar to clariah:Sampling.
+
+ms:FactRankTool
+    a clariah:ComponentTool ;
+    rdfs:label "FactRank Tool"@en ;
+    schema:description "Assists researchers in finding fact-checkable statements within a selection of Dutch talk shows (from January 2024). Researchers query by keyword, date range, and programme, and use a score slider to filter by check-worthiness. Statements are derived from ASR transcripts and subtitles and scored by the FactRank model; clicking a statement opens the Resource Viewer at the relevant timecode."@en ;
+    schema:url <https://mediasuite.clariah.nl/labo/documentation/factrank> ;
+    clariah:partOf ms:MediaSuite ;
+    clariah:deploysService ms:FactRankModel ;
+    clariah:researchActivity tadirah:informationRetrieval, tadirah:discourseAnalysis ;
+    schema:releaseNotes "Experimental — limited to a subset of Dutch talk shows; model and data are continuously updated." .
+
+ms:FactRankModel
+    a clariah:InfrastructureService ;
+    rdfs:label "FactRank Model"@en ;
+    schema:description "The check-worthiness scoring model developed at factrank.org, applied to ASR transcripts and subtitles from the Sound & Vision catalog to produce FactRank scores for statements."@en ;
+    schema:url <https://factrank.org> ;
+    clariah:enriches ms:SoundVisionCollection ;
+    clariah:researchActivity tadirah:dataMining .
+
+# External research environment used in cross-environment workflows
+<https://sane.surf.nl/>
+    a clariah:ResearchEnvironment ;
+    rdfs:label "SANE — Secure ANalysis Environment"@en ;
+    schema:description "A trusted research environment operated by SURF for analysing sensitive data. Data providers maintain full control while researchers work within the secure environment. A component of SURF Research Cloud."@en ;
+    schema:url <https://roelandordelman.github.io/media-suite-community/sane/> ;
+    clariah:partOf <https://www.surf.nl/en/surf-research-cloud> .
+
+ms:AccessManagement
+    a clariah:InfrastructureService ;
+    rdfs:label "Access Management"@en ;
+    schema:description "Authentication and authorisation layer controlling who can log in to the Media Suite and what content they can access. Integrates multiple external identity and access management systems depending on user type and access context."@en ;
+    clariah:partOf ms:MediaSuite ;
+    # Authentication strands (who are you):
+    #   SURFconext  — federated identity for Dutch research and education institutions;
+    #                 the primary login route for researchers at affiliated universities
+    #   eduID       — persistent digital identity (SURF) for individuals without an
+    #                 institutional account (e.g. independent researchers, students)
+    #   EUiD        — European-level research identity for international users accessing
+    #                 the Media Suite outside the Dutch institutional context
+    #
+    # Authorisation and access management (what can you access / group membership):
+    #   SRAM        — SURF Research Access Management; manages group-based access to
+    #                 services and collections; used for SANE access control and
+    #                 for granting access to restricted collections
+    #
+    # Access tiers:
+    #   Public      — unauthenticated access to metadata and open content
+    #   Registered  — authenticated users can use the Workspace and personal projects
+    #   Restricted  — IPR-restricted audiovisual content; requires affiliation with
+    #                 a rights-holding institution via SURFconext
+    #   SANE        — sensitive data analysis; requires SRAM group membership
+    #                 in addition to authentication
+    schema:url <https://mediasuite.clariah.nl/documentation/faq/who-can-access> .
+
+# ── Representative Data Collections ──────────────────────────────────────────
+# A selection of key collections accessible via the Media Suite.
+# Full collection descriptions are in the data.beeldengeluid.nl knowledge base.
+
+ms:SoundVisionCollection
+    a dcat:Dataset ;
+    rdfs:label "Sound & Vision Archive"@en ;
+    schema:description "The main audiovisual archive of the Netherlands Institute for Sound & Vision (NISV), containing television, radio, and related materials."@en ;
+    schema:url <https://data.beeldengeluid.nl/datasets/nisv-media-catalog> .
+
+ms:OpenBeeldenCollection
+    a dcat:Dataset ;
+    rdfs:label "Open Beelden"@en ;
+    schema:description "An openly licensed collection of historical audiovisual material from Sound & Vision."@en ;
+    schema:url <https://data.beeldengeluid.nl/datasets/open-beelden> .

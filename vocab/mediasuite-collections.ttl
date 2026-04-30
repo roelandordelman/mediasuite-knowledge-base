@@ -1,0 +1,247 @@
+@prefix ms:      <https://mediasuite.clariah.nl/vocab#> .
+@prefix clariah: <https://roelandordelman.github.io/mediasuite-knowledge-base/vocab#> .
+@prefix dcat:    <http://www.w3.org/ns/dcat#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix schema:  <https://schema.org/> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix foaf:    <http://xmlns.com/foaf/0.1/> .
+
+# ── Intended architecture (partially implemented) ─────────────────────────────
+#
+#   data.beeldengeluid.nl / KB / EYE / ...  ← publisher platforms; authoritative source
+#         ↓ publishes to / harvested by
+#   NDE dataset register                    ← Dutch national registry for cultural heritage
+#   (+ SSHOC marketplace, CLARIN VLO)       ← EU-level registries harvesting from NDE
+#         ↓ should be harvested by
+#   mediasuitedata.clariah.nl               ← Media Suite CKAN registry: which collections
+#                                              are accessible via the Media Suite specifically
+#         ↓ queried by VREs; access via DAB + ODRL (SSHOC-NL, in development)
+#   ms:MediaSuite / sane.surf.nl            ← VREs that expose collections to researchers
+#
+# Note on data.beeldengeluid.nl: this is NISV's own Linked Open Data publication
+# platform — the *publisher* of NISV datasets. NDE harvests FROM it. Dataset URIs
+# such as http://data.beeldengeluid.nl/id/dataset/0002 are the authoritative identifiers
+# for NISV collections and are used in owl:sameAs links below.
+#
+# Current reality: mediasuitedata.clariah.nl is partly manually maintained and
+# not fully linked to resource maintainers. owl:sameAs links below point to NDE/
+# publisher URIs where confirmed; [NO_NDE_URI] flags collections not yet registered.
+# Full dataset descriptions belong in the registries — this file only models the
+# Media Suite's access relationship to each collection.
+#
+# Data currency: these descriptions were last reviewed 2026-04-30. Each entity
+# carries dcterms:modified (last reviewed) and dcterms:source (where to check for
+# updates). Collection metadata changes slowly but can accelerate during active
+# registry cleanup. Long-term solution: SPARQL federation against NDE/publisher
+# endpoints + NDE change notifications when available.
+
+# ── Catalog stubs ─────────────────────────────────────────────────────────────
+
+<https://datasetregister.netwerkdigitaalerfgoed.nl/>
+    a dcat:Catalog ;
+    rdfs:label "NDE Dataset Register"@en ;
+    schema:description "The Dutch national dataset register for cultural heritage institutions, maintained by Netwerk Digitaal Erfgoed (NDE). Authoritative source for dataset descriptions from Dutch heritage organisations."@en .
+
+<https://mediasuitedata.clariah.nl/>
+    a dcat:Catalog ;
+    rdfs:label "Media Suite Collection Registry"@en ;
+    schema:description "CKAN-based registry of collections accessible via the CLARIAH Media Suite. Intended to harvest from national registries; currently partly manually maintained."@en ;
+    dcat:isPartOf <https://datasetregister.netwerkdigitaalerfgoed.nl/> .
+
+# ── NISV collections ──────────────────────────────────────────────────────────
+# Sound & Vision (NISV) publishes collection descriptions at data.beeldengeluid.nl
+# and as Linked Open Data via cat.apis.beeldengeluid.nl/sparql.
+# The full archive (ms:NISVArchive) is the parent; sub-collections and open
+# subsets are modelled as dcterms:hasPart children.
+
+ms:NISVArchive
+    a dcat:Dataset ;
+    rdfs:label "Sound & Vision Archive"@en ;
+    skos:altLabel "Beeld & Geluid archief"@nl ;
+    schema:description "The main audiovisual archive of the Netherlands Institute for Sound & Vision (NISV), covering Dutch television, radio, and related media from the 1890s to the present."@en ;
+    dcterms:publisher <https://www.beeldengeluid.nl/> ;
+    dcterms:accessRights "Restricted — access to IPR-protected content requires affiliation with a rights-holding institution via SURFconext."@en ;
+    schema:url <https://data.beeldengeluid.nl/datasets/nisv-media-catalog> ;
+    dcterms:modified "2026-04-30" ;
+    dcterms:source <https://data.beeldengeluid.nl/datasets/nisv-media-catalog> ;
+    clariah:partOf ms:MediaSuite ;
+    # [NO_NDE_URI] — NISV full archive not yet registered as a single entry in NDE.
+    dcterms:hasPart ms:SoundVisionTelevisionArchive, ms:SoundVisionRadioArchive,
+                    ms:OpenBeelden, ms:RadioOranje, ms:NISVArtCollection,
+                    ms:AmateurFilmCollection, ms:DutchProgramGuides, ms:KijkLuistercijfers .
+
+ms:SoundVisionTelevisionArchive
+    a dcat:Dataset ;
+    rdfs:label "Sound & Vision Television Archive"@en ;
+    dcterms:publisher <https://www.beeldengeluid.nl/> ;
+    dcterms:accessRights "Restricted"@en ;
+    dcterms:isPartOf ms:NISVArchive ;
+    dcterms:modified "2026-04-30" ;
+    dcterms:source <https://data.beeldengeluid.nl/datasets> ;
+    clariah:partOf ms:MediaSuite .
+    # [NO_NDE_URI]
+
+ms:SoundVisionRadioArchive
+    a dcat:Dataset ;
+    rdfs:label "Sound & Vision Radio Archive"@en ;
+    dcterms:publisher <https://www.beeldengeluid.nl/> ;
+    dcterms:accessRights "Restricted"@en ;
+    dcterms:isPartOf ms:NISVArchive ;
+    dcterms:modified "2026-04-30" ;
+    dcterms:source <https://data.beeldengeluid.nl/datasets> ;
+    clariah:partOf ms:MediaSuite .
+    # [NO_NDE_URI]
+
+ms:OpenBeelden
+    a dcat:Dataset ;
+    rdfs:label "Open Beelden"@en ;
+    schema:description "Openly licensed historical audiovisual material from Sound & Vision, including Polygoon newsreels and early 20th-century films. 7,092 items under Creative Commons Zero (Public Domain)."@en ;
+    dcterms:publisher <https://www.beeldengeluid.nl/> ;
+    dcterms:accessRights "Open — CC0 (Public Domain)"@en ;
+    dcterms:isPartOf ms:NISVArchive ;
+    dcterms:hasPart ms:Natuurbeelden ;
+    schema:url <https://data.beeldengeluid.nl/datasets/open-beelden> ;
+    dcat:accessService ms:OpenImagesAPI ;
+    dcterms:modified "2026-04-30" ;
+    dcterms:source <http://data.beeldengeluid.nl/id/dataset/0002> ;
+    clariah:partOf ms:MediaSuite ;
+    owl:sameAs <http://data.beeldengeluid.nl/id/dataset/0002> .
+    # NDE URI confirmed: http://data.beeldengeluid.nl/id/dataset/0002
+
+ms:Natuurbeelden
+    a dcat:Dataset ;
+    rdfs:label "Open Beelden Natuurbeelden"@en ;
+    schema:description "Open collection of nature video fragments (4,000+ items) from Sound & Vision, accessible via the Open Beelden API."@en ;
+    dcterms:publisher <https://www.beeldengeluid.nl/> ;
+    dcterms:accessRights "Open — Creative Commons licensed"@en ;
+    dcterms:isPartOf ms:OpenBeelden ;
+    dcat:accessService ms:OpenImagesAPI ;
+    dcterms:modified "2026-04-30" ;
+    dcterms:source <https://data.beeldengeluid.nl/datasets> ;
+    clariah:partOf ms:MediaSuite .
+    # [NO_NDE_URI] — not separately registered; part of Open Beelden dataset.
+
+ms:RadioOranje
+    a dcat:Dataset ;
+    rdfs:label "Radio Oranje"@en ;
+    schema:description "NISV collection of Dutch-language wartime radio broadcasts (1940–1945). Public Domain under Dutch law."@en ;
+    dcterms:publisher <https://www.beeldengeluid.nl/> ;
+    dcterms:accessRights "Open — Public Domain"@en ;
+    dcterms:isPartOf ms:NISVArchive ;
+    schema:url <https://data.beeldengeluid.nl/datasets/radio-oranje> ;
+    dcterms:modified "2026-04-30" ;
+    dcterms:source <https://data.beeldengeluid.nl/datasets/radio-oranje> ;
+    clariah:partOf ms:MediaSuite .
+    # [NO_NDE_URI] — not separately registered in NDE.
+
+ms:NISVArtCollection
+    a dcat:Dataset ;
+    rdfs:label "NISV Art Collection"@en ;
+    dcterms:publisher <https://www.beeldengeluid.nl/> ;
+    dcterms:accessRights "Restricted"@en ;
+    dcterms:isPartOf ms:NISVArchive ;
+    dcterms:modified "2026-04-30" ;
+    dcterms:source <https://data.beeldengeluid.nl/datasets> ;
+    clariah:partOf ms:MediaSuite .
+    # [NO_NDE_URI]
+
+ms:AmateurFilmCollection
+    a dcat:Dataset ;
+    rdfs:label "Amateur Film Collection"@en ;
+    dcterms:publisher <https://www.beeldengeluid.nl/> ;
+    dcterms:accessRights "Restricted"@en ;
+    dcterms:isPartOf ms:NISVArchive ;
+    dcterms:modified "2026-04-30" ;
+    dcterms:source <https://data.beeldengeluid.nl/datasets> ;
+    clariah:partOf ms:MediaSuite .
+    # [NO_NDE_URI]
+
+ms:DutchProgramGuides
+    a dcat:Dataset ;
+    rdfs:label "Dutch Program Guides"@en ;
+    dcterms:publisher <https://www.beeldengeluid.nl/> ;
+    dcterms:accessRights "Restricted"@en ;
+    dcterms:isPartOf ms:NISVArchive ;
+    dcterms:modified "2026-04-30" ;
+    dcterms:source <https://data.beeldengeluid.nl/datasets> ;
+    clariah:partOf ms:MediaSuite .
+    # [NO_NDE_URI]
+
+ms:KijkLuistercijfers
+    a dcat:Dataset ;
+    rdfs:label "Kijk & Luistercijfers"@en ;
+    skos:altLabel "Dutch Audience Ratings"@en ;
+    dcterms:publisher <https://www.beeldengeluid.nl/> ;
+    dcterms:accessRights "Restricted"@en ;
+    dcterms:isPartOf ms:NISVArchive ;
+    dcterms:modified "2026-04-30" ;
+    dcterms:source <https://data.beeldengeluid.nl/datasets> ;
+    clariah:partOf ms:MediaSuite .
+    # [NO_NDE_URI]
+
+# ── Partner collections ────────────────────────────────────────────────────────
+
+ms:DANSOralHistory
+    a dcat:Dataset ;
+    rdfs:label "DANS Oral History Archive"@en ;
+    schema:description "Oral history interview collections archived at DANS, including the Getuigenverhalen (Witness Testimonies) collection of ~500 interviews (2006–2010)."@en ;
+    dcterms:publisher <https://dans.knaw.nl/> ;
+    dcterms:accessRights "Open — DANS Open Data"@en ;
+    schema:url <https://easy.dans.knaw.nl/ui/datasets/id/easy-dataset:50198> ;
+    dcterms:modified "2026-04-30" ;
+    dcterms:source <https://easy.dans.knaw.nl/ui/datasets/id/easy-dataset:50198> ;
+    clariah:partOf ms:MediaSuite .
+    # [NO_NDE_URI] — archived in DANS; not separately in NDE dataset register.
+
+ms:KBNewspapers
+    a dcat:Dataset ;
+    rdfs:label "KB Newspaper Collection"@en ;
+    skos:altLabel "Delpher Newspapers"@en ;
+    schema:description "Digitised Dutch newspapers (1618–1995) from the Koninklijke Bibliotheek (KB). Open Domain for pre-1879 material; restricted for later dates."@en ;
+    dcterms:publisher <https://www.kb.nl/> ;
+    dcterms:accessRights "Mixed — open (pre-1879), restricted (post-1879)"@en ;
+    schema:url <https://www.kb.nl/en/research-find/datasets/delpher-newspapers> ;
+    dcterms:modified "2026-04-30" ;
+    dcterms:source <https://www.kb.nl/en/research-find/datasets/delpher-newspapers> ;
+    clariah:partOf ms:MediaSuite .
+    # [NO_NDE_URI] — available via KB Linked Data (data.bibliotheken.nl) but not
+    # found as a distinct entry in the NDE dataset register.
+
+ms:EYEFilmCollection
+    a dcat:Dataset ;
+    rdfs:label "EYE Film Collection"@en ;
+    schema:description "Film heritage collections from the EYE Filmmuseum, including 54,000+ films and archival materials."@en ;
+    dcterms:publisher <https://www.eyefilm.nl/> ;
+    dcterms:accessRights "Restricted"@en ;
+    schema:url <https://filmdatabase.eyefilm.nl/en> ;
+    dcterms:modified "2026-04-30" ;
+    dcterms:source <https://filmdatabase.eyefilm.nl/en> ;
+    clariah:partOf ms:MediaSuite .
+    # [NO_NDE_URI] — not found in NDE dataset register.
+
+ms:TweedeKamerArchive
+    a dcat:Dataset ;
+    rdfs:label "Tweede Kamer Archive"@en ;
+    skos:altLabel "Dutch Parliament Archive"@en ;
+    dcterms:publisher <https://www.tweedekamer.nl/> ;
+    dcterms:accessRights "Open"@en ;
+    dcterms:modified "2026-04-30" ;
+    dcterms:source <https://www.tweedekamer.nl/> ;
+    clariah:partOf ms:MediaSuite .
+    # [NO_NDE_URI]
+
+ms:MeertensDialectDB
+    a dcat:Dataset ;
+    rdfs:label "Meertens Soundbites Collection"@en ;
+    skos:altLabel "Nederlandse Dialectenbank"@nl ;
+    schema:description "1,000+ hours of Dutch dialect recordings. Anonymised transcriptions are open; full transcripts are restricted."@en ;
+    dcterms:publisher <https://www.meertens.knaw.nl/> ;
+    dcterms:accessRights "Mixed — anonymised transcriptions open, full transcripts restricted"@en ;
+    schema:url <https://www.meertens.knaw.nl/soundbites/> ;
+    dcterms:modified "2026-04-30" ;
+    dcterms:source <https://ssh.datastations.nl/dataset.xhtml?persistentId=doi:10.17026/dans-zx8-52x3> ;
+    clariah:partOf ms:MediaSuite .
+    # [NO_NDE_URI] — archived in DANS (doi:10.17026/dans-zx8-52x3) but not
+    # separately registered in the NDE dataset register.

@@ -1,0 +1,146 @@
+@prefix clariah: <https://roelandordelman.github.io/mediasuite-knowledge-base/vocab#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix schema:  <https://schema.org/> .
+@prefix codemeta: <https://codemeta.github.io/terms/> .
+@prefix softwaretypes: <https://vocabs.dariah.eu/softwaretypes/> .
+@prefix tadirah: <https://vocabs.dariah.eu/tadirah/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+# ── Ontology declaration ──────────────────────────────────────────────────────
+
+<https://roelandordelman.github.io/mediasuite-knowledge-base/vocab#>
+    a owl:Ontology ;
+    rdfs:label "CLARIAH vocabulary extension"@en ;
+    rdfs:comment "Custom terms for describing CLARIAH research environments, component tools, infrastructure services, and workflows. Extends schema.org, CodeMeta, softwaretypes, and TaDiRaH."@en ;
+    dcterms:created "2026-04-30" ;
+    dcterms:creator <https://orcid.org/0000-0001-9229-0006> .
+    # NOTE on namespace URI: the base URI currently resolves to the GitHub Pages site
+    # for this repository. This is an aspirational URI — it is published and resolvable,
+    # but not yet a formal CLARIAH standard. If/when this vocabulary is adopted more
+    # broadly within CLARIAH, the namespace should migrate to a persistent URI such as
+    # https://w3id.org/clariah/vocab# (registered via a PR to github.com/perma-id/w3id.org).
+    # All clariah: terms in this file would then redirect to the w3id.org URI.
+
+# ── Classes ───────────────────────────────────────────────────────────────────
+
+clariah:ResearchEnvironment
+    a owl:Class ;
+    rdfs:subClassOf schema:SoftwareApplication ;
+    rdfs:label "Research Environment"@en ;
+    rdfs:comment "In this vocabulary, a ResearchEnvironment is concretely instantiated as a software platform that integrates component tools, data collections, and backend services into a unified interface for researchers. Example: the CLARIAH Media Suite."@en ;
+    skos:prefLabel "Virtual Research Environment"@en ;
+    skos:altLabel "Research Environment"@en ;
+    skos:altLabel "VRE"@en ;
+    skos:definition "A complex, often virtual or digital, infrastructure integrating people, data, tools, and services to support collaborative scientific research and the management of the research lifecycle."@en ;
+    # NOTE on URI alignment: 'Virtual Research Environment' (VRE) is a widely used
+    # concept in European research infrastructure (JISC, DARIAH, EOSC) but no single
+    # canonical, publicly resolvable SKOS URI has been published by an authoritative
+    # body. This is a known gap in humanities/social science infrastructure vocabularies
+    # (contrast with biomedical ontologies where OBO Foundry provides this). We use
+    # the Wikidata URI as a stable closeMatch for now; update to an EOSC/DARIAH URI
+    # if one is published.
+    skos:closeMatch <https://www.wikidata.org/wiki/Q7935198> ;
+    skos:closeMatch softwaretypes:ResearchEnvironment .
+
+clariah:ComponentTool
+    a owl:Class ;
+    rdfs:subClassOf schema:SoftwareApplication ;
+    rdfs:label "Component Tool"@en ;
+    rdfs:comment "A discrete, user-facing component within a ResearchEnvironment that supports one or more scholarly research activities. Each ComponentTool is linked to the activity it supports via tadirah:activity."@en ;
+    skos:definition "A modular unit of a research environment that exposes a specific scholarly capability — such as searching, annotating, or comparing — to researchers through a dedicated interface."@en ;
+    # NOTE on terminology: 'component', 'tool', and 'functionality' are three
+    # overlapping concepts used differently across communities:
+    #   component   — architectural view: a modular unit within a larger system
+    #   tool        — user/task view: something a researcher picks up to do work
+    #   functionality — feature view: a specific capability, more granular than a tool
+    # 'ComponentTool' is chosen to capture both the architectural role (part of a
+    # ResearchEnvironment) and the user-facing role (something researchers operate).
+    # Functionality is deliberately excluded — it is too granular (e.g. "filter by
+    # date range" is a functionality of the SearchTool, not a ComponentTool itself).
+    #
+    # NOTE on TaDiRaH and scholarly primitives: Unsworth (2000) identified seven
+    # foundational scholarly activities — Discovering, Annotating, Comparing,
+    # Referring, Sampling, Illustrating, Representing — as a framework for designing
+    # and evaluating humanities research tools. TaDiRaH (DARIAH, ~2014) extends and
+    # operationalizes this tradition into a broader, hierarchical, community-maintained
+    # taxonomy of digital research activities. Using tadirah:activity on a
+    # ComponentTool anchors each component to the scholarly primitive(s) it supports,
+    # linking platform architecture to research practice.
+    skos:closeMatch softwaretypes:WebApplication .
+
+clariah:InfrastructureService
+    a owl:Class ;
+    rdfs:subClassOf schema:SoftwareApplication ;
+    rdfs:label "Infrastructure Service"@en ;
+    rdfs:comment "A backend computational service that enriches or processes data within a research environment. Not directly operated by researchers but drives tool functionality. Examples: ASR service, computer vision service."@en ;
+    skos:closeMatch softwaretypes:WebService .
+
+clariah:Workflow
+    a owl:Class ;
+    rdfs:subClassOf schema:HowTo ;
+    rdfs:label "Research Workflow"@en ;
+    rdfs:comment "An ordered sequence of research activities (typed via tadirah:activity) performed with clariah:ComponentTool and clariah:InfrastructureService instances, operating over dcat:Dataset collections, within or across clariah:ResearchEnvironment instances."@en ;
+    skos:definition "A structured sequence of scholarly research activities, each performed with one or more tools or services and producing an intermediate or final research output. Workflows may span a single research environment or combine tools and services from multiple environments."@en ;
+    # NOTE on OWL restrictions: the prose above links Workflow to ComponentTool,
+    # InfrastructureService, and dcat:Dataset by reference. A stricter machine-
+    # enforceable version would use owl:Restriction on schema:instrument to require
+    # that workflow steps involve at least one ComponentTool or InfrastructureService.
+    # This is deferred to Phase 4 when Fuseki + a reasoner are in place.
+    skos:closeMatch <https://www.wikidata.org/wiki/Q1312235> .  # scientific workflow
+
+# ── SKOS Concepts (activity extensions) ──────────────────────────────────────
+# These are research activities not (yet) present in TaDiRaH that are needed to
+# describe Media Suite and CLARIAH workflows. They live in the clariah: namespace
+# and are typed as skos:Concept so they can be used interchangeably with TaDiRaH
+# concepts as values of clariah:researchActivity.
+
+clariah:Sampling
+    a skos:Concept ;
+    skos:prefLabel "Sampling"@en ;
+    skos:definition "The purposive selection of a subset of items from a larger dataset or collection for analysis, citation, or the construction of a personal research corpus."@en ;
+    rdfs:comment "Covers the activity of a researcher defining a bounded, purposive subset — for example, selecting a set of items across multiple collections for quantitative analysis, or assembling a personal mixed-dataset corpus. Distinct from tadirah:collecting (which covers bookmarking/saving) and tadirah:aggregating (which covers combining sources): Sampling implies a selection rationale and an analytical intent."@en ;
+    # NOTE on TaDiRaH gap: 'Sampling' was one of Unsworth's original seven scholarly
+    # primitives (2000) — defined as "selecting a representative portion of a larger
+    # body of material." It was not carried forward into TaDiRaH 2.0 as a distinct
+    # concept. Its absence is increasingly felt as researchers move from browsing to
+    # corpus-based quantitative analysis and from fixed institutional collections to
+    # researcher-defined personal collections that mix material across datasets.
+    # clariah:Sampling is proposed as a candidate for submission to the TaDiRaH
+    # maintainers (github.com/dhtaxonomy/TaDiRAH) as a gap in the current taxonomy.
+    skos:closeMatch <https://www.wikidata.org/wiki/Q206702> ;  # sampling (statistics)
+    skos:broadMatch tadirah:collecting ;
+    skos:broadMatch tadirah:aggregating .
+
+# ── Properties ────────────────────────────────────────────────────────────────
+
+clariah:researchActivity
+    a owl:ObjectProperty ;
+    rdfs:label "research activity"@en ;
+    rdfs:comment "Links a ComponentTool, InfrastructureService, or workflow step to the TaDiRaH concept(s) describing the scholarly activity it supports. TaDiRaH concepts are SKOS concepts, not OWL properties, so this clariah: property is needed as the predicate."@en ;
+    rdfs:range skos:Concept .
+    # NOTE: tadirah: defines only SKOS *concepts* (activities), not OWL properties.
+    # A common mistake is to write 'tadirah:activity tadirah:searching' — treating
+    # a TaDiRaH concept as a predicate. The correct pattern is:
+    #   clariah:researchActivity tadirah:searching .
+
+clariah:deploysService
+    a owl:ObjectProperty ;
+    rdfs:label "deploys service"@en ;
+    rdfs:comment "Relates a ComponentTool to the InfrastructureService it exposes to researchers. The tool is the user-facing layer; the service does the computation."@en ;
+    rdfs:domain clariah:ComponentTool ;
+    rdfs:range  clariah:InfrastructureService .
+
+clariah:enriches
+    a owl:ObjectProperty ;
+    rdfs:label "enriches"@en ;
+    rdfs:comment "Relates an InfrastructureService or ComponentTool to the dataset or collection it adds value to (e.g. ASR service adds transcripts to audiovisual collections)."@en ;
+    rdfs:range  <http://www.w3.org/ns/dcat#Dataset> .
+
+clariah:partOf
+    a owl:ObjectProperty ;
+    rdfs:label "part of"@en ;
+    rdfs:comment "Relates a ComponentTool or InfrastructureService to the ResearchEnvironment it belongs to."@en ;
+    rdfs:range  clariah:ResearchEnvironment .

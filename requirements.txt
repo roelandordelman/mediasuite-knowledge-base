@@ -3,4 +3,5 @@ ollama
 pdfplumber
 python-frontmatter
 pyyaml
+rdflib
 requests

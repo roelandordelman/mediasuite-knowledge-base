@@ -597,6 +597,63 @@ Zenodo) are exactly what the SSHOC Marketplace workflow model is designed for
 — the Turtle representation above can be submitted as a structured workflow
 entry there once finalised.
 
+### Collection registries and data currency
+
+#### Relationship between the three registries
+
+Collection descriptions in the knowledge base are drawn from three distinct levels
+of a publisher → national registry → VRE stack:
+
+```
+data.beeldengeluid.nl / KB / EYE / ...   publisher platforms — the authoritative
+                                         source. NISV publishes dataset URIs as
+                                         Linked Open Data (e.g. data.beeldengeluid.nl/
+                                         id/dataset/0002). NDE harvests FROM here.
+        ↓ harvested by
+NDE dataset register                     Dutch national registry for cultural heritage
+(+ SSHOC Marketplace, CLARIN VLO)        (EU-level registries harvest from NDE).
+                                         Authoritative at national level across all
+                                         institutions.
+        ↓ should be harvested by
+mediasuitedata.clariah.nl                Media Suite CKAN registry — which collections
+                                         are accessible via the Media Suite specifically.
+                                         A filtered, VRE-specific view on a subset of
+                                         the national catalog, with Media Suite access
+                                         context added.
+        ↓ queried by VREs; access negotiated via DAB + ODRL (SSHOC-NL, in development)
+ms:MediaSuite / sane.surf.nl             VREs that expose collections to researchers.
+```
+
+**Current reality:** `mediasuitedata.clariah.nl` is partly manually maintained and
+not fully linked to resource maintainers — some collections were added without a
+proper link to the registering institution. The intended direction is to clean this
+up and adhere to NDE standards, but this will take time. In `mediasuite-collections.ttl`,
+`owl:sameAs` links point to publisher/NDE URIs where confirmed; `[NO_NDE_URI]`
+flags collections not yet registered at the national level.
+
+**On `data.beeldengeluid.nl` specifically:** this is NISV's own Linked Open Data
+publication platform — the *publisher*, not a registry. The URIs it mints (e.g.
+`http://data.beeldengeluid.nl/id/dataset/0002`) are the authoritative identifiers
+for NISV collections, used as `owl:sameAs` targets in the entity graph.
+
+#### Keeping entity descriptions current
+
+The Turtle files in `vocab/` are a *view* on information that lives authoritatively
+in the registries above. They will lag reality. How to manage this:
+
+| Horizon | Approach |
+|---|---|
+| Now | Each entity carries `dcterms:modified` (last reviewed) and `dcterms:source` (where to check for updates). Update manually when you know something changed. |
+| Phase 4 | When Fuseki is running, updating the graph is a single file reload — no re-embedding needed. The `entity_uri` field in chunks keeps chunks linked to current descriptions. |
+| Long term | SPARQL federation against NDE and publisher endpoints at query time, rather than static copies. Requires upstream systems to be stable and consistently available. |
+| Long term | NDE change notifications — when the NDE change log mechanism matures, subscribe to it for NISV-related datasets to trigger graph updates automatically. |
+| Long term | DAB + ODRL (SSHOC-NL, in development) — when the Data Access Broker is in place, access rights flow from the registry into the VRE; the manual `dcterms:accessRights` strings in the entity graph become redundant. |
+
+Collection metadata changes slowly in normal operations, but can change faster
+during active registry cleanup or when new collections are onboarded. The `[NO_NDE_URI]`
+flags in `mediasuite-collections.ttl` are the most actionable items: each one
+represents a collection that should be registered at NDE but isn't yet.
+
 ---
 
 ## Roadmap
