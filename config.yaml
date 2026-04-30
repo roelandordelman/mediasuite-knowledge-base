@@ -58,6 +58,129 @@ known_collections:
   - NISV Art Collection
   - Open Beelden Natuurbeelden
 
+# Tool→entity URI and TaDiRaH activity mappings for Phase 4 knowledge graph.
+# Supplements known_tools (flat list used for keyword extraction — pipelines unchanged).
+# Graph-building tooling reads this block to attach entity_uri and activity links to chunks.
+# Notes explain cases where a known_tools entry is not a standalone entity in the graph.
+tool_entities:
+  "Search Tool":
+    entity_uri: "https://mediasuite.clariah.nl/vocab#SearchTool"
+    entity_type: "ComponentTool"
+    tadirah_activities:
+      - "https://vocabs.dariah.eu/tadirah/searching"
+      - "https://vocabs.dariah.eu/tadirah/querying"
+      - "https://vocabs.dariah.eu/tadirah/dataVisualization"
+      - "https://roelandordelman.github.io/mediasuite-knowledge-base/vocab#Sampling"
+  "Collection Inspector":
+    entity_uri: "https://mediasuite.clariah.nl/vocab#CollectionInspector"
+    entity_type: "ComponentTool"
+    tadirah_activities:
+      - "https://vocabs.dariah.eu/tadirah/browsing"
+      - "https://vocabs.dariah.eu/tadirah/exploration"
+      - "https://vocabs.dariah.eu/tadirah/dataVisualization"
+      - "https://vocabs.dariah.eu/tadirah/qualityAssurance"
+  "Explore Tool":
+    entity_uri: "https://mediasuite.clariah.nl/vocab#ExploreTool"
+    entity_type: "ComponentTool"
+    tadirah_activities:
+      - "https://vocabs.dariah.eu/tadirah/browsing"
+      - "https://vocabs.dariah.eu/tadirah/exploration"
+      - "https://vocabs.dariah.eu/tadirah/linkedOpenData"
+  "Compare Tool":
+    entity_uri: "https://mediasuite.clariah.nl/vocab#CompareTool"
+    entity_type: "ComponentTool"
+    tadirah_activities:
+      - "https://vocabs.dariah.eu/tadirah/comparing"
+      - "https://vocabs.dariah.eu/tadirah/dataVisualization"
+  "Resource Viewer":
+    entity_uri: "https://mediasuite.clariah.nl/vocab#ResourceViewer"
+    entity_type: "ComponentTool"
+    tadirah_activities:
+      - "https://vocabs.dariah.eu/tadirah/browsing"
+      - "https://vocabs.dariah.eu/tadirah/segmenting"
+      - "https://vocabs.dariah.eu/tadirah/visualAnnotation"
+      - "https://vocabs.dariah.eu/tadirah/audioAnnotation"
+  "Annotation Tool":
+    entity_uri: "https://mediasuite.clariah.nl/vocab#AnnotationTool"
+    entity_type: "ComponentTool"
+    tadirah_activities:
+      - "https://vocabs.dariah.eu/tadirah/visualAnnotation"
+      - "https://vocabs.dariah.eu/tadirah/audioAnnotation"
+      - "https://vocabs.dariah.eu/tadirah/segmenting"
+  "Workspace":
+    entity_uri: "https://mediasuite.clariah.nl/vocab#Workspace"
+    entity_type: "ComponentTool"
+    tadirah_activities:
+      - "https://vocabs.dariah.eu/tadirah/collecting"
+      - "https://vocabs.dariah.eu/tadirah/managing"
+      - "https://roelandordelman.github.io/mediasuite-knowledge-base/vocab#Sampling"
+  "Bookmarking":
+    entity_uri: "https://mediasuite.clariah.nl/vocab#Workspace"
+    entity_type: "ComponentTool"
+    note: "Bookmarking is a functionality within Workspace; no separate entity URI."
+    tadirah_activities:
+      - "https://vocabs.dariah.eu/tadirah/collecting"
+  "User Project":
+    entity_uri: "https://mediasuite.clariah.nl/vocab#Workspace"
+    entity_type: "ComponentTool"
+    note: "User Project is a functionality within Workspace; no separate entity URI."
+    tadirah_activities:
+      - "https://vocabs.dariah.eu/tadirah/collecting"
+      - "https://vocabs.dariah.eu/tadirah/managing"
+  "Statistical Analysis":
+    entity_uri: "https://mediasuite.clariah.nl/vocab#StatisticalAnalysis"
+    entity_type: "ComponentTool"
+    tadirah_activities:
+      - "https://vocabs.dariah.eu/tadirah/dataVisualization"
+      - "https://vocabs.dariah.eu/tadirah/dataMining"
+  "Fragment Cutter":
+    entity_uri: "https://mediasuite.clariah.nl/vocab#FragmentCutter"
+    entity_type: "ComponentTool"
+    tadirah_activities:
+      - "https://vocabs.dariah.eu/tadirah/segmenting"
+      - "https://vocabs.dariah.eu/tadirah/videoEditing"
+  "Computer Vision":
+    entity_uri: "https://mediasuite.clariah.nl/vocab#SimilarityTool"
+    entity_type: "ComponentTool"
+    note: "Alternate name for the Similarity Tool (ms:SimilarityTool)."
+    tadirah_activities:
+      - "https://vocabs.dariah.eu/tadirah/patternRecognition"
+      - "https://vocabs.dariah.eu/tadirah/informationRetrieval"
+  "FactRank Tool":
+    entity_uri: "https://mediasuite.clariah.nl/vocab#FactRankTool"
+    entity_type: "ComponentTool"
+    tadirah_activities:
+      - "https://vocabs.dariah.eu/tadirah/informationRetrieval"
+      - "https://vocabs.dariah.eu/tadirah/discourseAnalysis"
+  "Reflexivity Tool":
+    entity_uri: "https://mediasuite.clariah.nl/vocab#ReflexivityTool"
+    entity_type: "ComponentTool"
+    tadirah_activities:
+      - "https://vocabs.dariah.eu/tadirah/defining"
+  "Speech Recognition":
+    entity_uri: "https://mediasuite.clariah.nl/vocab#ASRService"
+    entity_type: "InfrastructureService"
+    note: "Backend service (ms:ASRService), not a ComponentTool. In known_tools for keyword extraction."
+    tadirah_activities:
+      - "https://vocabs.dariah.eu/tadirah/speechRecognizing"
+  "Data Stories":
+    entity_uri: "https://mediasuite.clariah.nl/vocab#DataStory"
+    entity_type: "DataProduct"
+    note: "Data Stories is a publication format (ms:DataStory data product), not a ComponentTool."
+    tadirah_activities: []
+  "Timeline":
+    entity_uri: "https://mediasuite.clariah.nl/vocab#ResourceViewer"
+    entity_type: "ComponentTool"
+    note: "Timeline is the zoomable timeline within the Resource Viewer, not a standalone entity."
+    tadirah_activities:
+      - "https://vocabs.dariah.eu/tadirah/dataVisualization"
+  "Word Cloud":
+    entity_uri: "https://mediasuite.clariah.nl/vocab#StatisticalAnalysis"
+    entity_type: "ComponentTool"
+    note: "Word Cloud is a visualization option within Statistical Analysis / Compare Tool, not a standalone entity."
+    tadirah_activities:
+      - "https://vocabs.dariah.eu/tadirah/dataVisualization"
+
 publications:
   output: "publications.json"
   cache_dir: "/tmp/publications_cache"

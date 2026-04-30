@@ -922,19 +922,27 @@ vocabulary groundwork for the structured data layer in Phase 4.
 
 **Vocabulary preparation (groundwork for Phase 4)**
 
-- [ ] Define a `clariah-vocab.ttl` file with custom terms not covered by existing vocabularies:
+- [x] Define a `clariah-vocab.ttl` file with custom terms not covered by existing vocabularies:
   `clariah:ResearchEnvironment`, `clariah:ComponentTool`, `clariah:InfrastructureService`,
-  `clariah:deploysService`, `clariah:enriches` — with `rdfs:label`, `rdfs:comment`, and
-  alignment links to `codemeta:`, `softwaretypes:`, `schema:`, `tadirah:`
-- [ ] Map `known_tools` list in `config.yaml` to TaDiRaH activity URIs
-  (e.g. `SearchTool` → `tadirah:Searching`, `AnnotationTool` → `tadirah:Annotating`) — these
-  mappings become the basis for structured activity tagging in Phase 4
-- [ ] Write Media Suite entity descriptions in Turtle — one named individual per entity
-  (MediaSuite as `clariah:ResearchEnvironment`, each tool as `clariah:ComponentTool`,
-  ASR/VisXP as `clariah:InfrastructureService`, collections as `dcat:Dataset`)
-- [ ] Write 3–5 representative workflow descriptions in Turtle — e.g. gender analysis
-  workflow (search → filter → annotate → export), SANE workflow (access secure environment →
-  analyse sensitive material → export results), search-annotate-export workflow
+  `clariah:deploysService`, `clariah:enriches`, `clariah:researchActivity`,
+  `clariah:workflowStatus`, `clariah:optional` — with `rdfs:label`, `rdfs:comment`, and
+  alignment links to `codemeta:`, `softwaretypes:`, `schema:`, `tadirah:`. Also added
+  `clariah:Sampling` as a SKOS concept extension for the TaDiRaH gap (Unsworth scholarly
+  primitive not in TaDiRaH 2.0).
+- [x] Map `known_tools` list in `config.yaml` to TaDiRaH activity URIs — added `tool_entities`
+  block in `config.yaml` mapping each tool name to its `entity_uri`, `entity_type`, and
+  `tadirah_activities` list; pipelines unchanged (still read flat `known_tools` list for
+  keyword extraction); graph tooling reads `tool_entities` for Phase 4 entity linking
+- [x] Write Media Suite entity descriptions in Turtle — named individuals in
+  `vocab/mediasuite-entities.ttl` (MediaSuite as `clariah:ResearchEnvironment`, 11 component
+  tools, 4 infrastructure services as `clariah:InfrastructureService`) and
+  `vocab/mediasuite-collections.ttl` (15 collections as `dcat:Dataset` with EU access-right
+  vocabulary URIs, confirmed `dcterms:license` URIs, and `[NO_NDE_URI]` flags)
+- [x] Write workflow descriptions in Turtle — 18 top-level workflows + 5 sub-workflows in
+  `vocab/mediasuite-workflows.ttl`, covering gender analysis, SANE secure analysis, search-
+  annotate-export, fact-checking, oral history, on-demand enrichment, and more; 17 named
+  data products; `clariah:workflowStatus` values (Fully supported / Partially supported /
+  Aspirational); `clariah:optional` on 14 optional steps across 10 workflows
 - [ ] Share vocabulary sketch with tools.clariah.nl maintainers for feedback on alignment
   with existing CodeMeta + TaDiRaH + softwaretypes descriptors
 
