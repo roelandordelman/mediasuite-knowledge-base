@@ -179,8 +179,9 @@ ms:ODA3 a schema:HowToStep ; schema:position 3 ;
 ms:RestrictedDataSANEWorkflow
     a clariah:Workflow ;
     schema:name "Quantitative analysis of restricted data via SANE"@en ;
-    schema:description "Selection and sampling in the Media Suite; analysis in SANE where data providers retain full control. Requires SRAM group membership."@en ;
+    schema:description "Selection and sampling in the Media Suite; analysis in SANE where data providers retain full control. Requires SRAM group membership. Prerequisite: complete ms:SANEAccessSubWorkflow first to formalise access and receive the SANE environment."@en ;
     clariah:workflowStatus "Fully supported" ;
+    schema:hasPart ms:SANEAccessSubWorkflow ;
     schema:step ms:RDS1, ms:RDS2, ms:RDS3, ms:RDS4 .
 
 ms:RDS1 a schema:HowToStep ; schema:position 1 ;
@@ -486,6 +487,53 @@ ms:FC2 a schema:HowToStep ; schema:position 2 ;
     schema:name "Cite fragment via stable IIIF URI"@en ;
     clariah:researchActivity tadirah:persistentIdentifier ;
     schema:result ms:CitableFragment .
+
+# ── Sub-workflow D: Formalising access to SANE ────────────────────────────────
+# Administrative and procedural prerequisite to ms:RestrictedDataSANEWorkflow.
+# The steps in this sub-workflow are procedural, not scholarly activities in
+# the TaDiRaH sense; tadirah:managing is used as the closest available concept
+# for the administrative steps.
+# Currently available for NISV collections only (CLARIAH beta pilot).
+# Documented at: https://roelandordelman.github.io/media-suite-community/sane/
+
+ms:SANEAccessSubWorkflow
+    a clariah:Workflow ;
+    schema:name "Formalising access to SANE"@en ;
+    schema:description "Administrative and procedural steps for obtaining access to SANE (Secure ANalysis Environment) for analysis of restricted Media Suite collections. A prerequisite to ms:RestrictedDataSANEWorkflow — complete this sub-workflow first, then proceed with corpus selection and analysis. Currently scoped to NISV collections only (CLARIAH beta pilot); other data providers are not yet a routed option. Key constraint: no data leaves SANE without data provider review and approval."@en ;
+    clariah:workflowStatus "Fully supported" ;
+    dcterms:source <https://roelandordelman.github.io/media-suite-community/sane/> ;
+    schema:step ms:SA1, ms:SA2, ms:SA3, ms:SA4, ms:SA5 .
+
+ms:SA1 a schema:HowToStep ; schema:position 1 ;
+    schema:name "Select corpus and document research motivation"@en ;
+    schema:description "In the Media Suite Workspace, define which NISV collections and data are needed, and document the research motivation, methods, and intended use. This documentation forms the basis of the access request in the next step."@en ;
+    schema:instrument ms:SearchTool, ms:Workspace ;
+    clariah:researchActivity tadirah:searching, clariah:Sampling ;
+    schema:result ms:SelectedCorpus .
+
+ms:SA2 a schema:HowToStep ; schema:position 2 ;
+    schema:name "Submit SANE access request"@en ;
+    schema:description "Submit the access request form via the Media Suite, providing: identity and institutional affiliation, desired NISV collections, research motivation and methods, and software and compute requirements. The Media Suite Broker checks eligibility and forwards the request to the data provider (NISV)."@en ;
+    clariah:researchActivity tadirah:managing ;
+    schema:result ms:MethodologyRecord .
+
+ms:SA3 a schema:HowToStep ; schema:position 3 ;
+    schema:name "Complete data provider review and sign agreement"@en ;
+    schema:description "NISV reviews the request. Depending on the collection and intended use, the researcher may be required to sign a confidentiality or data-use agreement. This step is data provider-driven; the researcher waits and responds to agreement requirements. Approval is not guaranteed."@en ;
+    clariah:researchActivity tadirah:managing .
+
+ms:SA4 a schema:HowToStep ; schema:position 4 ;
+    schema:name "Receive SANE environment"@en ;
+    schema:description "SURF configures the secure workspace upon approval, typically ~30 minutes for a basic environment (1 core, 8 GB RAM). The researcher receives access to SANE with the agreed data loaded and standard tools (R, Python) available. Larger compute configurations can be requested."@en ;
+    schema:instrument <https://sane.surf.nl/> ;
+    clariah:researchActivity tadirah:managing .
+
+ms:SA5 a schema:HowToStep ; schema:position 5 ;
+    schema:name "Output review and environment closeout"@en ;
+    schema:description "Before the SANE environment is decommissioned, any outputs the researcher wishes to take out are reviewed by the data provider. No data leaves SANE without data provider approval. Once outputs are cleared, the environment is removed."@en ;
+    schema:instrument <https://sane.surf.nl/> ;
+    clariah:researchActivity tadirah:qualityAssurance ;
+    schema:result ms:ExportedData .
 
 # ── Sub-workflow C: Collection inspection and data fracture analysis ───────────
 # Operational pattern — use before or during any workflow to assess data quality
