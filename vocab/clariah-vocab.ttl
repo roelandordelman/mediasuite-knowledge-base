@@ -126,6 +126,13 @@ clariah:researchActivity
     # a TaDiRaH concept as a predicate. The correct pattern is:
     #   clariah:researchActivity tadirah:searching .
 
+clariah:workflowStatus
+    a owl:DatatypeProperty ;
+    rdfs:label "workflow status"@en ;
+    rdfs:comment "Implementation status of a clariah:Workflow. Three defined values: 'Fully supported' — all steps are possible with current tools and services; 'Partially supported' — some steps require experimental tools, workarounds, or tools under active development; 'Aspirational' — describes a desired workflow not yet fully implementable, included to document researcher needs and infrastructure gaps."@en ;
+    rdfs:domain clariah:Workflow ;
+    rdfs:range  <http://www.w3.org/2001/XMLSchema#string> .
+
 clariah:deploysService
     a owl:ObjectProperty ;
     rdfs:label "deploys service"@en ;

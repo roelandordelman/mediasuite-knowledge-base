@@ -9,219 +9,429 @@
 
 # ── Intermediate data products ────────────────────────────────────────────────
 # Named individuals representing the outputs that flow between workflow steps.
-# Typed as dcat:Dataset (a bounded, purposive collection of data) rather than
-# schema:DataFeed to stay aligned with DCAT used for collections.
+# Typed as dcat:Dataset to stay aligned with DCAT used for collections.
 
-ms:SearchResult
-    a dcat:Dataset ;
-    rdfs:label "Search Result Set"@en ;
-    schema:description "The set of items returned by a query in the Search Tool, before sampling or annotation."@en .
+ms:SearchResult       a dcat:Dataset ; rdfs:label "Search Result Set"@en ;
+    schema:description "Items returned by a query before sampling or annotation."@en .
 
-ms:SelectedCorpus
-    a dcat:Dataset ;
-    rdfs:label "Selected Corpus"@en ;
-    schema:description "A researcher-defined subset of items saved to the Workspace, representing a purposive sample for further analysis."@en .
+ms:SelectedCorpus     a dcat:Dataset ; rdfs:label "Selected Corpus"@en ;
+    schema:description "Researcher-defined subset of items saved to the Workspace as a purposive sample."@en .
 
-ms:AnnotatedCorpus
-    a dcat:Dataset ;
-    rdfs:label "Annotated Corpus"@en ;
-    schema:description "A corpus of media items enriched with researcher annotations (segments, tags, notes)."@en .
+ms:AnnotatedCorpus    a dcat:Dataset ; rdfs:label "Annotated Corpus"@en ;
+    schema:description "Media items enriched with researcher annotations (segments, tags, notes)."@en .
 
-ms:ExportedData
-    a dcat:Dataset ;
-    rdfs:label "Exported Data"@en ;
-    schema:description "Data exported from the Media Suite (annotations, metadata, or item references) for use in an external analysis environment."@en .
+ms:ExportedData       a dcat:Dataset ; rdfs:label "Exported Data"@en ;
+    schema:description "Data exported from the Media Suite for use in an external analysis environment."@en .
 
-ms:AnalysisDataset
-    a dcat:Dataset ;
-    rdfs:label "Analysis Dataset"@en ;
-    schema:description "A processed dataset produced by quantitative or qualitative analysis, typically in a computational environment such as SANE or a Jupyter notebook."@en .
+ms:AnalysisDataset    a dcat:Dataset ; rdfs:label "Analysis Dataset"@en ;
+    schema:description "Processed dataset produced by quantitative or qualitative analysis."@en .
 
-ms:Publication
-    a dcat:Dataset ;
-    rdfs:label "Research Publication or Data Deposit"@en ;
-    schema:description "The final research output — a paper, data story, or deposited dataset — produced at the end of a research workflow."@en .
+ms:Publication        a dcat:Dataset ; rdfs:label "Research Publication or Data Deposit"@en ;
+    schema:description "Final research output — a paper, data story, or deposited dataset."@en .
+
+ms:ComparisonResult   a dcat:Dataset ; rdfs:label "Comparison Result"@en ;
+    schema:description "Visualised comparison of multiple search queries or corpora over time."@en .
+
+ms:StatementList      a dcat:Dataset ; rdfs:label "Fact-check Statement List"@en ;
+    schema:description "Ranked list of check-worthy statements extracted from ASR/subtitle data by the FactRank model."@en .
+
+ms:VisualCorpus       a dcat:Dataset ; rdfs:label "Visual Corpus"@en ;
+    schema:description "Corpus of visually similar media items assembled via the Similarity Tool."@en .
+
+ms:ExplorationPath    a dcat:Dataset ; rdfs:label "Exploration Path"@en ;
+    schema:description "Recorded navigation path through linked data entities in the Explore Tool."@en .
+
+ms:MethodologyRecord  a dcat:Dataset ; rdfs:label "Methodology Record"@en ;
+    schema:description "Documented record of methodological choices, search strategies, and interpretive decisions."@en .
+
+ms:Fragment           a dcat:Dataset ; rdfs:label "Media Fragment"@en ;
+    schema:description "A bounded temporal or spatial segment of a media item, defined by the researcher."@en .
+
+ms:CitableFragment    a dcat:Dataset ; rdfs:label "Citable Media Fragment"@en ;
+    schema:description "A media fragment with a stable, resolvable URI (e.g. IIIF) suitable for citation."@en .
 
 # ── Workflow 1: Gender representation analysis ────────────────────────────────
-# Cross-environment workflow drawn from the gender data story
-# (mediasuitedatastories.clariah.nl/gender-research-intro/).
-# Illustrates a workflow that spans the Media Suite, SANE, and Zenodo.
 
 ms:GenderWorkflow
     a clariah:Workflow ;
     schema:name "Gender representation analysis using Media Suite and SANE"@en ;
-    schema:description "A research workflow for studying gender representation in Dutch broadcast media. Combines Media Suite search and annotation with secure analysis in SANE for sensitive data, followed by publication."@en ;
+    schema:description "Studying gender representation in Dutch broadcast media, combining Media Suite search and annotation with secure analysis in SANE."@en ;
+    clariah:workflowStatus "Fully supported" ;
     dcterms:source <https://mediasuitedatastories.clariah.nl/gender-research-intro/> ;
     schema:step ms:GW1, ms:GW2, ms:GW3, ms:GW4 .
 
-ms:GW1 a schema:HowToStep ;
-    schema:position 1 ;
+ms:GW1 a schema:HowToStep ; schema:position 1 ;
     schema:name "Search collections"@en ;
     schema:instrument ms:SearchTool ;
     clariah:researchActivity tadirah:searching, tadirah:querying ;
     schema:result ms:SearchResult .
 
-ms:GW2 a schema:HowToStep ;
-    schema:position 2 ;
+ms:GW2 a schema:HowToStep ; schema:position 2 ;
     schema:name "Annotate selected items"@en ;
     schema:instrument ms:AnnotationTool ;
     clariah:researchActivity tadirah:visualAnnotation, tadirah:audioAnnotation ;
     schema:result ms:AnnotatedCorpus .
 
-ms:GW3 a schema:HowToStep ;
-    schema:position 3 ;
+ms:GW3 a schema:HowToStep ; schema:position 3 ;
     schema:name "Analyse in secure environment"@en ;
     schema:instrument <https://sane.surf.nl/> ;
     clariah:researchActivity tadirah:analyzing ;
     schema:result ms:AnalysisDataset .
 
-ms:GW4 a schema:HowToStep ;
-    schema:position 4 ;
+ms:GW4 a schema:HowToStep ; schema:position 4 ;
     schema:name "Publish results"@en ;
     schema:instrument <https://zenodo.org> ;
     clariah:researchActivity tadirah:academicPublishing ;
     schema:result ms:Publication .
 
 # ── Workflow 2: Search → annotate → export ────────────────────────────────────
-# The core Media Suite research loop: find items, build a corpus,
-# annotate them, and export results for further use or citation.
 
 ms:SearchAnnotateExportWorkflow
     a clariah:Workflow ;
     schema:name "Search, annotate, and export"@en ;
     schema:description "The core Media Suite research loop: search collections, sample items into a personal corpus, annotate, and export results."@en ;
+    clariah:workflowStatus "Fully supported" ;
+    schema:hasPart ms:FAIRAnnotationSharing ;
     schema:step ms:SAE1, ms:SAE2, ms:SAE3, ms:SAE4 .
 
-ms:SAE1 a schema:HowToStep ;
-    schema:position 1 ;
+ms:SAE1 a schema:HowToStep ; schema:position 1 ;
     schema:name "Search and browse collections"@en ;
     schema:instrument ms:SearchTool, ms:CollectionInspector ;
     clariah:researchActivity tadirah:searching, tadirah:browsing ;
     schema:result ms:SearchResult .
 
-ms:SAE2 a schema:HowToStep ;
-    schema:position 2 ;
+ms:SAE2 a schema:HowToStep ; schema:position 2 ;
     schema:name "Select and save corpus to Workspace"@en ;
     schema:instrument ms:Workspace ;
     clariah:researchActivity clariah:Sampling, tadirah:collecting ;
     schema:result ms:SelectedCorpus .
 
-ms:SAE3 a schema:HowToStep ;
-    schema:position 3 ;
+ms:SAE3 a schema:HowToStep ; schema:position 3 ;
     schema:name "Annotate items and segments"@en ;
     schema:instrument ms:AnnotationTool, ms:ResourceViewer ;
-    clariah:researchActivity tadirah:visualAnnotation, tadirah:audioAnnotation,
-                             tadirah:segmenting ;
+    clariah:researchActivity tadirah:visualAnnotation, tadirah:audioAnnotation, tadirah:segmenting ;
     schema:result ms:AnnotatedCorpus .
 
-ms:SAE4 a schema:HowToStep ;
-    schema:position 4 ;
+ms:SAE4 a schema:HowToStep ; schema:position 4 ;
     schema:name "Export annotations and metadata"@en ;
     schema:instrument ms:Workspace ;
-    clariah:researchActivity tadirah:dataIngestion ;  # closest TaDiRaH term for export
+    clariah:researchActivity tadirah:dataIngestion ;
     schema:result ms:ExportedData .
 
-# ── Workflow 3: Quantitative analysis — open data path ───────────────────────
-# For open access collections: use the API or SPARQL endpoint to retrieve data
-# programmatically, analyse in a Jupyter notebook, and publish results.
-# No authentication required beyond open access.
+# ── Workflow 3: Quantitative analysis — open data ─────────────────────────────
 
 ms:OpenDataAnalysisWorkflow
     a clariah:Workflow ;
     schema:name "Quantitative analysis of open data via API"@en ;
-    schema:description "Programmatic retrieval of open Media Suite collection data via the Open Images API or SPARQL endpoint, followed by analysis in a Jupyter notebook and publication of results."@en ;
+    schema:description "Programmatic retrieval of open collection data via the Open Images API or SPARQL endpoint, followed by analysis in a Jupyter notebook."@en ;
+    clariah:workflowStatus "Fully supported" ;
     schema:step ms:ODA1, ms:ODA2, ms:ODA3 .
 
-ms:ODA1 a schema:HowToStep ;
-    schema:position 1 ;
+ms:ODA1 a schema:HowToStep ; schema:position 1 ;
     schema:name "Retrieve data via API or SPARQL"@en ;
     schema:instrument ms:OpenImagesAPI, ms:SoundVisionSPARQL ;
     clariah:researchActivity tadirah:querying, tadirah:dataIngestion ;
     schema:result ms:SelectedCorpus .
 
-ms:ODA2 a schema:HowToStep ;
-    schema:position 2 ;
+ms:ODA2 a schema:HowToStep ; schema:position 2 ;
     schema:name "Analyse in Jupyter notebook"@en ;
-    schema:instrument <https://jupyter.org> ;  # external tool
+    schema:instrument <https://jupyter.org> ;
     clariah:researchActivity tadirah:analyzing, tadirah:dataMining ;
     schema:result ms:AnalysisDataset .
 
-ms:ODA3 a schema:HowToStep ;
-    schema:position 3 ;
-    schema:name "Publish results"@en ;
-    schema:instrument <https://zenodo.org> ;  # external platform
-    clariah:researchActivity tadirah:academicPublishing ;
-    schema:result ms:Publication .
-
-# ── Workflow 4: Quantitative analysis — restricted data via SANE ─────────────
-# For restricted collections: select and sample within the Media Suite,
-# export the selection, and perform analysis in SANE where data cannot
-# leave the archive. Requires SRAM group membership for SANE access.
-
-ms:RestrictedDataSANEWorkflow
-    a clariah:Workflow ;
-    schema:name "Quantitative analysis of restricted data via SANE"@en ;
-    schema:description "Research workflow for quantitative analysis of IPR-restricted audiovisual data. Selection and sampling occur in the Media Suite; analysis is performed in SANE, where data providers retain full control. Requires SRAM group membership."@en ;
-    schema:step ms:RDS1, ms:RDS2, ms:RDS3, ms:RDS4 .
-
-ms:RDS1 a schema:HowToStep ;
-    schema:position 1 ;
-    schema:name "Search and sample corpus in Media Suite"@en ;
-    schema:instrument ms:SearchTool, ms:Workspace ;
-    clariah:researchActivity tadirah:searching, clariah:Sampling ;
-    schema:result ms:SelectedCorpus .
-
-ms:RDS2 a schema:HowToStep ;
-    schema:position 2 ;
-    schema:name "Export selection for SANE"@en ;
-    schema:instrument ms:Workspace ;
-    clariah:researchActivity tadirah:dataIngestion ;
-    schema:result ms:ExportedData .
-
-ms:RDS3 a schema:HowToStep ;
-    schema:position 3 ;
-    schema:name "Analyse in SANE"@en ;
-    schema:instrument <https://sane.surf.nl/> ;
-    clariah:researchActivity tadirah:analyzing, tadirah:dataMining ;
-    schema:result ms:AnalysisDataset .
-
-ms:RDS4 a schema:HowToStep ;
-    schema:position 4 ;
+ms:ODA3 a schema:HowToStep ; schema:position 3 ;
     schema:name "Publish results"@en ;
     schema:instrument <https://zenodo.org> ;
     clariah:researchActivity tadirah:academicPublishing ;
     schema:result ms:Publication .
 
-# ── Workflow 5: Quantitative analysis — on-premise (embedded researchers) ────
-# For embedded researchers who have on-site access to restricted data by
-# arrangement with Sound & Vision. Selection occurs in the Media Suite;
-# analysis is performed in a local environment at NISV.
-# Access is granted on a case-by-case basis — not a self-service workflow.
+# ── Workflow 4: Quantitative analysis — restricted data via SANE ─────────────
 
-ms:OnPremiseAnalysisWorkflow
+ms:RestrictedDataSANEWorkflow
     a clariah:Workflow ;
-    schema:name "Quantitative analysis of restricted data on-premise"@en ;
-    schema:description "Research workflow for embedded researchers with on-site access to restricted Sound & Vision data. Selection and sampling in the Media Suite; analysis in a local environment at NISV by prior arrangement."@en ;
-    schema:step ms:OPR1, ms:OPR2, ms:OPR3 .
+    schema:name "Quantitative analysis of restricted data via SANE"@en ;
+    schema:description "Selection and sampling in the Media Suite; analysis in SANE where data providers retain full control. Requires SRAM group membership."@en ;
+    clariah:workflowStatus "Fully supported" ;
+    schema:step ms:RDS1, ms:RDS2, ms:RDS3, ms:RDS4 .
 
-ms:OPR1 a schema:HowToStep ;
-    schema:position 1 ;
+ms:RDS1 a schema:HowToStep ; schema:position 1 ;
     schema:name "Search and sample corpus in Media Suite"@en ;
     schema:instrument ms:SearchTool, ms:Workspace ;
     clariah:researchActivity tadirah:searching, clariah:Sampling ;
     schema:result ms:SelectedCorpus .
 
-ms:OPR2 a schema:HowToStep ;
-    schema:position 2 ;
-    schema:name "Access data in on-premise environment"@en ;
-    # No ms: instrument — the on-premise environment is not a registered VRE entity.
-    # Access is arranged directly with Sound & Vision (NISV).
+ms:RDS2 a schema:HowToStep ; schema:position 2 ;
+    schema:name "Export selection for SANE"@en ;
+    schema:instrument ms:Workspace ;
     clariah:researchActivity tadirah:dataIngestion ;
     schema:result ms:ExportedData .
 
-ms:OPR3 a schema:HowToStep ;
-    schema:position 3 ;
-    schema:name "Analyse locally"@en ;
-    schema:instrument <https://jupyter.org> ;  # typical tool; may vary
+ms:RDS3 a schema:HowToStep ; schema:position 3 ;
+    schema:name "Analyse in SANE"@en ;
+    schema:instrument <https://sane.surf.nl/> ;
     clariah:researchActivity tadirah:analyzing, tadirah:dataMining ;
     schema:result ms:AnalysisDataset .
+
+ms:RDS4 a schema:HowToStep ; schema:position 4 ;
+    schema:name "Publish results"@en ;
+    schema:instrument <https://zenodo.org> ;
+    clariah:researchActivity tadirah:academicPublishing ;
+    schema:result ms:Publication .
+
+# ── Workflow 5: Quantitative analysis — on-premise ───────────────────────────
+
+ms:OnPremiseAnalysisWorkflow
+    a clariah:Workflow ;
+    schema:name "Quantitative analysis of restricted data on-premise"@en ;
+    schema:description "For embedded researchers with on-site access by arrangement with Sound & Vision. Selection in the Media Suite; analysis in a local environment at NISV."@en ;
+    clariah:workflowStatus "Fully supported" ;
+    schema:releaseNotes "Not self-service — access arranged directly with NISV on a case-by-case basis." ;
+    schema:step ms:OPR1, ms:OPR2, ms:OPR3 .
+
+ms:OPR1 a schema:HowToStep ; schema:position 1 ;
+    schema:name "Search and sample corpus in Media Suite"@en ;
+    schema:instrument ms:SearchTool, ms:Workspace ;
+    clariah:researchActivity tadirah:searching, clariah:Sampling ;
+    schema:result ms:SelectedCorpus .
+
+ms:OPR2 a schema:HowToStep ; schema:position 2 ;
+    schema:name "Access data in on-premise environment"@en ;
+    clariah:researchActivity tadirah:dataIngestion ;
+    schema:result ms:ExportedData .
+
+ms:OPR3 a schema:HowToStep ; schema:position 3 ;
+    schema:name "Analyse locally"@en ;
+    schema:instrument <https://jupyter.org> ;
+    clariah:researchActivity tadirah:analyzing, tadirah:dataMining ;
+    schema:result ms:AnalysisDataset .
+
+# ── Workflow 6: ASR-based transcript research ─────────────────────────────────
+
+ms:ASRTranscriptResearchWorkflow
+    a clariah:Workflow ;
+    schema:name "Research using automatic speech recognition transcripts"@en ;
+    schema:description "Using the ASR data layer to search spoken content in audiovisual collections, identify relevant segments, and annotate speech patterns."@en ;
+    clariah:workflowStatus "Fully supported" ;
+    schema:step ms:ASR1, ms:ASR2, ms:ASR3, ms:ASR4 .
+
+ms:ASR1 a schema:HowToStep ; schema:position 1 ;
+    schema:name "Search in ASR transcript layer"@en ;
+    schema:instrument ms:SearchTool ;
+    clariah:researchActivity tadirah:searching, tadirah:informationRetrieval ;
+    schema:result ms:SearchResult .
+
+ms:ASR2 a schema:HowToStep ; schema:position 2 ;
+    schema:name "Inspect transcript and media in Resource Viewer"@en ;
+    schema:instrument ms:ResourceViewer ;
+    clariah:researchActivity tadirah:browsing ;
+    schema:result ms:SelectedCorpus .
+
+ms:ASR3 a schema:HowToStep ; schema:position 3 ;
+    schema:name "Annotate speech segments"@en ;
+    schema:instrument ms:AnnotationTool ;
+    clariah:researchActivity tadirah:audioAnnotation, tadirah:segmenting ;
+    schema:result ms:AnnotatedCorpus .
+
+ms:ASR4 a schema:HowToStep ; schema:position 4 ;
+    schema:name "Export annotations for analysis"@en ;
+    schema:instrument ms:Workspace ;
+    clariah:researchActivity tadirah:dataIngestion ;
+    schema:result ms:ExportedData .
+
+# ── Workflow 7: Cross-collection comparative analysis ─────────────────────────
+
+ms:CrossCollectionComparativeWorkflow
+    a clariah:Workflow ;
+    schema:name "Cross-collection comparative analysis"@en ;
+    schema:description "Comparing search query results across collections and over time to identify trends, differences, and patterns in media coverage."@en ;
+    clariah:workflowStatus "Fully supported" ;
+    schema:step ms:CCA1, ms:CCA2, ms:CCA3 .
+
+ms:CCA1 a schema:HowToStep ; schema:position 1 ;
+    schema:name "Search across multiple collections"@en ;
+    schema:instrument ms:SearchTool ;
+    clariah:researchActivity tadirah:searching, tadirah:querying ;
+    schema:result ms:SearchResult .
+
+ms:CCA2 a schema:HowToStep ; schema:position 2 ;
+    schema:name "Compare queries over time"@en ;
+    schema:instrument ms:CompareTool, ms:StatisticalAnalysis ;
+    clariah:researchActivity tadirah:comparing, tadirah:dataVisualization ;
+    schema:result ms:ComparisonResult .
+
+ms:CCA3 a schema:HowToStep ; schema:position 3 ;
+    schema:name "Export and publish findings"@en ;
+    schema:instrument ms:Workspace ;
+    clariah:researchActivity tadirah:academicPublishing ;
+    schema:result ms:Publication .
+
+# ── Workflow 8: Fact-checking research ───────────────────────────────────────
+
+ms:FactCheckingWorkflow
+    a clariah:Workflow ;
+    schema:name "Fact-checking research on broadcast media"@en ;
+    schema:description "Identifying and investigating check-worthy claims in Dutch talk shows using the FactRank tool, followed by annotation and publication of findings."@en ;
+    clariah:workflowStatus "Partially supported" ;
+    schema:releaseNotes "FactRank is experimental and currently limited to a subset of Dutch talk shows from January 2024. Coverage expands as the model is updated." ;
+    schema:step ms:FCR1, ms:FCR2, ms:FCR3, ms:FCR4 .
+
+ms:FCR1 a schema:HowToStep ; schema:position 1 ;
+    schema:name "Query FactRank for check-worthy statements"@en ;
+    schema:instrument ms:FactRankTool ;
+    clariah:researchActivity tadirah:informationRetrieval, tadirah:discourseAnalysis ;
+    schema:result ms:StatementList .
+
+ms:FCR2 a schema:HowToStep ; schema:position 2 ;
+    schema:name "Review statements in Resource Viewer"@en ;
+    schema:instrument ms:ResourceViewer ;
+    clariah:researchActivity tadirah:browsing ;
+    schema:result ms:SelectedCorpus .
+
+ms:FCR3 a schema:HowToStep ; schema:position 3 ;
+    schema:name "Annotate findings"@en ;
+    schema:instrument ms:AnnotationTool ;
+    clariah:researchActivity tadirah:visualAnnotation, tadirah:audioAnnotation ;
+    schema:result ms:AnnotatedCorpus .
+
+ms:FCR4 a schema:HowToStep ; schema:position 4 ;
+    schema:name "Publish findings"@en ;
+    schema:instrument <https://zenodo.org> ;
+    clariah:researchActivity tadirah:academicPublishing ;
+    schema:result ms:Publication .
+
+# ── Workflow 9: Similarity-based corpus building ──────────────────────────────
+
+ms:SimilarityCorpusWorkflow
+    a clariah:Workflow ;
+    schema:name "Similarity-based visual corpus building"@en ;
+    schema:description "Using the Similarity Tool to find visually similar audiovisual content, building a corpus of related items for visual pattern research."@en ;
+    clariah:workflowStatus "Partially supported" ;
+    schema:releaseNotes "Similarity Tool is experimental with limited archive coverage (only keyframe-processed items). Entry point is the 'Only resources with keyframes' filter in the Search Tool." ;
+    schema:step ms:SCB1, ms:SCB2, ms:SCB3 .
+
+ms:SCB1 a schema:HowToStep ; schema:position 1 ;
+    schema:name "Search with keyframe filter"@en ;
+    schema:instrument ms:SearchTool ;
+    clariah:researchActivity tadirah:searching, clariah:Sampling ;
+    schema:result ms:SearchResult .
+
+ms:SCB2 a schema:HowToStep ; schema:position 2 ;
+    schema:name "Find visually similar items"@en ;
+    schema:instrument ms:SimilarityTool ;
+    clariah:researchActivity tadirah:patternRecognition, tadirah:informationRetrieval ;
+    schema:result ms:VisualCorpus .
+
+ms:SCB3 a schema:HowToStep ; schema:position 3 ;
+    schema:name "Annotate visual patterns"@en ;
+    schema:instrument ms:AnnotationTool ;
+    clariah:researchActivity tadirah:visualAnnotation ;
+    schema:result ms:AnnotatedCorpus .
+
+# ── Workflow 10: Linked data exploration ─────────────────────────────────────
+
+ms:LinkedDataExplorationWorkflow
+    a clariah:Workflow ;
+    schema:name "Serendipitous discovery via linked data"@en ;
+    schema:description "Open-ended exploration of collections by following linked data connections between entities — people, locations, concepts — to discover unexpected items and relationships."@en ;
+    clariah:workflowStatus "Partially supported" ;
+    schema:releaseNotes "Explore Tool is functional but currently being revamped. Covers Sound & Vision, EYE Film Museum, and Natuurbeelden collections." ;
+    schema:step ms:LDE1, ms:LDE2, ms:LDE3 .
+
+ms:LDE1 a schema:HowToStep ; schema:position 1 ;
+    schema:name "Browse entities via Explore Tool"@en ;
+    schema:instrument ms:ExploreTool ;
+    clariah:researchActivity tadirah:browsing, tadirah:linkedOpenData ;
+    schema:result ms:ExplorationPath .
+
+ms:LDE2 a schema:HowToStep ; schema:position 2 ;
+    schema:name "Follow linked data connections to discover items"@en ;
+    schema:instrument ms:ExploreTool ;
+    clariah:researchActivity tadirah:exploration ;
+    schema:result ms:SelectedCorpus .
+
+ms:LDE3 a schema:HowToStep ; schema:position 3 ;
+    schema:name "Save and annotate discovered items"@en ;
+    schema:instrument ms:Workspace, ms:AnnotationTool ;
+    clariah:researchActivity tadirah:collecting, tadirah:visualAnnotation ;
+    schema:result ms:AnnotatedCorpus .
+
+# ── Workflow 11: Replicate from publication ───────────────────────────────────
+
+ms:ReplicationWorkflow
+    a clariah:Workflow ;
+    schema:name "Replication and provenance tracing from research publication"@en ;
+    schema:description "Starting from a published research paper that used the Media Suite, reconstructing the original search queries, verifying the corpus, and documenting the methodological chain for reproducibility."@en ;
+    clariah:workflowStatus "Aspirational" ;
+    schema:releaseNotes "Requires persistent query identifiers and structured methodology records not yet implemented. The Reflexivity Tool addresses the documentation step but query persistence is a gap." ;
+    schema:step ms:REP1, ms:REP2, ms:REP3, ms:REP4 .
+
+ms:REP1 a schema:HowToStep ; schema:position 1 ;
+    schema:name "Identify original search queries from publication"@en ;
+    schema:instrument <https://zenodo.org> ;  # or institutional repository where paper is deposited
+    clariah:researchActivity tadirah:finding ;
+    schema:result ms:MethodologyRecord .
+
+ms:REP2 a schema:HowToStep ; schema:position 2 ;
+    schema:name "Reconstruct search in Media Suite"@en ;
+    schema:instrument ms:SearchTool ;
+    clariah:researchActivity tadirah:searching, tadirah:querying ;
+    schema:result ms:SearchResult .
+
+ms:REP3 a schema:HowToStep ; schema:position 3 ;
+    schema:name "Compare reconstructed results with original"@en ;
+    schema:instrument ms:CompareTool ;
+    clariah:researchActivity tadirah:comparing ;
+    schema:result ms:ComparisonResult .
+
+ms:REP4 a schema:HowToStep ; schema:position 4 ;
+    schema:name "Document methodology and deviations"@en ;
+    schema:instrument ms:ReflexivityTool ;
+    clariah:researchActivity tadirah:defining ;
+    schema:result ms:MethodologyRecord .
+
+# ── Sub-workflow A: FAIR annotation sharing ───────────────────────────────────
+# Operational pattern — appears as a step inside annotation workflows.
+# Modelled as schema:hasPart of SearchAnnotateExportWorkflow.
+
+ms:FAIRAnnotationSharing
+    a clariah:Workflow ;
+    schema:name "FAIR annotation sharing"@en ;
+    schema:description "Exporting annotations from the Media Suite in a FAIR-compliant format and depositing them in a repository for community reuse."@en ;
+    clariah:workflowStatus "Fully supported" ;
+    dcterms:source <https://mediasuite.clariah.nl/learn/tool-tutorials/tutorial-sharing-media-suite-annotations-following-the-fair-principles> ;
+    schema:step ms:FAIR1, ms:FAIR2 .
+
+ms:FAIR1 a schema:HowToStep ; schema:position 1 ;
+    schema:name "Export annotations from Workspace"@en ;
+    schema:instrument ms:Workspace ;
+    clariah:researchActivity tadirah:dataIngestion ;
+    schema:result ms:ExportedData .
+
+ms:FAIR2 a schema:HowToStep ; schema:position 2 ;
+    schema:name "Deposit in FAIR repository"@en ;
+    schema:instrument <https://zenodo.org> ;
+    clariah:researchActivity tadirah:academicPublishing ;
+    schema:result ms:Publication .
+
+# ── Sub-workflow B: Fragment citation via IIIF ────────────────────────────────
+# Operational pattern — aspirational pending Fragment Cutter implementation.
+# Intended to appear as a step inside annotation and viewing workflows.
+
+ms:FragmentCitationSubWorkflow
+    a clariah:Workflow ;
+    schema:name "Fragment citation via IIIF"@en ;
+    schema:description "Defining a temporal or spatial media fragment, obtaining a stable IIIF URI, and citing it in a publication or annotation."@en ;
+    clariah:workflowStatus "Aspirational" ;
+    schema:releaseNotes "Requires the Fragment Cutter tool (planned, not yet built) and IIIF manifest support for Media Suite items." ;
+    schema:step ms:FC1, ms:FC2 .
+
+ms:FC1 a schema:HowToStep ; schema:position 1 ;
+    schema:name "Define and save media fragment"@en ;
+    schema:instrument ms:FragmentCutter ;
+    clariah:researchActivity tadirah:segmenting ;
+    schema:result ms:Fragment .
+
+ms:FC2 a schema:HowToStep ; schema:position 2 ;
+    schema:name "Cite fragment via stable IIIF URI"@en ;
+    clariah:researchActivity tadirah:persistentIdentifier ;
+    schema:result ms:CitableFragment .
