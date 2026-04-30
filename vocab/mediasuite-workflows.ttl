@@ -55,6 +55,9 @@ ms:ExplorationPath    a dcat:Dataset ; rdfs:label "Exploration Path"@en ;
 ms:MethodologyRecord  a dcat:Dataset ; rdfs:label "Methodology Record"@en ;
     schema:description "Documented record of methodological choices, search strategies, and interpretive decisions."@en .
 
+ms:CollectionProfile  a dcat:Dataset ; rdfs:label "Collection Profile"@en ;
+    schema:description "Statistical overview of metadata field completeness, enrichment coverage (e.g. proportion of items with ASR transcripts, subject tags, face recognition), and temporal patterns in annotation practice, produced by the Collection Inspector. Represents the data quality context for a research workflow — making 'data fractures' visible: gaps and inconsistencies arising from different annotation methods, temporal shifts in cataloguing practice, or uneven resource allocation across collection segments."@en .
+
 ms:Fragment           a dcat:Dataset ; rdfs:label "Media Fragment"@en ;
     schema:description "A bounded temporal or spatial segment of a media item, defined by the researcher."@en .
 
@@ -483,3 +486,32 @@ ms:FC2 a schema:HowToStep ; schema:position 2 ;
     schema:name "Cite fragment via stable IIIF URI"@en ;
     clariah:researchActivity tadirah:persistentIdentifier ;
     schema:result ms:CitableFragment .
+
+# ── Sub-workflow C: Collection inspection and data fracture analysis ───────────
+# Operational pattern — use before or during any workflow to assess data quality
+# and make metadata limitations explicit. Grounds tool criticism in quantitative
+# evidence from the Collection Inspector.
+# Documented in: https://data.beeldengeluid.nl/showcases/data-fractures
+
+ms:CollectionInspectionSubWorkflow
+    a clariah:Workflow ;
+    schema:name "Collection inspection and data fracture analysis"@en ;
+    schema:description "Investigating metadata field completeness and enrichment coverage in a collection before or during a research workflow, in order to surface 'data fractures': gaps and inconsistencies caused by different annotation methods (archivist vs. AI vs. programme maker), temporal shifts in cataloguing practice, or uneven resource allocation (e.g. face recognition applied to news but not radio). Essential for tool criticism and for making informed methodological choices — e.g. whether to compare absolute hit counts or percentages, or whether ASR coverage is sufficient to support a speech-based corpus study."@en ;
+    clariah:workflowStatus "Fully supported" ;
+    dcterms:source <https://data.beeldengeluid.nl/showcases/data-fractures> ;
+    schema:step ms:CI1, ms:CI2 .
+
+ms:CI1 a schema:HowToStep ; schema:position 1 ;
+    schema:name "Inspect metadata completeness and enrichment coverage"@en ;
+    schema:description "Use the Collection Inspector to examine field completeness over time and across collection segments. Key questions: What proportion of items have ASR transcripts? Are subject tags evenly distributed across time periods? Which metadata fields are sparse or absent for certain genres or date ranges?"@en ;
+    schema:instrument ms:CollectionInspector ;
+    clariah:researchActivity tadirah:browsing, tadirah:dataVisualization, tadirah:qualityAssurance ;
+    schema:result ms:CollectionProfile .
+
+ms:CI2 a schema:HowToStep ; schema:position 2 ;
+    schema:name "Document data fractures and methodological adjustments"@en ;
+    schema:description "Record the gaps and inconsistencies found and document how they affect the research workflow — e.g. choosing percentages over absolute counts in the Compare Tool to compensate for temporal annotation gaps. Use the Reflexivity Tool to make this part of the methodology record."@en ;
+    schema:instrument ms:ReflexivityTool, ms:CompareTool ;
+    clariah:researchActivity tadirah:qualityAssurance, tadirah:defining ;
+    clariah:optional true ;
+    schema:result ms:MethodologyRecord .

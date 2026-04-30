@@ -36,10 +36,11 @@ ms:SearchTool
 ms:CollectionInspector
     a clariah:ComponentTool ;
     rdfs:label "Collection Inspector"@en ;
-    schema:description "Provides statistical overviews and faceted browsing of collection metadata, including field completeness and value distributions."@en ;
+    schema:description "Provides statistical overviews and faceted browsing of collection metadata, including field completeness and value distributions over time. Used to surface 'data fractures': gaps and inconsistencies in metadata caused by different annotation methods, temporal shifts in cataloguing practice, or uneven enrichment coverage (e.g. proportion of items with ASR transcripts or subject tags)."@en ;
     schema:url <https://mediasuite.clariah.nl/documentation/howtos/inspect-collections> ;
     clariah:partOf ms:MediaSuite ;
-    clariah:researchActivity tadirah:browsing, tadirah:exploration .
+    clariah:researchActivity tadirah:browsing, tadirah:exploration,
+                             tadirah:dataVisualization, tadirah:qualityAssurance .
 
 ms:ExploreTool
     a clariah:ComponentTool ;
