@@ -32,6 +32,28 @@ def load_config(path: Path) -> dict:
         return yaml.safe_load(f)
 
 
+def assign_entity_uri(
+    url: str,
+    tools_mentioned: list,
+    collections_mentioned: list,
+    url_entity_map: dict,
+    tool_entities: dict,
+    collection_entities: dict,
+) -> str:
+    for substring, uri in url_entity_map.items():
+        if substring in url:
+            return uri
+    if len(tools_mentioned) == 1 and len(collections_mentioned) == 0:
+        tool = tools_mentioned[0]
+        if tool in tool_entities:
+            return tool_entities[tool]["entity_uri"]
+    if len(collections_mentioned) == 1 and len(tools_mentioned) == 0:
+        coll = collections_mentioned[0]
+        if coll in collection_entities:
+            return collection_entities[coll]
+    return ""
+
+
 def _list_to_json(value: list) -> str:
     """Encode a list as a JSON string for ChromaDB metadata (which requires scalar values)."""
     return json.dumps(value, ensure_ascii=False)
@@ -40,6 +62,10 @@ def _list_to_json(value: list) -> str:
 def build_index(input_path: Path, cfg: dict) -> None:
     vs = cfg["vector_store"]
     embed_cfg = cfg["embedding"]
+    gcfg = cfg.get("graph", {})
+    url_entity_map = gcfg.get("url_entity_map", {})
+    tool_entities = cfg.get("tool_entities", {})
+    collection_entities = gcfg.get("collection_entities", {})
 
     print(f"Loading chunks from {input_path} …")
     chunks = json.loads(input_path.read_text())
@@ -87,6 +113,14 @@ def build_index(input_path: Path, cfg: dict) -> None:
                     "source_commit": c.get("source_commit", ""),
                     "content_hash": c.get("content_hash", ""),
                     "char_count": c.get("char_count", 0),
+                    "entity_uri": assign_entity_uri(
+                        c.get("url", ""),
+                        c.get("tools_mentioned", []),
+                        c.get("collections_mentioned", []),
+                        url_entity_map,
+                        tool_entities,
+                        collection_entities,
+                    ),
                 }
                 for c in batch
             ],

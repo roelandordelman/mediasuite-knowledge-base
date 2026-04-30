@@ -293,7 +293,8 @@ answer evaluation in the chatbot repo is needed to catch hallucination.
   "source_commit":         "a3f9b2c",
   "content_hash":          "sha256:e3b0c44...",
   "text":                  "[Title — Section]\nThe chunk text...",
-  "char_count":            312
+  "char_count":            312,
+  "entity_uri":            "https://mediasuite.clariah.nl/vocab#SearchTool"
 }
 ```
 
@@ -349,6 +350,7 @@ consistent with how CLARIAH already handles identifiers for datasets.
 | `source_commit` | git log | git commit hash at time of ingestion |
 | `content_hash` | SHA256 of chunk text | fingerprint for drift detection |
 | `char_count` | generated | chunk length in characters |
+| `entity_uri` | `enrich_entity_uri.py` / `build_index.py` | URI of the primary entity this chunk describes; empty string if ambiguous; enables SPARQL → chunk lookup |
 
 ### Why modification date matters
 
@@ -956,11 +958,14 @@ them in a triplestore and connects the graph layer to retrieval.
 The five entity types (see "Entity model and vocabulary" section above):
 **ResearchEnvironment** · **ComponentTool** · **InfrastructureService** · **Workflow** · **DataProduct**
 
-- [ ] Set up Apache Jena Fuseki triplestore locally — load `clariah-vocab.ttl` and the
-  Media Suite entity Turtle files from Phase 3 into a named graph
-- [ ] Add `entity_uri` field to the chunk schema — each chunk carries the URI of the
-  entity it describes (e.g. `ms:SearchTool`); enables SPARQL → chunk lookup for
-  structural queries ("what tools support annotating?")
+- [x] Set up Apache Jena Fuseki triplestore locally — Docker image `stain/jena-fuseki`,
+  TDB2 dataset `mediasuite`, 1057 triples loaded via `pipelines/graph/build_graph.py`;
+  SPARQL endpoint at `http://localhost:3030/mediasuite/sparql`
+- [x] Add `entity_uri` field to the chunk schema — backfilled on all 2568 existing chunks
+  via `pipelines/graph/enrich_entity_uri.py`; 534/2568 (20%) assigned using URL map,
+  single-tool, and single-collection heuristics; `build_index.py` assigns `entity_uri`
+  on new chunks automatically; hybrid retrieval verified end-to-end (SPARQL → entity URIs
+  → ChromaDB filter → chunks)
 - [ ] Write SPARQL queries for structural retrieval patterns:
   - list all `clariah:ComponentTool` instances with their `tadirah:` activity links
   - list all `clariah:InfrastructureService` instances and which tools `clariah:deploysService` them

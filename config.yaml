@@ -263,6 +263,47 @@ graph:
     - "vocab/mediasuite-collections.ttl"
     - "vocab/mediasuite-workflows.ttl"
 
+  # Collection name → entity URI (mirrors known_collections + mediasuite-collections.ttl)
+  collection_entities:
+    "Sound & Vision Archive":            "https://mediasuite.clariah.nl/vocab#NISVArchive"
+    "Sound & Vision Radio Archive":      "https://mediasuite.clariah.nl/vocab#SoundVisionRadioArchive"
+    "Sound & Vision Television Archive": "https://mediasuite.clariah.nl/vocab#SoundVisionTelevisionArchive"
+    "DANS Oral History Archive":         "https://mediasuite.clariah.nl/vocab#DANSOralHistory"
+    "Radio Oranje":                      "https://mediasuite.clariah.nl/vocab#RadioOranje"
+    "Open Beelden":                      "https://mediasuite.clariah.nl/vocab#OpenBeelden"
+    "KB Newspaper Collection":           "https://mediasuite.clariah.nl/vocab#KBNewspapers"
+    "EYE Film Collection":               "https://mediasuite.clariah.nl/vocab#EYEFilmCollection"
+    "Tweede Kamer Archive":              "https://mediasuite.clariah.nl/vocab#TweedeKamerArchive"
+    "Meertens Soundbites Collection":    "https://mediasuite.clariah.nl/vocab#MeertensDialectDB"
+    "Amateur Film Collection":           "https://mediasuite.clariah.nl/vocab#AmateurFilmCollection"
+    "Dutch Program Guides":              "https://mediasuite.clariah.nl/vocab#DutchProgramGuides"
+    "Kijk & Luistercijfers":             "https://mediasuite.clariah.nl/vocab#KijkLuistercijfers"
+    "NISV Art Collection":               "https://mediasuite.clariah.nl/vocab#NISVArtCollection"
+    "Open Beelden Natuurbeelden":        "https://mediasuite.clariah.nl/vocab#Natuurbeelden"
+
+  # URL substring → entity URI for tool/collection pages where the URL is
+  # a more reliable signal than tools_mentioned (e.g. howto pages that describe
+  # one tool but mention several). Matched in order; first match wins.
+  url_entity_map:
+    "howtos/search":                     "https://mediasuite.clariah.nl/vocab#SearchTool"
+    "howtos/annotate":                   "https://mediasuite.clariah.nl/vocab#AnnotationTool"
+    "howtos/compare-queries":            "https://mediasuite.clariah.nl/vocab#CompareTool"
+    "howtos/inspect-collections":        "https://mediasuite.clariah.nl/vocab#CollectionInspector"
+    "howtos/explore":                    "https://mediasuite.clariah.nl/vocab#ExploreTool"
+    "howtos/view-resources":             "https://mediasuite.clariah.nl/vocab#ResourceViewer"
+    "howtos/bookmark":                   "https://mediasuite.clariah.nl/vocab#Workspace"
+    "howtos/similarity":                 "https://mediasuite.clariah.nl/vocab#SimilarityTool"
+    "labo/documentation/factrank":       "https://mediasuite.clariah.nl/vocab#FactRankTool"
+    "datasets/open-beelden-natuurbeelden": "https://mediasuite.clariah.nl/vocab#Natuurbeelden"
+    "datasets/open-beelden":             "https://mediasuite.clariah.nl/vocab#OpenBeelden"
+    "datasets/radio-oranje":             "https://mediasuite.clariah.nl/vocab#RadioOranje"
+    "datasets/nisv-media-catalog":       "https://mediasuite.clariah.nl/vocab#NISVArchive"
+    "datasets/dans-oral-history":        "https://mediasuite.clariah.nl/vocab#DANSOralHistory"
+    "apis/nisv-media-catalog":           "https://mediasuite.clariah.nl/vocab#SoundVisionSPARQL"
+    "apis/open-images":                  "https://mediasuite.clariah.nl/vocab#OpenImagesAPI"
+    "sane/collections":                  "https://mediasuite.clariah.nl/vocab#NISVArchive"
+    "media-suite-community/sane":        "https://sane.surf.nl/"
+
 collections:
   _help:
     content_type: "Help / Documentation"
