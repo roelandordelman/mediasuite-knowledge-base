@@ -111,6 +111,24 @@ WHERE {{
 ORDER BY ?toolLabel
 """
 
+# Q3b: Infrastructure services that enrich a given collection
+# Answers: "Which services enrich the Sound & Vision collection?",
+#          "What automatic enrichment has been applied to Sound & Vision?"
+QUERIES["enrichment_services"] = PREFIXES + """
+SELECT ?serviceUri ?serviceLabel ?altLabel ?serviceDesc ?activity
+WHERE {{
+  GRAPH <{graph}> {{
+    ?serviceUri a clariah:InfrastructureService ;
+               rdfs:label ?serviceLabel ;
+               clariah:enriches <{collection_uri}> .
+    OPTIONAL {{ ?serviceUri skos:altLabel ?altLabel }}
+    OPTIONAL {{ ?serviceUri schema:description ?serviceDesc }}
+    OPTIONAL {{ ?serviceUri clariah:researchActivity ?activity }}
+  }}
+}}
+ORDER BY ?serviceLabel
+"""
+
 # Q4: Datasets accessible via the Media Suite, with access rights
 # Answers: "Which collections are open?", "What can I access without login?"
 QUERIES["collections_by_access"] = PREFIXES + """
@@ -260,6 +278,10 @@ def tadirah_uri(local_name: str) -> str:
     return f"https://vocabs.dariah.eu/tadirah/{local_name}"
 
 
+def collection_uri(local_name: str) -> str:
+    return f"https://mediasuite.clariah.nl/vocab#{local_name}"
+
+
 # ── CLI for testing all queries ────────────────────────────────────────────────
 
 def _print_results(rows: list[dict], max_rows: int = 20) -> None:
@@ -285,6 +307,7 @@ def main() -> None:
     parser.add_argument("--tool", default="SearchTool", help="Tool local name for workflow/activity queries")
     parser.add_argument("--workflow", default="GenderWorkflow", help="Workflow local name for workflow_steps")
     parser.add_argument("--entity", default="SearchTool", help="Entity local name for entity_description")
+    parser.add_argument("--collection", default="SoundVisionCollection", help="Collection local name for enrichment_services")
     args = parser.parse_args()
 
     cfg = load_config()
@@ -314,14 +337,18 @@ def main() -> None:
             params["workflow_uri"] = tool_uri(args.workflow)
         if "{entity_uri}" in QUERIES[args.query]:
             params["entity_uri"] = tool_uri(args.entity)
+        if "{collection_uri}" in QUERIES[args.query]:
+            params["collection_uri"] = collection_uri(args.collection)
         run(args.query, **params)
     else:
         # Run all queries with default parameters
         run("all_tools")
         run("tools_with_status")
         run("tools_by_activity", activity_uri=tadirah_uri("searching"))
+        run("tools_by_activity", activity_uri=tadirah_uri("visualAnalysis"))
         run("tools_by_activity", activity_uri=tadirah_uri("annotating"))
         run("services_by_tool")
+        run("enrichment_services", collection_uri=collection_uri("SoundVisionCollection"))
         run("open_collections")
         run("collections_by_access")
         run("workflows_by_tool", tool_uri=tool_uri("SearchTool"))

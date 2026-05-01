@@ -145,7 +145,12 @@ ms:SimilarityTool
     schema:url <https://mediasuite.clariah.nl/documentation/howtos/search> ;
     clariah:partOf ms:MediaSuite ;
     clariah:deploysService ms:VisualSimilarityService ;
-    clariah:researchActivity tadirah:patternRecognition, tadirah:informationRetrieval ;
+    clariah:researchActivity tadirah:patternRecognition, tadirah:informationRetrieval,
+                             tadirah:visualAnalysis ;
+    # tadirah:visualAnalysis added for routing: its prefLabel is in German ("Visualisierung")
+    # and lacks an English definition, but it IS the concept researchers mean by "visual
+    # analysis of video content". Using it here so the chatbot router can find this tool.
+    # tadirah:patternRecognition is retained as the semantically more precise term.
     schema:releaseNotes "Experimental — limited archive coverage; entry point is the Search Tool keyframe filter." .
 
 # ── Infrastructure Services ───────────────────────────────────────────────────
