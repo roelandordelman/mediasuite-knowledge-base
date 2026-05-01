@@ -289,3 +289,144 @@ questions:
     category: structural
     expected_answer: "No — the Fragment Cutter tool is planned but not yet available. Fragment citation via IIIF is also aspirational. Bookmarking fragments for personal use is supported via the Workspace."
     notes: "SPARQL: schema:releaseNotes on ms:FragmentCutter + clariah:workflowStatus on ms:FragmentCitationSubWorkflow. Status flags are graph properties."
+
+  # ── General orientation ───────────────────────────────────────────────────
+
+  - question: "What can I do with the Media Suite?"
+    category: partial
+    notes: "General orientation question; answer spans tools, collections, and workflows — no single URL. Variants: 'I've just been given access — where do I even begin?', 'What are the main functionalities for humanities research?'"
+
+  - question: "Can the Media Suite help me with my research questions?"
+    category: partial
+    expected_urls:
+      - https://mediasuite.clariah.nl/learn/example-projects
+    notes: "Domain-specific variants ('I research Dutch television history', 'I study political discourse in radio') should retrieve relevant tutorials and example projects. The example-projects index is the most useful single entry point."
+
+  - question: "What are the types of research the Media Suite supports?"
+    category: partial
+    expected_urls:
+      - https://mediasuite.clariah.nl/learn/example-projects
+    notes: "Tests whether the system can map 'close reading, distant reading, corpus analysis' vocabulary onto existing tutorials and example projects."
+
+  # ── Access and authentication ─────────────────────────────────────────────
+
+  - question: "Which collections can I use without needing to log in?"
+    category: structural
+    expected_answer: "Open Beelden (CC0), Open Beelden Natuurbeelden (CC0), Radio Oranje (Public Domain), DANS Oral History Archive (open), Tweede Kamer Archive (public)"
+    notes: "Variant of 'Which collections can I access without logging in?' — researcher-oriented phrasing. SPARQL: open_collections."
+
+  - question: "What can I do in the Media Suite without a login?"
+    category: structural
+    expected_answer: "Without logging in you can browse Open Beelden, Open Beelden Natuurbeelden, Radio Oranje, DANS Oral History Archive, and the Tweede Kamer Archive. Personal features — Workspace, Annotation Tool, saving projects — require a login."
+    notes: "Broader than the open_collections query: also asks about functionality scope. SPARQL: open_collections + entity graph for tool requirements."
+
+  - question: "What can I do in the Media Suite without a SURFconext account?"
+    category: structural
+    expected_answer: "Without a SURFconext account you can access the five PUBLIC collections (Open Beelden, Open Beelden Natuurbeelden, Radio Oranje, DANS Oral History Archive, Tweede Kamer Archive). Restricted collections (Sound & Vision, EYE, KB, etc.) and personal tools (Workspace, Annotation Tool) require SURFconext or equivalent institutional login."
+    notes: "Extends the open-access question to cover identity provider context. SPARQL: open_collections + collections_by_access."
+
+  - question: "Which collections can I use only as a researcher working at a university?"
+    category: structural
+    expected_answer: "RESTRICTED (institutional access required): Sound & Vision Archive, Sound & Vision Television Archive, Sound & Vision Radio Archive, NISV Art Collection, Amateur Film Collection, Dutch Program Guides, Kijk & Luistercijfers, EYE Film Collection. NON_PUBLIC (special arrangement): KB Newspaper Collection, Meertens Soundbites Collection."
+    notes: "SPARQL: collections_by_access filtering for euright:RESTRICTED and euright:NON_PUBLIC. Vector search cannot enumerate all restricted collections reliably."
+
+  # ── Licenses and reuse ────────────────────────────────────────────────────
+
+  - question: "Which collections have a Creative Commons license?"
+    category: structural
+    expected_answer: "Open Beelden (CC0 1.0), Open Beelden Natuurbeelden (CC0 1.0), Radio Oranje (Public Domain Mark 1.0 — a CC tool). Other PUBLIC collections (DANS Oral History Archive, Tweede Kamer Archive) are openly accessible but their license conditions are not documented in the collection registry."
+    notes: "SPARQL: collections_by_access filtering for dcterms:license URIs containing creativecommons.org."
+
+  - question: "Which collections in the Media Suite have a CC0 license?"
+    category: structural
+    expected_answer: "Open Beelden and Open Beelden Natuurbeelden — both carry CC0 1.0 (Creative Commons Zero), meaning content and metadata are freely reusable with no attribution required."
+    notes: "SPARQL: collections_by_access filtering for dcterms:license = creativecommons.org/publicdomain/zero/1.0/. Radio Oranje uses Public Domain Mark, not CC0."
+
+  - question: "Can I use Radio Oranje data without restrictions?"
+    category: structural
+    expected_answer: "Yes — Radio Oranje is in the Public Domain under Dutch law (Public Domain Mark 1.0), so there are no copyright or reuse restrictions."
+    notes: "Variant of 'Can I use Radio Oranje data commercially?' with access/restrictions framing. SPARQL: dcterms:license for ms:RadioOranje."
+
+  # ── Tools and research activities ─────────────────────────────────────────
+
+  - question: "Which tools are still experimental?"
+    category: structural
+    expected_answer: "Similarity Tool (experimental — limited archive coverage), FactRank Tool (experimental — limited to Dutch talk shows), Fragment Cutter (planned — not yet available), Explore Tool (outdated — revamp in progress)"
+    notes: "Variant of 'Which tools are experimental or not yet released?' with stability framing. SPARQL: tools_with_status query."
+
+  - question: "Which tools are there for annotation?"
+    category: structural
+    expected_answer: "Annotation Tool (visual and audio annotation, segmenting), Resource Viewer (annotation via timeline), Fragment Cutter (planned — segmenting)"
+    notes: "Variant of 'Which tools support annotation?' with researcher-facing phrasing. SPARQL: tools_by_activity for tadirah:visualAnnotation and tadirah:audioAnnotation."
+
+  - question: "Which tools are for visual analysis of video?"
+    category: structural
+    expected_answer: "The Similarity Tool (powered by the Visual Similarity Service / VisXP) supports visual analysis by finding visually similar content using keyframe embeddings. It is experimental and limited to the portion of the Sound & Vision archive processed for keyframes."
+    notes: "SPARQL: tools_by_activity for tadirah:patternRecognition (the closest mapped TaDiRaH activity; tadirah:visualAnalysis is not used due to quality issues in that concept — see TTL comment in mediasuite-entities.ttl)."
+
+  - question: "Can you describe how the FactRank tool works, which steps are involved and what it produces?"
+    category: structural
+    expected_answer: "FactRank is an experimental tool (limited to Dutch talk shows) that helps researchers find fact-checkable statements in broadcast media. Workflow: 1. Query FactRank for check-worthy statements → Statement List. 2. Review statements in Resource Viewer. 3. Annotate findings → Annotated Corpus. 4. Deposit findings (optional). Status: partially supported — limited to specific talk show content."
+    notes: "SPARQL: entity_description for ms:FactRankTool + workflow_steps for ms:FactCheckingWorkflow."
+
+  - question: "How would researchers use the Workspace and the Compare Tool?"
+    category: partial
+    expected_urls:
+      - https://mediasuite.clariah.nl/documentation/howtos/compare-queries
+      - https://mediasuite.clariah.nl/labo/documentation/query-comparison
+      - https://mediasuite.clariah.nl/documentation/howtos/bookmark
+    notes: "Tests retrieval of workflow context combining two tools. Variants: 'I've saved items to my Workspace — how does Compare fit in?'"
+
+  # ── Workflows and research steps ─────────────────────────────────────────
+
+  - question: "What are the research steps the Media Suite supports?"
+    category: structural
+    expected_answer: "Discovery and corpus selection (Search Tool, Collection Inspector), annotation and segmentation (Annotation Tool, Resource Viewer), comparative analysis (Compare Tool), quantitative analysis (via API or SANE), FAIR export and sharing (Workspace). Aspirational: fragment citation via IIIF, researcher-triggered enrichment, oral history ingestion."
+    notes: "SPARQL: all_workflows. Tests whether the router maps 'research steps/stages' onto the workflow graph rather than falling back to generic documentation chunks."
+
+  - question: "What are the steps involved to use SANE?"
+    category: structural
+    expected_answer: "1. Search and sample corpus in Media Suite (Search Tool) → Selected Corpus. 2. Export selection for SANE (Workspace) → Exported Data. 3. Analyse in SANE (SANE environment) → Analysis Dataset. 4. Deposit and cite research output (optional) → Deposited Research Output."
+    notes: "Natural language variant of 'What are the steps of the SANE workflow in order?' — tests router with conversational phrasing. SPARQL: workflow_steps for ms:RestrictedDataSANEWorkflow."
+
+  - question: "Which workflows do you foresee for the near future that are not yet supported?"
+    category: structural
+    expected_answer: "Fragment citation via IIIF, Oral history ASR and Media Suite ingestion, Replication and provenance tracing from research publication, Researcher-triggered enrichment on demand"
+    notes: "Future-oriented variant of 'Which workflows are not yet possible in the Media Suite?' SPARQL: all_workflows filtered by clariah:workflowStatus 'Aspirational'."
+
+  - question: "Is fragment citation currently possible?"
+    category: structural
+    expected_answer: "No — the Fragment Cutter tool is planned but not yet available. Fragment citation via IIIF is also aspirational. Bookmarking fragments for personal use is supported via the Workspace."
+    notes: "Shorter variant of 'Is fragment citation currently supported in the Media Suite?' SPARQL: schema:releaseNotes on ms:FragmentCutter + clariah:workflowStatus on ms:FragmentCitationSubWorkflow."
+
+  # ── Collections, APIs, and enrichment ────────────────────────────────────
+
+  - question: "Which collections can I access via the Open Images API?"
+    category: structural
+    expected_answer: "The Open Images API (openimages.eu/api) serves the Open Beelden collection — open access audiovisual content from the Sound & Vision archive. It enables programmatic, Jupyter-based quantitative analysis without authentication restrictions."
+    notes: "SPARQL: dcat:servesDataset on ms:OpenImagesAPI. Pure graph relationship (API → collection) not reliably surfaced by vector search."
+
+  - question: "Is there a SPARQL endpoint for the Sound & Vision catalog?"
+    category: answerable
+    expected_urls:
+      - https://data.beeldengeluid.nl/apis/nisv-media-catalog
+    notes: "The endpoint (cat.apis.beeldengeluid.nl/sparql) is modeled as ms:SoundVisionSPARQL in the graph; full documentation lives in data_platform.json. Vector search should retrieve this from the data platform chunk."
+
+  - question: "Which services exist for enriching the Sound & Vision collection? Can I ask for enrichment on-demand?"
+    category: structural
+    expected_answer: "Automatic enrichment services include the ASR Service (speech recognition for broadcast content) and the Visual Similarity Service / VisXP (keyframe extraction). On-demand enrichment is not yet supported — 'Researcher-triggered enrichment on demand' is an aspirational workflow."
+    notes: "Two-part question. SPARQL: services_by_tool for enrichment services + all_workflows filtered by Aspirational for ms:OnDemandEnrichmentWorkflow."
+
+  - question: "What did the Media Suite implement the Similarity Tool for?"
+    category: partial
+    expected_urls:
+      - https://mediasuite.clariah.nl/labo/documentation/similarity
+      - https://doi.org/10.5281/zenodo.12517693
+    notes: "Purpose/rationale question. Tests retrieval of tool description over generic overview chunks."
+
+  - question: "How can I download my annotations?"
+    category: partial
+    expected_urls:
+      - https://mediasuite.clariah.nl/learn/tool-tutorials/tutorial-sharing-media-suite-annotations-following-the-fair-principles
+      - https://mediasuite.clariah.nl/documentation/howtos/export
+    notes: "Variant phrasing of 'Can I download my annotations?' — tests whether export how-to and FAIR tutorial rank for action-oriented phrasing."
