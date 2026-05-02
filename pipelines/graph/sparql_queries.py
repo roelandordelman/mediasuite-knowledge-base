@@ -129,6 +129,23 @@ WHERE {{
 ORDER BY ?serviceLabel
 """
 
+# Q3c: Datasets served by a given API or data service
+# Answers: "Which collections can I access via the Open Images API?",
+#          "What data does the Sound & Vision SPARQL endpoint expose?"
+QUERIES["datasets_by_service"] = PREFIXES + """
+SELECT ?serviceLabel ?datasetUri ?datasetLabel ?license ?accessRights ?endpointURL
+WHERE {{
+  GRAPH <{graph}> {{
+    <{service_uri}> rdfs:label ?serviceLabel ;
+                   dcat:servesDataset ?datasetUri .
+    ?datasetUri rdfs:label ?datasetLabel .
+    OPTIONAL {{ ?datasetUri dcterms:license ?license }}
+    OPTIONAL {{ ?datasetUri dcterms:accessRights ?accessRights }}
+    OPTIONAL {{ <{service_uri}> dcat:endpointURL ?endpointURL }}
+  }}
+}}
+"""
+
 # Q4: Datasets accessible via the Media Suite, with access rights
 # Answers: "Which collections are open?", "What can I access without login?"
 QUERIES["collections_by_access"] = PREFIXES + """
@@ -308,6 +325,7 @@ def main() -> None:
     parser.add_argument("--workflow", default="GenderWorkflow", help="Workflow local name for workflow_steps")
     parser.add_argument("--entity", default="SearchTool", help="Entity local name for entity_description")
     parser.add_argument("--collection", default="SoundVisionCollection", help="Collection local name for enrichment_services")
+    parser.add_argument("--service", default="OpenImagesAPI", help="Service local name for datasets_by_service")
     args = parser.parse_args()
 
     cfg = load_config()
@@ -339,6 +357,8 @@ def main() -> None:
             params["entity_uri"] = tool_uri(args.entity)
         if "{collection_uri}" in QUERIES[args.query]:
             params["collection_uri"] = collection_uri(args.collection)
+        if "{service_uri}" in QUERIES[args.query]:
+            params["service_uri"] = tool_uri(args.service)
         run(args.query, **params)
     else:
         # Run all queries with default parameters
@@ -349,6 +369,8 @@ def main() -> None:
         run("tools_by_activity", activity_uri=tadirah_uri("annotating"))
         run("services_by_tool")
         run("enrichment_services", collection_uri=collection_uri("SoundVisionCollection"))
+        run("datasets_by_service", service_uri=tool_uri("OpenImagesAPI"))
+        run("datasets_by_service", service_uri=tool_uri("SoundVisionSPARQL"))
         run("open_collections")
         run("collections_by_access")
         run("workflows_by_tool", tool_uri=tool_uri("SearchTool"))

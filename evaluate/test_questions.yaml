@@ -404,7 +404,7 @@ questions:
   - question: "Which collections can I access via the Open Images API?"
     category: structural
     expected_answer: "The Open Images API (openimages.eu/api) serves the Open Beelden collection — open access audiovisual content from the Sound & Vision archive. It enables programmatic, Jupyter-based quantitative analysis without authentication restrictions."
-    notes: "SPARQL: dcat:servesDataset on ms:OpenImagesAPI. Pure graph relationship (API → collection) not reliably surfaced by vector search."
+    notes: "SPARQL: datasets_by_service on ms:OpenImagesAPI (dcat:servesDataset relationship). Vector search fails: the chunk text describes OAI-PMH harvesting and creative reuse, not collection access — vocabulary mismatch confirmed in eval. Structural path works correctly via entity_uri filter on the apis/open-images chunk."
 
   - question: "Is there a SPARQL endpoint for the Sound & Vision catalog?"
     category: answerable
@@ -422,7 +422,7 @@ questions:
     expected_urls:
       - https://mediasuite.clariah.nl/labo/documentation/similarity
       - https://doi.org/10.5281/zenodo.12517693
-    notes: "Purpose/rationale question. Tests retrieval of tool description over generic overview chunks."
+    notes: "Vector search path fails: nomic-embed-text embeds 'Similarity Tool' near generic Media Suite content because 'Similarity' is a common English word — the brand name doesn't embed near its documentation. Structural path (SPARQL entity_description → entity_uri filter) works correctly. Chatbot should route named-tool questions through the structural path, not pure vector search."
 
   - question: "How can I download my annotations?"
     category: partial

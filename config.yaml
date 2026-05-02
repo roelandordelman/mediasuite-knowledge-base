@@ -37,6 +37,7 @@ known_tools:
   - Fragment Cutter
   - Speech Recognition
   - Computer Vision
+  - Similarity Tool
   - FactRank Tool
   - Reflexivity Tool
 
@@ -249,7 +250,7 @@ data_platform:
 # Use when the page title uses different vocabulary than researchers would use
 # in queries (e.g. tool has a branded name but researchers search by concept).
 chunk_title_overrides:
-  similarity: "Similarity — Computer Vision Tool for Visual Image Search"
+  similarity: "Similarity Tool — Computer Vision Visual Similarity Search for Video (VisXP)"
 
 graph:
   fuseki_url: "http://localhost:3030"
@@ -293,6 +294,7 @@ graph:
     "howtos/view-resources":             "https://mediasuite.clariah.nl/vocab#ResourceViewer"
     "howtos/bookmark":                   "https://mediasuite.clariah.nl/vocab#Workspace"
     "howtos/similarity":                 "https://mediasuite.clariah.nl/vocab#SimilarityTool"
+    "labo/documentation/similarity":     "https://mediasuite.clariah.nl/vocab#SimilarityTool"
     "labo/documentation/factrank":       "https://mediasuite.clariah.nl/vocab#FactRankTool"
     "datasets/open-beelden-natuurbeelden": "https://mediasuite.clariah.nl/vocab#Natuurbeelden"
     "datasets/open-beelden":             "https://mediasuite.clariah.nl/vocab#OpenBeelden"
