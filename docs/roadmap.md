@@ -17,9 +17,8 @@ templates and deterministic embedding-based routing. The chatbot runs end-to-end
 locally with parallel narrative and structural retrieval paths and a conversational
 history API.
 
-**Next priorities:** history-aware query reformulation (rewrite follow-up questions
-as standalone queries before embedding), complete Phase 5 version log, and plan
-the NISV infrastructure migration before external researcher evaluation begins.
+**Next priorities:** complete Phase 5 version log, and plan the NISV infrastructure
+migration before external researcher evaluation begins.
 
 ---
 
@@ -113,7 +112,7 @@ production-quality RAG pipeline.
   - [x] Open Images API: `apis/open-images` chunk re-embedded with `collections_mentioned: ["Open Beelden"]`; `datasets_by_service` SPARQL query added; structural path confirmed working via entity_uri filter
   - [x] Similarity Tool: `labo/documentation/similarity` added to `url_entity_map`; `"Similarity Tool"` added to `known_tools` and `tools_mentioned`; chunk_title_overrides updated; all 11 chunks re-embedded. Note: vector search still fails for brand-name queries — structural path (SPARQL entity_description + entity_uri filter) is the correct route; documented in test_questions.yaml
 - [x] Conversation history: pass prior turns to LLM for follow-up question handling
-- [ ] History-aware query reformulation — rewrite follow-up questions as standalone queries before embedding
+- [x] History-aware query reformulation — `_rewrite_as_standalone()` detects follow-up signals (pronouns, "the tool", etc.) and rewrites the question using the last 3 history turns before embedding; original question still used for generation
 - [ ] Retrieval confidence scoring — ask clarifying question rather than generating a weak answer when top-k score is low
 - [ ] Proactive follow-up suggestions after each answer
 - [ ] Evaluate conversational quality with multi-turn test scenarios
