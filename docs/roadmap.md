@@ -6,6 +6,23 @@ If something turns out to be harder, less useful, or superseded by a better appr
 
 ---
 
+## Current status (May 2026)
+
+Phases 1–4 are substantially complete. The knowledge base ingests five content
+sources (~2600 chunks across Media Suite documentation, data platform, research
+publications, data stories, and SANE community docs), achieves 94% Hit@10 on the
+narrative evaluation set and 26/26 (100%) on structural routing. The knowledge
+graph holds 1057 triples across 5 entity types with 11 named SPARQL query
+templates and deterministic embedding-based routing. The chatbot runs end-to-end
+locally with parallel narrative and structural retrieval paths and a conversational
+history API.
+
+**Next priorities:** fix two known retrieval gaps (Open Images API, Similarity
+Tool), complete Phase 5 version log, and plan the NISV infrastructure migration
+before external researcher evaluation begins.
+
+---
+
 ## Phase 1 — Local prototype ✓
 
 The goal of this phase is a working end-to-end RAG pipeline running locally,
@@ -90,6 +107,7 @@ production-quality RAG pipeline.
 - [x] Entity-URI filter: SPARQL result URIs fed back into ChromaDB for targeted chunk retrieval
 - [x] Structural eval (`eval_router.py`): 26/26 questions (100%); expected_terms scoring with --verbose and --debug modes
 - [x] Narrative eval (`eval_retrieval.py`): 14/14 questions (100%); URL presence in top-k
+- [x] `annotated: false` flag in `test_questions.yaml` — unannotated questions shown as `[PENDING]` with actual chatbot output, making incremental review and annotation easy without blocking the eval run
 - [ ] Fix two known retrieval gaps in the knowledge base:
   - [ ] Open Images API page: check `data.beeldengeluid.nl/datasets/open-beelden` is indexed with correct entity_uri; verify `open_images_api` page retrieval
   - [ ] Similarity Tool page: check `labo/documentation/similarity` is indexed with `entity_uri = ms:SimilarityTool`
@@ -135,7 +153,9 @@ enabling precise relational queries that semantic search cannot answer well.
 The goal of this phase is to make the knowledge base trustworthy enough for
 production use, where researchers need to cite sources and rely on stable links.
 
-- [ ] Add version log — record each ingestion run with date, source commit, chunk count
+- [ ] **Add version log (near term)** — record each ingestion run with date, source commit,
+  chunk count, and Hit@10 score; informal versioning (v0.5 etc.) already in use in the
+  learning log, formalise before NISV migration
 - [ ] Implement persistent URL redirect layer for all chatbot-facing source URLs
 - [ ] Raise documentation PID question within CLARIAH infrastructure team
 - [ ] Implement per-chunk provenance metadata suitable for research citation
@@ -151,9 +171,36 @@ production use, where researchers need to cite sources and rely on stable links.
 ## Phase 6 — Deployment and user evaluation
 
 The goal of this phase is to deploy the chatbot and put it in front of real researchers.
+The NISV infrastructure migration is a prerequisite for external researcher testing —
+it must happen before researchers outside the immediate project are asked to use the system.
+
+### NISV infrastructure migration
+
+Migrating to NISV infrastructure (servers, repositories, and potentially compute)
+is necessary for two reasons: (1) external researchers cannot be asked to depend on
+a system running on a personal laptop, and (2) heavier models, larger pipelines,
+or GPU-accelerated embedding will require more compute than is available locally.
+
+**Important caveat:** once the repos move under `beeldengeluid` GitHub organisation
+and the pipeline runs on NISV servers, access to some parts of the pipeline may be
+restricted by NISV security policies. This risk should be assessed and documented
+before migration begins — identify which pipeline components (Ollama, ChromaDB,
+Fuseki, FastAPI, GitHub Actions) may be affected and what the mitigations are.
+
+- [ ] Assess NISV security constraints on pipeline components before migration
+  - [ ] Identify which services (Ollama, ChromaDB HTTP, Fuseki, FastAPI) can run on NISV infra
+  - [ ] Identify which GitHub Actions workflows will still be accessible post-migration
+  - [ ] Document fallback options if key components are blocked (e.g. cloud model API instead of local Ollama)
+- [ ] Move `mediasuite-knowledge-base` to `beeldengeluid` GitHub organisation
+- [ ] Move `media-suite-learn-chatbot` to `beeldengeluid` GitHub organisation
+- [ ] Deploy ChromaDB and Fuseki on NISV server infrastructure
+- [ ] Deploy FastAPI chatbot backend on NISV server
+- [ ] Set up automated re-ingestion pipeline (GitHub Actions or cron) triggered by source repo updates
+- [ ] Assess whether heavier embedding or generation models are feasible with available NISV compute
+
+### User evaluation
 
 - [ ] Deploy chatbot widget on the [Media Suite Community site](https://roelandordelman.github.io/media-suite-community/)
-- [ ] Migrate both repos to NISV infrastructure
 - [ ] Define evaluation methodology — what does "good" look like for researchers?
 - [ ] Recruit a small group of Media Suite researchers for informal testing
 - [ ] Collect and analyse real questions asked to the chatbot
