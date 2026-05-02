@@ -108,9 +108,9 @@ production-quality RAG pipeline.
 - [x] Structural eval (`eval_router.py`): 26/26 questions (100%); expected_terms scoring with --verbose and --debug modes
 - [x] Narrative eval (`eval_retrieval.py`): 14/14 questions (100%); URL presence in top-k
 - [x] `annotated: false` flag in `test_questions.yaml` — unannotated questions shown as `[PENDING]` with actual chatbot output, making incremental review and annotation easy without blocking the eval run
-- [ ] Fix two known retrieval gaps in the knowledge base:
-  - [ ] Open Images API page: check `data.beeldengeluid.nl/datasets/open-beelden` is indexed with correct entity_uri; verify `open_images_api` page retrieval
-  - [ ] Similarity Tool page: check `labo/documentation/similarity` is indexed with `entity_uri = ms:SimilarityTool`
+- [x] Fix two known retrieval gaps in the knowledge base:
+  - [x] Open Images API: `apis/open-images` chunk re-embedded with `collections_mentioned: ["Open Beelden"]`; `datasets_by_service` SPARQL query added; structural path confirmed working via entity_uri filter
+  - [x] Similarity Tool: `labo/documentation/similarity` added to `url_entity_map`; `"Similarity Tool"` added to `known_tools` and `tools_mentioned`; chunk_title_overrides updated; all 11 chunks re-embedded. Note: vector search still fails for brand-name queries — structural path (SPARQL entity_description + entity_uri filter) is the correct route; documented in test_questions.yaml
 - [ ] Conversation history: pass prior turns to LLM for follow-up question handling
 - [ ] History-aware query reformulation — rewrite follow-up questions as standalone queries before embedding
 - [ ] Retrieval confidence scoring — ask clarifying question rather than generating a weak answer when top-k score is low
