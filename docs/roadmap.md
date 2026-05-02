@@ -17,9 +17,9 @@ templates and deterministic embedding-based routing. The chatbot runs end-to-end
 locally with parallel narrative and structural retrieval paths and a conversational
 history API.
 
-**Next priorities:** fix two known retrieval gaps (Open Images API, Similarity
-Tool), complete Phase 5 version log, and plan the NISV infrastructure migration
-before external researcher evaluation begins.
+**Next priorities:** history-aware query reformulation (rewrite follow-up questions
+as standalone queries before embedding), complete Phase 5 version log, and plan
+the NISV infrastructure migration before external researcher evaluation begins.
 
 ---
 
@@ -112,7 +112,7 @@ production-quality RAG pipeline.
 - [x] Fix two known retrieval gaps in the knowledge base:
   - [x] Open Images API: `apis/open-images` chunk re-embedded with `collections_mentioned: ["Open Beelden"]`; `datasets_by_service` SPARQL query added; structural path confirmed working via entity_uri filter
   - [x] Similarity Tool: `labo/documentation/similarity` added to `url_entity_map`; `"Similarity Tool"` added to `known_tools` and `tools_mentioned`; chunk_title_overrides updated; all 11 chunks re-embedded. Note: vector search still fails for brand-name queries — structural path (SPARQL entity_description + entity_uri filter) is the correct route; documented in test_questions.yaml
-- [ ] Conversation history: pass prior turns to LLM for follow-up question handling
+- [x] Conversation history: pass prior turns to LLM for follow-up question handling
 - [ ] History-aware query reformulation — rewrite follow-up questions as standalone queries before embedding
 - [ ] Retrieval confidence scoring — ask clarifying question rather than generating a weak answer when top-k score is low
 - [ ] Proactive follow-up suggestions after each answer
@@ -124,7 +124,7 @@ Background and rationale in [media-suite-learn-chatbot/docs/agentic_rag.md](http
 
 The current pipeline is a fixed sequence: expand → embed → retrieve → generate. It handles simple, well-formed questions well, but has no mechanism to detect or recover from a poor retrieval. Agentic RAG replaces the fixed pipeline with a reasoning loop. Planned in three stages:
 
-- [ ] **Stage 1 — CRAG (Corrective RAG)**: add a relevance scoring step after retrieval; if top-k chunks score below threshold, reformulate query and retry once before generating. Small addition to `api/rag.py`; meaningful improvement on ambiguous or poorly phrased questions without architectural change.
+- [x] **Stage 1 — CRAG (Corrective RAG)**: if structural path returns nothing and best narrative L2 distance > 0.75, `_reformulate_query()` asks the LLM to rephrase with different vocabulary and retries retrieval once; results merged best-per-URL. `crag_triggered` flag in debug output. Threshold tunable via `CRAG_RETRIEVAL_THRESHOLD` constant.
 - [ ] **Stage 2 — Hybrid routing**: route simple well-formed questions to the standard pipeline (fast) and complex multi-part questions to a ReAct loop (thorough). Dependency: measure latency of ReAct loop with local llama3.1:8b first — a 3–4 step ReAct loop could take 20–40s, which is noticeable in a chat interface.
 - [ ] **Stage 3 — Full ReAct agent**: replace fixed pipeline with a reasoning loop; ChromaDB, Fuseki, and future MCP-connected sources become tools the agent invokes with its own queries. Natural evolution of the current architecture — the named SPARQL catalogue and query expansion logic become the agent's tools, not the structure it replaces. Build on top of a stable, comprehensive knowledge base and query catalogue, not before.
 
