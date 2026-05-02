@@ -17,8 +17,7 @@ templates and deterministic embedding-based routing. The chatbot runs end-to-end
 locally with parallel narrative and structural retrieval paths and a conversational
 history API.
 
-**Next priorities:** complete Phase 5 version log, and plan the NISV infrastructure
-migration before external researcher evaluation begins.
+**Next priorities:** plan the NISV infrastructure migration before external researcher evaluation begins.
 
 ---
 
@@ -153,9 +152,7 @@ enabling precise relational queries that semantic search cannot answer well.
 The goal of this phase is to make the knowledge base trustworthy enough for
 production use, where researchers need to cite sources and rely on stable links.
 
-- [ ] **Add version log (near term)** — record each ingestion run with date, source commit,
-  chunk count, and Hit@10 score; informal versioning (v0.5 etc.) already in use in the
-  learning log, formalise before NISV migration
+- [x] **Add version log** — `docs/version_log.md` created; v0.5 pre-migration baseline recorded (2026-05-02): 2,568 chunks, 1,058 graph triples, 94% Hit@10, 100% structural routing, known limitations documented
 - [ ] Implement persistent URL redirect layer for all chatbot-facing source URLs
 - [ ] Raise documentation PID question within CLARIAH infrastructure team
 - [ ] Implement per-chunk provenance metadata suitable for research citation
