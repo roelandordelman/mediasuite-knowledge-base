@@ -306,6 +306,19 @@ graph:
     "sane/collections":                  "https://mediasuite.clariah.nl/vocab#NISVArchive"
     "media-suite-community/sane":        "https://sane.surf.nl/"
 
+content:
+  content_dir: "content"
+  output: "content.json"
+  base_url: ""  # replace with w3id.org URL when persistent redirect layer is set up
+
+# Authoritative record of infrastructure choices.
+# Used by ingest_content.py to lint tech_dependencies in Tier 1 documents.
+tech_stack:
+  vector_store: chromadb
+  graph_store: fuseki
+  embedding_model: nomic-embed-text
+  generation_model: mistral
+
 collections:
   _help:
     content_type: "Help / Documentation"

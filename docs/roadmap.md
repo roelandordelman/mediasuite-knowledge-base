@@ -144,6 +144,7 @@ enabling precise relational queries that semantic search cannot answer well.
 - [ ] Extract entities and relations from chunks using local LLM — augment Turtle descriptions with relations inferred from chunk text
 - [ ] Evaluate when graph retrieval outperforms vector retrieval — partially answered via eval suite: SPARQL wins for enumeration, filtering, ordered traversal; vector search wins for how-to and narrative questions; full analysis pending
 - [ ] Export knowledge graph as Turtle/RDF for reuse beyond the chatbot — align with tools.clariah.nl descriptor format
+- [ ] **RDF self-description** — express the knowledge base itself as RDF triples in the graph (tech stack, stats, ingestion dates) using clariah-vocab; enables chatbot to answer meta-questions ("what technology does this use?", "when was the knowledge base last updated?") as structured SPARQL queries; self-description shareable with tools.clariah.nl
 
 ---
 
@@ -153,11 +154,14 @@ The goal of this phase is to make the knowledge base trustworthy enough for
 production use, where researchers need to cite sources and rely on stable links.
 
 - [x] **Add version log** — `docs/version_log.md` created; v0.5 pre-migration baseline recorded (2026-05-02): 2,568 chunks, 1,058 graph triples, 94% Hit@10, 100% structural routing, known limitations documented
-- [ ] Implement persistent URL redirect layer for all chatbot-facing source URLs
-- [ ] Raise documentation PID question within CLARIAH infrastructure team
+- [ ] **Content framework and Pathway 2 infrastructure** — `docs/content_framework.md` written; `content/` directory and `content/_template.md` created; `ingest_content.py` to be built; first Tier 1 document (`content/system/how-ask-mediasuite-works.md`) in draft
+- [ ] **Stats database** — `build_index.py` outputs `stats.json` on every run (chunk counts by source, triple counts, last ingestion dates, eval scores); a generated `content/system/knowledge-base-coverage.md` is produced from `stats.json`; authored Tier 1 documents reference the coverage page rather than embedding static numbers
+- [ ] **Tech stack registry** — add `tech_stack` section to `config.yaml` as authoritative record of infrastructure choices (vector store, graph store, embedding model, generation model); lint step in `ingest_content.py` checks `tech_dependencies` front matter in Tier 1 documents against registry and warns on mismatch
+- [ ] Implement persistent URL redirect layer — use w3id.org namespace (e.g. `w3id.org/clariah/mediasuite/kb/`); check whether tools.clariah.nl already has a w3id.org namespace to piggyback on; manage redirects via GitHub PR to w3id.org repo. Trigger: before Phase 6 external researcher evaluation, not before. Immediate fix: keep authored Tier 1 documents qualitative (no hardcoded repo URLs or stats counts) until redirect layer exists.
+- [ ] Raise documentation PID question within CLARIAH infrastructure team — check existing w3id.org / PURL usage in CLARIAH before setting up a new namespace
 - [ ] Implement per-chunk provenance metadata suitable for research citation
 - [ ] Add API endpoint to query knowledge base version history
-- [ ] Define deprecation policy for outdated chunks
+- [ ] Define deprecation policy for outdated chunks (see `docs/content_framework.md`)
 - [ ] Expose knowledge base as an MCP server
   - [ ] Implement `search`, `get_by_url`, `list_collections` tools
   - [ ] Register as a CLARIAH shared MCP server

@@ -5,6 +5,7 @@ publications.json
 local_docs.json
 data_stories.json
 community.json
+content.json
 stores/
 __pycache__/
 *.pyc
