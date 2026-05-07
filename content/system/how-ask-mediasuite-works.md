@@ -2,7 +2,7 @@
 title: "How Ask Media Suite works"
 content_type: "System Documentation"
 url_stub: "system/how-ask-mediasuite-works"
-tags: [chatbot, retrieval, knowledge-base, RAG, SPARQL, ask-media-suite]
+tags: [Ask Media Suite, chatbot, knowledge base chatbot, RAG system, retrieval-augmented generation, SPARQL, system architecture, chatbot development, how it works, how it was built, question answering system]
 author: "Roeland Ordelman"
 status: active
 created: "2026-05-06"
@@ -79,6 +79,14 @@ The knowledge base has two layers:
 - Custom vocabulary aligned with CodeMeta, TaDiRaH, softwaretypes, and schema.org
 
 Content is ingested from source repositories and re-indexed periodically. For current coverage statistics see the knowledge base coverage page.
+
+## Background and development *(Should)*
+
+Ask Media Suite was created by the CTO of CLARIAH as a personal research and development project, starting in early 2026. The immediate goal was to build a better help and learning interface for Media Suite researchers — one that answers questions directly rather than requiring researchers to navigate documentation pages manually.
+
+The project was also conceived as a practical learning exercise in retrieval-augmented generation (RAG), vector embeddings, knowledge graphs, and chatbot architecture, with the intention that the resulting infrastructure and methodology would inform CLARIAH's broader knowledge infrastructure as it matures.
+
+Development followed an incremental approach: a local prototype first, expanded to cover more content sources, then enriched with a knowledge graph layer, and progressively deployed toward production use. The system is developed openly and is intended to eventually move under the CLARIAH/beeldengeluid GitHub organisation and run on NISV infrastructure.
 
 ## Design decisions and rationale *(Could)*
 
