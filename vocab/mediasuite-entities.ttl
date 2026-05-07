@@ -153,6 +153,18 @@ ms:SimilarityTool
     # tadirah:patternRecognition is retained as the semantically more precise term.
     schema:releaseNotes "Experimental — limited archive coverage; entry point is the Search Tool keyframe filter." .
 
+# ── Assistant Services ────────────────────────────────────────────────────────
+
+ms:AskMediaSuite
+    a clariah:AssistantService ;
+    rdfs:label "Ask Media Suite"@en ;
+    skos:altLabel "Ask Media Suite chatbot"@en ;
+    schema:description "A retrieval-augmented generation (RAG) chatbot that helps researchers find information about the CLARIAH Media Suite — its tools, collections, workflows, and research publications. Answers natural-language questions in English using a dual-path retrieval system: a semantic vector search path (narrative questions) and a SPARQL knowledge graph path (factual and relational questions). Developed by the CTO of CLARIAH as a prototype knowledge infrastructure, intended to inform and eventually integrate with broader CLARIAH infrastructure."@en ;
+    schema:url <https://roelandordelman.github.io/media-suite-community/> ;
+    schema:codeRepository <https://github.com/roelandordelman/media-suite-learn-chatbot> ;
+    clariah:partOf ms:MediaSuite ;
+    clariah:researchActivity tadirah:informationRetrieval, tadirah:browsing .
+
 # ── Infrastructure Services ───────────────────────────────────────────────────
 # Backend computational services that enrich collections or power tool features.
 # Not directly operated by researchers; exposed through ComponentTools.

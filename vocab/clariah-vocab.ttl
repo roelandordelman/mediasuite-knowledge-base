@@ -78,6 +78,13 @@ clariah:InfrastructureService
     rdfs:comment "A backend computational service that enriches or processes data within a research environment. Not directly operated by researchers but drives tool functionality. Examples: ASR service, computer vision service."@en ;
     skos:closeMatch softwaretypes:WebService .
 
+clariah:AssistantService
+    a owl:Class ;
+    rdfs:subClassOf schema:SoftwareApplication ;
+    rdfs:label "Assistant Service"@en ;
+    rdfs:comment "A conversational AI service that helps researchers navigate a research environment by answering natural-language questions, retrieving relevant documentation, and explaining tools, collections, and workflows. Directly operated by researchers via a chat interface. Distinct from clariah:ComponentTool (which performs research operations on data) and clariah:InfrastructureService (which operates in the background). Example: Ask Media Suite."@en ;
+    skos:closeMatch <https://www.wikidata.org/wiki/Q1827324> .  # chatbot
+
 clariah:Workflow
     a owl:Class ;
     rdfs:subClassOf schema:HowTo ;

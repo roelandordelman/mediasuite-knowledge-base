@@ -40,6 +40,7 @@ known_tools:
   - Similarity Tool
   - FactRank Tool
   - Reflexivity Tool
+  - Ask Media Suite
 
 # Media Suite data collection names used for structured filtering
 known_collections:
@@ -158,6 +159,12 @@ tool_entities:
     entity_type: "ComponentTool"
     tadirah_activities:
       - "https://vocabs.dariah.eu/tadirah/defining"
+  "Ask Media Suite":
+    entity_uri: "https://mediasuite.clariah.nl/vocab#AskMediaSuite"
+    entity_type: "AssistantService"
+    tadirah_activities:
+      - "https://vocabs.dariah.eu/tadirah/informationRetrieval"
+      - "https://vocabs.dariah.eu/tadirah/browsing"
   "Speech Recognition":
     entity_uri: "https://mediasuite.clariah.nl/vocab#ASRService"
     entity_type: "InfrastructureService"
@@ -305,6 +312,7 @@ graph:
     "apis/open-images":                  "https://mediasuite.clariah.nl/vocab#OpenImagesAPI"
     "sane/collections":                  "https://mediasuite.clariah.nl/vocab#NISVArchive"
     "media-suite-community/sane":        "https://sane.surf.nl/"
+    "system/how-ask-mediasuite-works":   "https://mediasuite.clariah.nl/vocab#AskMediaSuite"
 
 content:
   content_dir: "content"
