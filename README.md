@@ -808,28 +808,45 @@ noted here as concrete feedback for the NISV data team — improvements that wou
 manual curation work in this vocabulary and improve interoperability with NDE, SSHOC
 Marketplace, and downstream applications.
 
-1. **License information is absent or vague for most datasets.** The datasets overview
-   page displays no license information for the majority of collections. Where it appears,
-   the wording is generic ("Creative Commons licence, or is already in the Public Domain")
-   without specifying the variant (CC0 1.0, CC-BY 4.0, CC-BY-SA 3.0) or linking to a
-   CC URI. This forced manual investigation per dataset to determine the applicable license.
-   — *Recommendation:* Add an explicit `dcterms:license` URI (e.g.
-   `https://creativecommons.org/publicdomain/zero/1.0/`) to every dataset description
-   in the LOD. Surface this on the human-facing HTML page as a visible, linked badge.
+> **Strategic note (May 2026):** The rights situation for several collections is
+> sufficiently complex or unclear that it may be worth reconsidering whether those
+> datasets should continue to be offered via this knowledge base. Rights complexity is a
+> reason to be conservative, not to infer a license. This is a known consideration for
+> future curation decisions.
+
+1. **The scope of `schema:license` on dataset descriptions is ambiguous.** The CC0 license
+   on the Open Beelden dataset description (`data.beeldengeluid.nl/id/dataset/0002`) is
+   intentional and correct — it licenses the *metadata* for NDE findability, not the
+   individual media items. However, using `schema:license` (or `dcterms:license`) does not
+   make this scope explicit, which can mislead downstream consumers into thinking the items
+   themselves are CC0.
+   — *Recommendation:* Switch to `schema:sdLicense` + `schema:sdPublisher` on dataset
+   descriptions. These schema.org properties explicitly signal that the license applies to
+   the structured data representation (the metadata), not necessarily the media content.
+   This is consistent with how `sdLicense` is used for individual items and makes the
+   metadata/content distinction machine-readable.
 
 2. **The LOD description and the HTML page are out of sync on license information.**
-   The authoritative LOD entry for Open Beelden (`data.beeldengeluid.nl/id/dataset/0002`)
-   does carry `dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/>` —
-   this is good practice and was the only confirmed license URI found. However, the
-   corresponding HTML dataset page does not display this.
-   — *Recommendation:* Render the `dcterms:license` value from the LOD on the HTML page
-   so both representations stay in sync.
+   The LOD entry for Open Beelden carries `schema:license CC0` but the HTML dataset page
+   does not display this. Once the scope is clarified (see point 1), the HTML page should
+   render the metadata license visibly and with a label that makes the scope clear (e.g.
+   "Metadata license: CC0 1.0").
+   — *Recommendation:* Render the license value from the LOD on the HTML page, labelled
+   as the metadata license to avoid confusion with item-level rights.
 
-3. **Natuurbeelden has no confirmed specific license variant.** The dataset page says only
-   "Creative Commons license" without specifying which variant. In the vocabulary, CC0 is
-   inferred from the parent Open Beelden dataset and flagged as such — but not confirmed.
-   — *Recommendation:* Add an explicit `dcterms:license` URI to the Natuurbeelden dataset
-   description. If the license differs item-by-item, document the range of variants used.
+3. **Inferring item-level rights from a parent dataset's metadata license is incorrect.**
+   In the vocabulary, CC0 was initially inferred for Natuurbeelden from the parent Open
+   Beelden dataset. This was wrong: the CC0 on Open Beelden describes the *metadata*
+   license, not the rights of the individual items. Item-level rights in NISV collections
+   are determined by the `nisv.rightslicense` field in DAAN (see the
+   [NISV rights and licenses wiki](https://github.com/beeldengeluid/beng-lod-server/wiki/Rights-and-licenses-for-NISV-open-data)),
+   and it is not always possible to express a single license for an entire collection or
+   even per record. When the rights status is genuinely unclear, `rightsstatements.org/vocab/UND/1.0/`
+   (Not Determined) is the appropriate machine-readable signal at both item and dataset level —
+   not an inferred CC variant.
+   — *Recommendation:* Remove inferred item-level license claims from collection descriptions
+   where the source is a parent dataset's metadata license. Use
+   `rightsstatements.org/vocab/UND/1.0/` where rights cannot be determined.
 
 4. **`dcterms:accessRights` uses prose literals, not standard vocabulary URIs.**
    Across the platform, access rights are described as free text strings rather than using
@@ -838,7 +855,11 @@ Marketplace, and downstream applications.
    — *Recommendation:* Use `dcterms:accessRights <http://publications.europa.eu/resource/
    authority/access-right/PUBLIC>` (etc.) for machine-readable classification; carry
    the human-readable detail in `schema:conditionsOfAccess`. This is also required for
-   DCAT-AP 3.0 compliance and NDE dataset register ingestion quality.
+   DCAT-AP 3.0 compliance and NDE dataset register ingestion quality. For collections
+   where rights are determined per item via `nisv.rightslicense`, use
+   `rightsstatements.org/vocab/UND/1.0/` (Not Determined) at dataset level as the
+   conservative, machine-readable default. See also the
+   [NDE architecture pattern for rights](https://dera.netwerkdigitaalerfgoed.nl/index.php/Auteursrechten_en_licenties).
 
 5. **Most NISV sub-collections are not separately registered in NDE.** Eight of nine NISV
    dataset stubs in the vocabulary carry `[NO_NDE_URI]` — they are not individually
@@ -847,6 +868,17 @@ Marketplace, and downstream applications.
    Program Guides, Kijk- & Luistercijfers, etc.) as a separate entry in the NDE dataset
    register, linked to the parent via `dcterms:isPartOf`. This enables NDE-level discovery,
    citation, and change tracking per collection.
+
+6. **No distinction between metadata license and content license at item level.**
+   The NISV rights model operates at the item level via `nisv.rightslicense` in DAAN,
+   mapped to rightsstatements.org and Creative Commons URIs (documented in the
+   [NISV rights wiki](https://github.com/beeldengeluid/beng-lod-server/wiki/Rights-and-licenses-for-NISV-open-data)).
+   This item-level rights information is not consistently surfaced in the LOD. In the
+   meantime, the `schema:sdLicense` / `schema:sdPublisher` pattern — used to signal that a
+   license claim applies to the structured data layer rather than the media content — is the
+   recommended approach for dataset-level descriptions where the metadata is CC0 but item
+   rights vary. This pattern is already used for individual items and should be applied
+   consistently to dataset descriptions too.
 
 ---
 
