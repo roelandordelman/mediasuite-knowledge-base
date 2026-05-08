@@ -835,33 +835,20 @@ Marketplace, and downstream applications.
    as the metadata license to avoid confusion with item-level rights.
 
 3. **Inferring item-level rights from a parent dataset's metadata license is incorrect.**
-   In the vocabulary, CC0 was initially inferred for Natuurbeelden from the parent Open
-   Beelden dataset. This was wrong: the CC0 on Open Beelden describes the *metadata*
-   license, not the rights of the individual items. Item-level rights in NISV collections
+   An earlier version of `mediasuite-collections.ttl` assigned CC0 to Natuurbeelden,
+   inferred from the parent Open Beelden dataset. This was wrong on two counts: the CC0
+   on Open Beelden describes the *metadata* license, not item rights; and the Natuurbeelden
+   dataset page already carries `rightsstatements.org/vocab/UND/1.0/` (Not Determined) at
+   dataset level, while its DataDownload carries `schema:license CC-BY-SA 3.0`. The
+   vocabulary file has been corrected accordingly. Item-level rights in NISV collections
    are determined by the `nisv.rightslicense` field in DAAN (see the
-   [NISV rights and licenses wiki](https://github.com/beeldengeluid/beng-lod-server/wiki/Rights-and-licenses-for-NISV-open-data)),
-   and it is not always possible to express a single license for an entire collection or
-   even per record. When the rights status is genuinely unclear, `rightsstatements.org/vocab/UND/1.0/`
-   (Not Determined) is the appropriate machine-readable signal at both item and dataset level —
-   not an inferred CC variant.
-   — *Recommendation:* Remove inferred item-level license claims from collection descriptions
-   where the source is a parent dataset's metadata license. Use
-   `rightsstatements.org/vocab/UND/1.0/` where rights cannot be determined.
+   [NISV rights and licenses wiki](https://github.com/beeldengeluid/beng-lod-server/wiki/Rights-and-licenses-for-NISV-open-data));
+   it is not always possible to express a single license for an entire collection.
+   — *No new recommendation:* Natuurbeelden already applies UNDETERMINED correctly. For
+   other collections with unclear rights, `rightsstatements.org/vocab/UND/1.0/` at dataset
+   level is the right approach — already consistent with current practice.
 
-4. **`dcterms:accessRights` uses prose literals, not standard vocabulary URIs.**
-   Across the platform, access rights are described as free text strings rather than using
-   the EU Publications Office access-right vocabulary (`PUBLIC`, `RESTRICTED`, `NON_PUBLIC`).
-   This is a common shortcut but it prevents machine-readable access classification.
-   — *Recommendation:* Use `dcterms:accessRights <http://publications.europa.eu/resource/
-   authority/access-right/PUBLIC>` (etc.) for machine-readable classification; carry
-   the human-readable detail in `schema:conditionsOfAccess`. This is also required for
-   DCAT-AP 3.0 compliance and NDE dataset register ingestion quality. For collections
-   where rights are determined per item via `nisv.rightslicense`, use
-   `rightsstatements.org/vocab/UND/1.0/` (Not Determined) at dataset level as the
-   conservative, machine-readable default. See also the
-   [NDE architecture pattern for rights](https://dera.netwerkdigitaalerfgoed.nl/index.php/Auteursrechten_en_licenties).
-
-5. **Most NISV sub-collections are not separately registered in NDE.** Eight of nine NISV
+4. **Most NISV sub-collections are not separately registered in NDE.** Eight of nine NISV
    dataset stubs in the vocabulary carry `[NO_NDE_URI]` — they are not individually
    discoverable via the national registry. Only Open Beelden has a confirmed NDE URI.
    — *Recommendation:* Register each sub-collection (Television Archive, Radio Archive,

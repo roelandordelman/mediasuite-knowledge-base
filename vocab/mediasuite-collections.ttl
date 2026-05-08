@@ -142,8 +142,10 @@ ms:Natuurbeelden
     schema:description "Open collection of nature video fragments (4,000+ items) from Sound & Vision, accessible via the Open Beelden API."@en ;
     dcterms:publisher <https://www.beeldengeluid.nl/> ;
     dcterms:accessRights euright:PUBLIC ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    # License inferred from parent dataset ms:OpenBeelden (CC0 per data.beeldengeluid.nl); verify against individual item metadata if needed
+    dcterms:license <https://rightsstatements.org/vocab/UND/1.0/> ;
+    # Rights not determined at dataset level (per data.beeldengeluid.nl dataset page).
+    # The associated DataDownload carries schema:license CC-BY-SA 3.0 for the download itself.
+    # Earlier version incorrectly inferred CC0 from parent Open Beelden metadata license — corrected 2026-05-08.
     dcterms:isPartOf ms:OpenBeelden ;
     dcat:accessService ms:OpenImagesAPI ;
     dcterms:modified "2026-04-30" ;
