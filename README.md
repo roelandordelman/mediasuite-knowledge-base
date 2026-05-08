@@ -801,71 +801,57 @@ during active registry cleanup or when new collections are onboarded. The `[NO_N
 flags in `mediasuite-collections.ttl` are the most actionable items: each one
 represents a collection that should be registered at NDE but isn't yet.
 
-#### Learnings: recommendations for data.beeldengeluid.nl
+#### Notes for data.beeldengeluid.nl
 
-The following gaps were observed while building `mediasuite-collections.ttl`. They are
-noted here as concrete feedback for the NISV data team — improvements that would reduce
-manual curation work in this vocabulary and improve interoperability with NDE, SSHOC
-Marketplace, and downstream applications.
+The following observations were made while building `mediasuite-collections.ttl`.
+They are noted here as possible topics for further investigation by the NISV data team —
+not as verified findings or formal recommendations. Some may already be addressed or
+may reflect incomplete understanding of the current data model.
 
-> **Strategic note (May 2026):** The rights situation for several collections is
-> sufficiently complex or unclear that it may be worth reconsidering whether those
-> datasets should continue to be offered via this knowledge base. Rights complexity is a
-> reason to be conservative, not to infer a license. This is a known consideration for
-> future curation decisions.
+> **Note (May 2026):** The rights situation for several collections is sufficiently
+> complex that it may be worth reconsidering whether those datasets should continue to
+> be offered via this knowledge base. Rights complexity is a reason to be conservative.
+> This is a consideration for future curation decisions, to be discussed with the NISV
+> data team.
 
-1. **The scope of `schema:license` on dataset descriptions is ambiguous.** The CC0 license
-   on the Open Beelden dataset description (`data.beeldengeluid.nl/id/dataset/0002`) is
-   intentional and correct — it licenses the *metadata* for NDE findability, not the
-   individual media items. However, using `schema:license` (or `dcterms:license`) does not
-   make this scope explicit, which can mislead downstream consumers into thinking the items
-   themselves are CC0.
-   — *Recommendation:* Switch to `schema:sdLicense` + `schema:sdPublisher` on dataset
-   descriptions. These schema.org properties explicitly signal that the license applies to
-   the structured data representation (the metadata), not necessarily the media content.
-   This is consistent with how `sdLicense` is used for individual items and makes the
-   metadata/content distinction machine-readable.
+1. **The scope of `schema:license` on dataset descriptions may be worth clarifying.**
+   The CC0 license on the Open Beelden dataset description appears to license the
+   *metadata* for NDE findability, not the individual media items. It may be worth
+   investigating whether `schema:sdLicense` + `schema:sdPublisher` would be a clearer
+   pattern, as these schema.org properties explicitly signal that a license applies to
+   the structured data representation rather than the media content. This could help
+   downstream consumers distinguish metadata license from item-level rights.
 
-2. **The LOD description and the HTML page are out of sync on license information.**
-   The LOD entry for Open Beelden carries `schema:license CC0` but the HTML dataset page
-   does not display this. Once the scope is clarified (see point 1), the HTML page should
-   render the metadata license visibly and with a label that makes the scope clear (e.g.
-   "Metadata license: CC0 1.0").
-   — *Recommendation:* Render the license value from the LOD on the HTML page, labelled
-   as the metadata license to avoid confusion with item-level rights.
+2. **The LOD description and the HTML page may be out of sync on license information.**
+   The LOD entry for Open Beelden appears to carry a license URI that is not displayed
+   on the corresponding HTML dataset page. If accurate, it may be worth investigating
+   whether surfacing the metadata license on the HTML page (with a label making the
+   scope clear) would improve transparency for users.
 
-3. **Inferring item-level rights from a parent dataset's metadata license is incorrect.**
-   An earlier version of `mediasuite-collections.ttl` assigned CC0 to Natuurbeelden,
-   inferred from the parent Open Beelden dataset. This was wrong on two counts: the CC0
-   on Open Beelden describes the *metadata* license, not item rights; and the Natuurbeelden
-   dataset page already carries `rightsstatements.org/vocab/UND/1.0/` (Not Determined) at
-   dataset level, while its DataDownload carries `schema:license CC-BY-SA 3.0`. The
-   vocabulary file has been corrected accordingly. Item-level rights in NISV collections
-   are determined by the `nisv.rightslicense` field in DAAN (see the
+3. **Item-level rights and dataset-level license descriptions.** An earlier version of
+   `mediasuite-collections.ttl` incorrectly inferred CC0 for Natuurbeelden from the
+   parent Open Beelden dataset — this has been corrected to `rightsstatements.org/vocab/UND/1.0/`
+   (Not Determined), consistent with the Natuurbeelden dataset page. Item-level rights
+   in NISV collections are determined by the `nisv.rightslicense` field in DAAN (see the
    [NISV rights and licenses wiki](https://github.com/beeldengeluid/beng-lod-server/wiki/Rights-and-licenses-for-NISV-open-data));
-   it is not always possible to express a single license for an entire collection.
-   — *No new recommendation:* Natuurbeelden already applies UNDETERMINED correctly. For
-   other collections with unclear rights, `rightsstatements.org/vocab/UND/1.0/` at dataset
-   level is the right approach — already consistent with current practice.
+   it is not always possible to express a single license for an entire collection or
+   per record. This complexity is acknowledged in the vocabulary where relevant.
 
-4. **Most NISV sub-collections are not separately registered in NDE.** Eight of nine NISV
-   dataset stubs in the vocabulary carry `[NO_NDE_URI]` — they are not individually
-   discoverable via the national registry. Only Open Beelden has a confirmed NDE URI.
-   — *Recommendation:* Register each sub-collection (Television Archive, Radio Archive,
-   Program Guides, Kijk- & Luistercijfers, etc.) as a separate entry in the NDE dataset
-   register, linked to the parent via `dcterms:isPartOf`. This enables NDE-level discovery,
-   citation, and change tracking per collection.
+4. **Most NISV sub-collections may not be separately registered in NDE.** Eight of nine
+   NISV dataset stubs in the vocabulary carry `[NO_NDE_URI]` — suggesting they may not
+   be individually discoverable via the national registry. Only Open Beelden has a
+   confirmed NDE URI. It may be worth investigating whether registering sub-collections
+   separately (linked to the parent via `dcterms:isPartOf`) would improve NDE-level
+   discovery and change tracking. This has not been verified against the current NDE
+   registry state.
 
-6. **No distinction between metadata license and content license at item level.**
-   The NISV rights model operates at the item level via `nisv.rightslicense` in DAAN,
-   mapped to rightsstatements.org and Creative Commons URIs (documented in the
+5. **Metadata license versus content license at item level.** The NISV rights model
+   operates at the item level via `nisv.rightslicense` in DAAN, mapped to
+   rightsstatements.org and Creative Commons URIs (documented in the
    [NISV rights wiki](https://github.com/beeldengeluid/beng-lod-server/wiki/Rights-and-licenses-for-NISV-open-data)).
-   This item-level rights information is not consistently surfaced in the LOD. In the
-   meantime, the `schema:sdLicense` / `schema:sdPublisher` pattern — used to signal that a
-   license claim applies to the structured data layer rather than the media content — is the
-   recommended approach for dataset-level descriptions where the metadata is CC0 but item
-   rights vary. This pattern is already used for individual items and should be applied
-   consistently to dataset descriptions too.
+   It may be worth investigating whether the `schema:sdLicense` / `schema:sdPublisher`
+   pattern could be applied consistently to dataset-level descriptions to make the
+   metadata/content distinction explicit across the platform.
 
 ---
 
