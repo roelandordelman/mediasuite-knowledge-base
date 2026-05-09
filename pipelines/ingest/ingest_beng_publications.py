@@ -206,6 +206,7 @@ def build_keyword_signals(cfg: dict) -> list[str]:
         | {
             "sound and vision", "beeld en geluid", "beeldengeluid", "nisv",
             "data.beeldengeluid.nl", "lod.sound-and-vision",
+            "tmg journal for media history", "view journal of european television",
         }
         | set(known_tools)
         | set(known_collections),
@@ -265,6 +266,7 @@ def record_to_chunk(record, content_type: str, source_collection: str,
     identifiers = md.get("identifier", [])
     keywords = md.get("subject", [])
     publisher = first(md.get("publisher", []))
+    journal_source = first(md.get("source", []))
     doi = extract_doi(identifiers)
 
     url = extract_https_url(identifiers)
@@ -300,6 +302,7 @@ def record_to_chunk(record, content_type: str, source_collection: str,
         "rights": rights,
         "keywords": keywords,
         "publisher": publisher,
+        "journal_source": journal_source,
         "source": source_collection,
     }
 
@@ -383,7 +386,9 @@ def harvest(cfg: dict, full: bool, limit: int | None,
 
                 # 2. Keyword pre-filter
                 sig = keyword_match(
-                    chunk["title"], chunk["description"], chunk["keywords"], signals
+                    chunk["title"], chunk["description"],
+                    chunk["keywords"] + ([chunk["journal_source"]] if chunk["journal_source"] else []),
+                    signals
                 )
                 if not sig:
                     n_no_keyword += 1
