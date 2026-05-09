@@ -6,6 +6,7 @@ local_docs.json
 data_stories.json
 community.json
 content.json
+beng_publications.json
 stores/
 __pycache__/
 *.pyc

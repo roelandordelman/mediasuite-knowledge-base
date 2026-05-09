@@ -63,6 +63,8 @@ that make it significantly more useful to researchers.
 - [x] Ingest Data Stories from [beeldengeluid/data-stories](https://github.com/beeldengeluid/data-stories) — 7 English stories, 369 chunks; closes gap on quantitative research use cases
 - [x] Ingest SANE documentation from [roelandordelman/media-suite-community](https://github.com/roelandordelman/media-suite-community) — 18 chunks covering SANE workflow and available NISV collections
 - [~] ~~Ingest internal planning documents (Dutch)~~ — Dutch content doesn't bridge to English queries via nomic-embed-text; `ingest_local_docs.py` remains available for English-language local docs
+- [x] Ingest B&G publications from publications.beeldengeluid.nl via OAI-PMH — `ingest_beng_publications.py` using Sickle; one chunk per record (title + abstract + metadata); incremental harvest via OAI-PMH `from` parameter; state in `stores/beng_publications_state.json`; ~2,500–3,000 records covering 1998–present
+- [ ] Automate B&G publications harvest — weekly incremental OAI-PMH poll; monthly full re-harvest to catch deletions (`deletedRecord: transient` on endpoint)
 - [ ] Ingest workshop and tutorial materials (PDFs, slide decks) — partially addressed via Zenodo supplementary_dois
 - [ ] Expand `known_tools` and `known_collections` lists in `config.yaml` based on corpus analysis
 - [ ] Validate entity extraction quality — check `tools_mentioned` / `collections_mentioned` for false positives
@@ -153,6 +155,7 @@ enabling precise relational queries that semantic search cannot answer well.
 The goal of this phase is to make the knowledge base trustworthy enough for
 production use, where researchers need to cite sources and rely on stable links.
 
+- [x] **Source sustainability audit** — `docs/source_sustainability.md` created; all sources assessed for update mechanism, cadence, failure mode, owner, rot risk; update policy targets defined for Phase 5/6 automation sprint
 - [x] **Add version log** — `docs/version_log.md` created; v0.5 pre-migration baseline recorded (2026-05-02): 2,568 chunks, 1,058 graph triples, 94% Hit@10, 100% structural routing, known limitations documented
 - [ ] **Content framework and Pathway 2 infrastructure** — `docs/content_framework.md` written; `content/` directory and `content/_template.md` created; `ingest_content.py` to be built; first Tier 1 document (`content/system/how-ask-mediasuite-works.md`) in draft
 - [ ] **Stats database** — `build_index.py` outputs `stats.json` on every run (chunk counts by source, triple counts, last ingestion dates, eval scores); a generated `content/system/knowledge-base-coverage.md` is produced from `stats.json`; authored Tier 1 documents reference the coverage page rather than embedding static numbers

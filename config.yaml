@@ -215,6 +215,16 @@ publications:
     - "10.5281/zenodo.18712971"  # CLARIAH Media Suite Workshop: ASR (lecturer manual + handout)
     - "10.5281/zenodo.18712838"  # CLARIAH Media Suite Workshop: Zoeken en/in Metadata
 
+beng_publications:
+  oai_endpoint: "https://publications.beeldengeluid.nl/oai"
+  metadata_prefix: "oai_dc"
+  output: "beng_publications.json"
+  state_file: "stores/beng_publications_state.json"
+  content_type: "B&G Publication"
+  source_collection: "publications_beeldengeluid"
+  # Uncomment to restrict indexing to specific languages:
+  # language_filter: ["en"]
+
 data_stories:
   repo_path: /tmp/data-stories
   output: "data_stories.json"
