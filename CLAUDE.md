@@ -192,6 +192,27 @@ knowledge_base:
   # url: http://kb-service:8000
 ```
 
+## Making recommendations about external systems
+
+When making observations or suggestions about external systems (e.g. third-party LOD
+platforms, rights practices, metadata conventions), always rate each point explicitly as:
+
+- **"Pretty certain"** — directly verified via primary sources (LOD endpoint, JSON-LD,
+  official documentation, confirmed by domain expert)
+- **"Something to look into further"** — plausible but not verified, or based on
+  indirect evidence only
+
+Follow this methodology when investigating a claim:
+1. Check primary sources first: fetch the actual LOD/JSON-LD, read official documentation
+2. Note when verification was not possible (e.g. registry unavailable, 404)
+3. Cite the specific sources checked
+4. Do not upgrade a claim from "look into further" to "pretty certain" based solely
+   on AI-generated inference — only direct evidence or expert confirmation qualifies
+
+This matters because observations made during knowledge base work may end up as notes
+or recommendations visible to third parties (e.g. the NISV data team). Unfounded
+suggestions cause unnecessary investigation work and erode trust.
+
 ## Relation to CLARIAH infrastructure
 
 This repository is a personal project and prototype. As it matures, it is

@@ -814,13 +814,11 @@ may reflect incomplete understanding of the current data model.
 > This is a consideration for future curation decisions, to be discussed with the NISV
 > data team.
 
-1. **The scope of `schema:license` on dataset descriptions may be worth clarifying.**
-   The CC0 license on the Open Beelden dataset description appears to license the
-   *metadata* for NDE findability, not the individual media items. It may be worth
-   investigating whether `schema:sdLicense` + `schema:sdPublisher` would be a clearer
-   pattern, as these schema.org properties explicitly signal that a license applies to
-   the structured data representation rather than the media content. This could help
-   downstream consumers distinguish metadata license from item-level rights.
+1. **The CC0 on dataset descriptions is for metadata/NDE findability, not item license.**
+   The CC0 license on the Open Beelden dataset description licenses the *metadata*
+   for NDE findability, not the individual media items. This is consistent with
+   NDE/DERA-endorsed practice (confirmed via the DERA documentation). The distinction
+   is real but the current pattern appears intentional — no change recommended.
 
 2. **The LOD description and the HTML page may be out of sync on license information.**
    The LOD entry for Open Beelden appears to carry a license URI that is not displayed
@@ -849,9 +847,18 @@ may reflect incomplete understanding of the current data model.
    operates at the item level via `nisv.rightslicense` in DAAN, mapped to
    rightsstatements.org and Creative Commons URIs (documented in the
    [NISV rights wiki](https://github.com/beeldengeluid/beng-lod-server/wiki/Rights-and-licenses-for-NISV-open-data)).
-   It may be worth investigating whether the `schema:sdLicense` / `schema:sdPublisher`
-   pattern could be applied consistently to dataset-level descriptions to make the
-   metadata/content distinction explicit across the platform.
+   The schema.org vocabulary does provide `schema:sdLicense` / `schema:sdPublisher`
+   properties to make the metadata/content distinction explicit at the dataset description
+   level — this was confirmed by the NISV data team as a meaningful distinction.
+   However, applying these properties is not currently part of NDE/DERA-documented
+   guidance, so this remains a possible investigation topic rather than an established
+   practice.
+
+##### Sources consulted
+
+- [NISV rights and licenses wiki](https://github.com/beeldengeluid/beng-lod-server/wiki/Rights-and-licenses-for-NISV-open-data) — documents the NISV rights model, DAAN field mappings, and use of rightsstatements.org and Creative Commons URIs per collection
+- [DERA — Auteursrechten en licenties](https://dera.netwerkdigitaalerfgoed.nl/index.php/Auteursrechten_en_licenties) — NDE/DERA documentation confirming CC0 on dataset descriptions as NDE-endorsed practice for metadata findability
+- [data.beeldengeluid.nl/id/dataset/0002](https://data.beeldengeluid.nl/id/dataset/0002) — the Open Beelden dataset LOD entry (JSON-LD), inspected directly to verify which schema.org properties are actually used
 
 ---
 
