@@ -20,11 +20,15 @@ flowchart LR
         src3["Research publications\n(Zotero group + OpenAlex)"]
         src4["Data Stories\n(data-stories GitHub)"]
         src5["Community site\n(media-suite-community)"]
+        src6["B&G Publications\n(OAI-PMH)"]
+        src7["Authored content\n(content/ directory)"]
         ingest1["ingest_mediasuite.py"]
         ingest2["ingest_dataplatform.py"]
         ingest3["ingest_publications.py"]
         ingest4["ingest_datastories.py"]
         ingest5["ingest_community.py"]
+        ingest6["ingest_beng_publications.py\n(keyword + LLM filter)"]
+        ingest7["ingest_content.py"]
         json["*.json chunks"]
         embed["build_index.py\n(nomic-embed-text via Ollama)"]
         chroma[("ChromaDB\nHTTP server")]
@@ -34,6 +38,8 @@ flowchart LR
         src3 --> ingest3 --> json
         src4 --> ingest4 --> json
         src5 --> ingest5 --> json
+        src6 --> ingest6 --> json
+        src7 --> ingest7 --> json
         json --> embed --> chroma
     end
 
@@ -84,6 +90,22 @@ From [beeldengeluid/data-stories](https://github.com/beeldengeluid/data-stories)
 ### Community site (SANE documentation)
 From [roelandordelman/media-suite-community](https://github.com/roelandordelman/media-suite-community) — SANE (Secure Analysis Environment) workflow documentation and available NISV collection descriptions. Covers how researchers work with sensitive audiovisual data that cannot leave the secure environment.
 
+### B&G Publications
+From [publications.beeldengeluid.nl](https://publications.beeldengeluid.nl) via OAI-PMH (`oai_dc`). Harvested with the `sickle` library; two-stage relevance filter before indexing:
+1. **Keyword pre-filter** — title + abstract + `dc:subject` must match Media Suite signals (tool names, collection names, institutional terms).
+2. **LLM verify** — Mistral scores each keyword-matched record as `RELEVANT` or `NOT_RELEVANT` based on title + abstract. Relevant means: research using Media Suite tools/data, or content about NISV collections accessible through the Media Suite.
+
+Records already in `publications.json` (Zotero, DOI-matched) are skipped — the Zotero version is richer. LLM decisions are cached in `stores/beng_publications_llm_cache.json` so re-runs only call Mistral for new records. Full harvest result: 79 of 1,250 total records kept.
+
+### Authored content (Tier 1)
+Curated documents in `content/` — authored directly in this repository for topics not well covered by source sync (e.g. system architecture explanations, how the RAG pipeline works). Status lifecycle: `draft → active → deprecated → retired`. See `docs/content_framework.md` for the full governance model.
+
+---
+
+## Source sustainability
+
+Update mechanisms, cadence, failure modes, and rot risk for all sources are documented in [`docs/source_sustainability.md`](docs/source_sustainability.md). All sources currently require manual re-runs; automated ingestion is planned for Phase 5/6.
+
 ---
 
 ## Running the pipeline
@@ -106,9 +128,11 @@ git clone --depth=1 https://github.com/roelandordelman/media-suite-community.git
 # 2. Ingest → JSON  (run all; each produces its own JSON file)
 python pipelines/ingest/ingest_mediasuite.py
 python pipelines/ingest/ingest_dataplatform.py
-python pipelines/ingest/ingest_publications.py   # fetches Zotero + OpenAlex; see flags below
+python pipelines/ingest/ingest_publications.py       # fetches Zotero + OpenAlex; see flags below
 python pipelines/ingest/ingest_datastories.py
 python pipelines/ingest/ingest_community.py
+python pipelines/ingest/ingest_beng_publications.py  # OAI-PMH harvest; see flags below
+python pipelines/ingest/ingest_content.py            # authored Tier 1 content
 
 # 3. Embed → ChromaDB  (incremental — skips already-indexed chunks)
 python pipelines/embed/build_index.py --input knowledge_base.json
@@ -116,6 +140,8 @@ python pipelines/embed/build_index.py --input data_platform.json
 python pipelines/embed/build_index.py --input publications.json
 python pipelines/embed/build_index.py --input data_stories.json
 python pipelines/embed/build_index.py --input community.json
+python pipelines/embed/build_index.py --input beng_publications.json
+python pipelines/embed/build_index.py --input content.json
 ```
 
 **Publications pipeline flags:**
@@ -125,6 +151,15 @@ python pipelines/ingest/ingest_publications.py --help
   --no-generate   skip LLM summary generation
   --refresh       re-fetch Zotero + OpenAlex data (clears API caches)
   --limit N       process only the first N papers (for testing)
+```
+
+**B&G Publications pipeline flags:**
+```bash
+python pipelines/ingest/ingest_beng_publications.py --help
+  --full          force full re-harvest (ignore last_harvest state)
+  --no-filter     index all records without relevance filtering
+  --no-llm        keyword pre-filter only, skip LLM verification
+  --limit N       process only first N OAI records (for testing; state not updated)
 ```
 
 To rebuild the index from scratch (e.g. after a schema change):
