@@ -234,6 +234,27 @@ questions:
       - https://doi.org/10.18146/tmg.811
     notes: MIMEHIST — supplementary paper (not in Zotero group, added via supplementary_dois)
 
+  - question: "What kind of research on migration is done with the Media Suite?"
+    category: gap
+    notes: >
+      No migration research publication is in the knowledge base. The B&G repo has Factcheck
+      Connect reports on migration (OAI IDs 2569, 2566) but they were dropped by the keyword
+      pre-filter (creator "Beeld & Geluid" uses ampersand, not "en") and would likely be
+      LLM-rejected anyway — they are factchecking project reports, not Media Suite research.
+      The Zotero group (publications.json) also has no migration-specific papers.
+      To fix: find Media Suite research on migration themes and add via supplementary_dois
+      in config.yaml, or author a Tier 1 document in content/ describing relevant collections
+      and tools for migration research (KB Newspaper, Sound & Vision Television Archive).
+
+  - question: "Have researchers used the Media Suite to study migration or refugees in Dutch media?"
+    category: gap
+    notes: >
+      Variant of the migration research gap question with more specific framing.
+      The "Emergence and Persistence of Racialised Stereotypes on Dutch Television" (indexed
+      B&G publication) is the closest result but is about racial stereotypes broadly, not
+      migration research. Both this and the parent question should pass once relevant
+      publications are added to the knowledge base.
+
   # ── Structural questions (SPARQL router) ───────────────────────────────────
   # These are skipped by eval_retrieval.py. The expected_answer is the ground
   # truth for end-to-end answer evaluation in the chatbot repo. Vector search
