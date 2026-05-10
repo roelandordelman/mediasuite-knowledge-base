@@ -114,6 +114,7 @@ production-quality RAG pipeline.
   - [x] Similarity Tool: `labo/documentation/similarity` added to `url_entity_map`; `"Similarity Tool"` added to `known_tools` and `tools_mentioned`; chunk_title_overrides updated; all 11 chunks re-embedded. Note: vector search still fails for brand-name queries — structural path (SPARQL entity_description + entity_uri filter) is the correct route; documented in test_questions.yaml
 - [x] Conversation history: pass prior turns to LLM for follow-up question handling
 - [x] History-aware query reformulation — `_rewrite_as_standalone()` detects follow-up signals (pronouns, "the tool", etc.) and rewrites the question using the last 3 history turns before embedding; original question still used for generation
+- [x] **Wiki path** — third parallel retrieval path: chatbot calls [mediasuite-wiki-agent](https://github.com/roelandordelman/mediasuite-wiki-agent) REST API (port 8002); semantic search against the Beeld & Geluid Wiki (24,104 articles, Milvus, multilingual-e5-large-instruct); results added to context only when cosine similarity ≥ 0.70; degrades gracefully when wiki service is down. Enables the chatbot to answer questions about Dutch media history persons and productions alongside documentation questions. Fuseki is shared: wiki loaded as a separate dataset (`wiki`).
 - [ ] Retrieval confidence scoring — ask clarifying question rather than generating a weak answer when top-k score is low
 - [ ] Proactive follow-up suggestions after each answer
 - [ ] Evaluate conversational quality with multi-turn test scenarios
