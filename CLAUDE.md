@@ -293,3 +293,7 @@ aligned with existing CLARIAH linked data vocabularies where possible.
 User evaluation should begin as soon as the chatbot application is stable enough
 for real researchers to use — this evaluation data is as valuable as the
 technical infrastructure itself.
+
+## Roadmap
+The project roadmap is at `docs/roadmap.md`.
+Before starting significant work, check current priorities there.
