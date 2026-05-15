@@ -314,14 +314,8 @@ questions:
   # ── General orientation ───────────────────────────────────────────────────
 
   - question: "What can I do with the Media Suite?"
-    category: partial
-    notes: "General orientation question; answer spans tools, collections, and workflows — no single URL. Variants: 'I've just been given access — where do I even begin?', 'What are the main functionalities for humanities research?'"
-
-  - question: "Can the Media Suite help me with my research questions?"
-    category: partial
-    expected_urls:
-      - https://mediasuite.clariah.nl/learn/example-projects
-    notes: "Domain-specific variants ('I research Dutch television history', 'I study political discourse in radio') should retrieve relevant tutorials and example projects. The example-projects index is the most useful single entry point."
+    category: structural
+    notes: "General orientation question; answer spans tools, collections, and workflows — no single URL. Evaluated via eval_router.py (SPARQL listing). Variants: 'I've just been given access — where do I even begin?', 'What are the main functionalities for humanities research?'"
 
   - question: "What are the types of research the Media Suite supports?"
     category: partial
@@ -390,7 +384,7 @@ questions:
     expected_answer: "FactRank is an experimental tool (limited to Dutch talk shows) that helps researchers find fact-checkable statements in broadcast media. Workflow: 1. Query FactRank for check-worthy statements → Statement List. 2. Review statements in Resource Viewer. 3. Annotate findings → Annotated Corpus. 4. Deposit findings (optional). Status: partially supported — limited to specific talk show content."
     notes: "SPARQL: entity_description for ms:FactRankTool + workflow_steps for ms:FactCheckingWorkflow."
 
-  - question: "How would researchers use the Workspace and the Compare Tool?"
+  - question: "How would researchers use the Workspace with the Compare Tool?"
     category: partial
     expected_urls:
       - https://mediasuite.clariah.nl/documentation/howtos/compare-queries
@@ -438,11 +432,19 @@ questions:
     expected_answer: "Automatic enrichment services include the ASR Service (speech recognition for broadcast content) and the Visual Similarity Service / VisXP (keyframe extraction). On-demand enrichment is not yet supported — 'Researcher-triggered enrichment on demand' is an aspirational workflow."
     notes: "Two-part question. SPARQL: services_by_tool for enrichment services + all_workflows filtered by Aspirational for ms:OnDemandEnrichmentWorkflow."
 
+  - question: "What is the Similarity Tool for?"
+    category: partial
+    expected_urls:
+      - https://mediasuite.clariah.nl/labo/documentation/similarity
+      - https://doi.org/10.5281/zenodo.12517693
+    notes: "Natural phrasing of the awkward-variant below. Expected to pass via named entity detection (_detect_named_entity fires entity_description for ms:SimilarityTool → entity_uri filter retrieves labo/documentation/similarity)."
+
   - question: "What did the Media Suite implement the Similarity Tool for?"
     category: partial
     expected_urls:
       - https://mediasuite.clariah.nl/labo/documentation/similarity
       - https://doi.org/10.5281/zenodo.12517693
+    note: "Awkward phrasing retained as robustness test. Natural equivalent: 'What is the Similarity Tool for?' — added above."
     notes: "Vector search path fails: nomic-embed-text embeds 'Similarity Tool' near generic Media Suite content because 'Similarity' is a common English word — the brand name doesn't embed near its documentation. Structural path (SPARQL entity_description → entity_uri filter) works correctly. Chatbot should route named-tool questions through the structural path, not pure vector search."
 
   - question: "How can I download my annotations?"
@@ -451,3 +453,14 @@ questions:
       - https://mediasuite.clariah.nl/learn/tool-tutorials/tutorial-sharing-media-suite-annotations-following-the-fair-principles
       - https://mediasuite.clariah.nl/documentation/howtos/export
     notes: "Variant phrasing of 'Can I download my annotations?' — tests whether export how-to and FAIR tutorial rank for action-oriented phrasing."
+
+# retired questions
+# Questions removed from the active test set. Kept here for traceability.
+
+# Retired 2026-05-15 — not a retrieval question; depends on the researcher's own
+# work, not on Media Suite content.
+# - question: "Can the Media Suite help me with my research questions?"
+#   category: partial
+#   expected_urls:
+#     - https://mediasuite.clariah.nl/learn/example-projects
+#   notes: "Domain-specific variants ('I research Dutch television history', 'I study political discourse in radio') should retrieve relevant tutorials and example projects. The example-projects index is the most useful single entry point."

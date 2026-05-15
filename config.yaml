@@ -326,7 +326,7 @@ graph:
 
 content:
   content_dir: "content"
-  output: "content.json"
+  output: "data/content.json"
   base_url: ""  # replace with w3id.org URL when persistent redirect layer is set up
 
 # Authoritative record of infrastructure choices.

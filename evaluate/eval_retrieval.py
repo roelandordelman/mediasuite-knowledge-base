@@ -88,6 +88,13 @@ def evaluate(cfg: dict, questions: list[dict], top_k: int, category: str | None 
         cat = q.get("category", "")
         expected = q.get("expected_urls", [])
         is_gap = cat == "gap"
+        is_structural = cat == "structural"
+
+        if is_structural:
+            # Structural questions are answered by the SPARQL path, not vector retrieval.
+            # They are evaluated by eval_router.py; skip here to keep Hit@k meaningful.
+            print(f"[SKIP] [structural]  {question}")
+            continue
 
         embedding = embed(question, embed_model)
         response = collection.query(

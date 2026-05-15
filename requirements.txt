@@ -1,4 +1,5 @@
 chromadb
+fastapi
 ollama
 pdfplumber
 python-frontmatter
@@ -6,3 +7,4 @@ pyyaml
 rdflib
 requests
 sickle
+uvicorn[standard]

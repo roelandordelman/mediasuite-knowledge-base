@@ -176,6 +176,12 @@ def make_chunks(
                 "source_commit": "",
                 "content_hash": hashlib.sha256(full_text.encode()).hexdigest(),
                 "tier": post.get("tier", 1),
+                "status": post.get("status", ""),
+                "last_reviewed": str(post.get("last_reviewed", "")),
+                "source_slug": url_stub,
+                "tech_dependencies": json.dumps(
+                    post.get("tech_dependencies", []), ensure_ascii=False
+                ),
                 "text": full_text,
                 "char_count": len(full_text),
             })
@@ -267,6 +273,7 @@ def main():
     print(f"  Retired:    {counts['retired']} skipped")
     print(f"  Total chunks: {len(all_chunks)}")
 
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(all_chunks, f, ensure_ascii=False, indent=2)
     print(f"\nWritten to: {output_path.resolve()}")

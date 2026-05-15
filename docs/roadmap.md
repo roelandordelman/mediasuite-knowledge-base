@@ -8,14 +8,21 @@ If something turns out to be harder, less useful, or superseded by a better appr
 
 ## Current status (May 2026)
 
-Phases 1–4 are substantially complete. The knowledge base ingests five content
-sources (~2600 chunks across Media Suite documentation, data platform, research
-publications, data stories, and SANE community docs), achieves 94% Hit@10 on the
-narrative evaluation set and 26/26 (100%) on structural routing. The knowledge
-graph holds 1057 triples across 5 entity types with 11 named SPARQL query
-templates and deterministic embedding-based routing. The chatbot runs end-to-end
-locally with parallel narrative and structural retrieval paths and a conversational
-history API.
+Phases 1–4 are substantially complete. The knowledge base ingests seven content
+sources (~2800 chunks across Media Suite documentation, data platform, research
+publications, data stories, SANE community docs, B&G publications, and Tier 1
+authored content), achieves **86% Hit@10 (32/37) on the answerable + partial
+evaluation set** with structural questions correctly excluded (evaluated separately
+via `eval_router.py`). Structural routing is 26/26 (100%). Wiki eval is 8/8
+(100%). The knowledge graph holds 1072 triples across 5 entity types with 11
+named SPARQL query templates and deterministic embedding-based routing. The
+chatbot runs end-to-end locally with parallel narrative and structural retrieval
+paths and a conversational history API.
+
+The 5 remaining retrieval failures are all pre-existing: 3 vocabulary gaps (SANE
+acronym, television news data stories, Workspace+Compare Tool phrasing), 1
+retained robustness test (Similarity Tool awkward phrasing — natural equivalent
+passes), and 1 never-passing question (`example-projects` vocabulary gap).
 
 **Next priorities:** plan the NISV infrastructure migration before external researcher evaluation begins.
 
@@ -188,15 +195,12 @@ it must happen before researchers outside the immediate project are asked to use
 
 ### NISV infrastructure migration
 
-**Status (May 2026):** Infrastructure access pending. Pre-migration assessment and
-preparation in progress — see risk matrix in `docs/nisv_migration_risk.md`.
+**Next priorities:** NISV infrastructure migration is the critical path to external
+researcher evaluation. Infrastructure access pending; pre-migration preparation
+underway — risk matrix, content framework, `tool_entities` sync fix, and evaluation
+protocol in progress.
 
-Migration is the critical path to external researcher evaluation. Before access is
-granted, complete: (1) risk matrix for pipeline components, (2) content framework
-and first Tier 1 document, (3) `tool_entities` sync fix, and (4) evaluation protocol.
-
-- [ ] Write `docs/nisv_migration_risk.md` — assess each pipeline component (Ollama, ChromaDB HTTP, Fuseki, FastAPI, GitHub Actions) against expected NISV security constraints; document fallback option for each; complete before infrastructure access is granted
-- [ ] Assess NISV security constraints on pipeline components before migration
+- [ ] Write `docs/nisv_migration_risk.md` — complete before infrastructure access is granted
   - [ ] Identify which services (Ollama, ChromaDB HTTP, Fuseki, FastAPI) can run on NISV infra
   - [ ] Identify which GitHub Actions workflows will still be accessible post-migration
   - [ ] Document fallback options if key components are blocked (e.g. cloud model API instead of local Ollama)
@@ -261,3 +265,5 @@ Things that turned out differently than expected. Updated as the project progres
 | 2026-05-02 | LLM non-determinism in answer generation is distinct from routing non-determinism — correct SPARQL context in, wrong terms out (~1 failure per run at 50% scoring threshold) | Routing is deterministic; answer generation is not; expected_terms in eval must cover the range of correct phrasings the LLM may produce |
 | 2026-05-02 | `entity_description` SPARQL subject URI was never added to the ChromaDB entity-filter set — URI is the query subject, not a returned value, so the entity-filter path was silently broken for all entity description queries | Fixed in `router.py`: explicitly add `params["entity_uri"]` to entity_uris after running entity_description |
 | 2026-05-02 | Cosine similarity routing is unreliable for direct entity questions ("Tell me about the Compare Tool") when phrasing diverges from trigger questions | Added `_detect_named_entity()`: checks tool/collection names verbatim in question text; always fires entity_description with the named URI regardless of similarity score |
+| 2026-05-15 | `eval_retrieval.py` was silently scoring 27 structural questions as FAIL (`reciprocal_rank` against `[]`) — skip logic was specified in the commit message but never implemented; Hit@10 appeared to drop from 94% to 48% after ingest changes but the index was untouched | Eval correctness is as critical as retrieval quality; question category filters must be implemented at the time questions are added, not assumed |
+| 2026-05-15 | 36 stale `context/` chunks were in ChromaDB from a directory rename (`context/` → `content/`); never cleaned up; `content/collections/` and `content/disciplines/` chunks never indexed because `build_index.py --input data/content.json` was never run explicitly | `build_index.py` input path must be documented in the ingest README and verified after any directory restructure |

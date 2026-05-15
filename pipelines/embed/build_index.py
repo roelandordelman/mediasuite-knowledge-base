@@ -142,6 +142,7 @@ def build_index(input_path: Path, cfg: dict) -> None:
                     "source_commit": c.get("source_commit", ""),
                     "content_hash": c.get("content_hash", ""),
                     "char_count": c.get("char_count", 0),
+                    "tier": c.get("tier", 0),
                     "entity_uri": assign_entity_uri(
                         c.get("url", ""),
                         c.get("tools_mentioned", []),
@@ -158,6 +159,7 @@ def build_index(input_path: Path, cfg: dict) -> None:
 
     print(f"\nDone. {len(new_chunks):,} chunks indexed into "
           f"'{vs['collection_name']}' on {vs['chroma_host']}:{vs['chroma_port']}")
+    print("Run pipelines/stats/build_stats.py after indexing all sources to update data/stats.json.")
 
 
 def main():

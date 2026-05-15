@@ -6,7 +6,7 @@ tags: [Ask Media Suite, chatbot, knowledge base chatbot, RAG system, retrieval-a
 author: "Roeland Ordelman"
 status: active
 created: "2026-05-06"
-last_reviewed: "2026-05-07"
+last_reviewed: "2026-05-15"
 sources:
   - "https://github.com/roelandordelman/mediasuite-knowledge-base/blob/main/CLAUDE.md"
   - "https://github.com/roelandordelman/mediasuite-knowledge-base/blob/main/docs/roadmap.md"
@@ -78,7 +78,7 @@ The knowledge base has two layers:
 - Top-level research workflows and sub-workflows
 - Custom vocabulary aligned with CodeMeta, TaDiRaH, softwaretypes, and schema.org
 
-Content is ingested from source repositories and re-indexed periodically. For current coverage statistics see the knowledge base coverage page.
+Content is ingested from source repositories and re-indexed periodically. For current coverage statistics see the [Knowledge base coverage](system/knowledge-base-coverage) page.
 
 ## Background and development *(Should)*
 
@@ -102,3 +102,4 @@ Development followed an incremental approach: a local prototype first, expanded 
 
 - [Media Suite documentation](https://mediasuite.clariah.nl/documentation)
 - [CLARIAH Media Suite community site](https://roelandordelman.github.io/media-suite-community/)
+- [Knowledge base coverage](system/knowledge-base-coverage)
