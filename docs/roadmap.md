@@ -188,17 +188,14 @@ it must happen before researchers outside the immediate project are asked to use
 
 ### NISV infrastructure migration
 
-Migrating to NISV infrastructure (servers, repositories, and potentially compute)
-is necessary for two reasons: (1) external researchers cannot be asked to depend on
-a system running on a personal laptop, and (2) heavier models, larger pipelines,
-or GPU-accelerated embedding will require more compute than is available locally.
+**Status (May 2026):** Infrastructure access pending. Pre-migration assessment and
+preparation in progress — see risk matrix in `docs/nisv_migration_risk.md`.
 
-**Important caveat:** once the repos move under `beeldengeluid` GitHub organisation
-and the pipeline runs on NISV servers, access to some parts of the pipeline may be
-restricted by NISV security policies. This risk should be assessed and documented
-before migration begins — identify which pipeline components (Ollama, ChromaDB,
-Fuseki, FastAPI, GitHub Actions) may be affected and what the mitigations are.
+Migration is the critical path to external researcher evaluation. Before access is
+granted, complete: (1) risk matrix for pipeline components, (2) content framework
+and first Tier 1 document, (3) `tool_entities` sync fix, and (4) evaluation protocol.
 
+- [ ] Write `docs/nisv_migration_risk.md` — assess each pipeline component (Ollama, ChromaDB HTTP, Fuseki, FastAPI, GitHub Actions) against expected NISV security constraints; document fallback option for each; complete before infrastructure access is granted
 - [ ] Assess NISV security constraints on pipeline components before migration
   - [ ] Identify which services (Ollama, ChromaDB HTTP, Fuseki, FastAPI) can run on NISV infra
   - [ ] Identify which GitHub Actions workflows will still be accessible post-migration
