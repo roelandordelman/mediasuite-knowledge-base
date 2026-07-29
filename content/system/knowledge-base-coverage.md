@@ -5,8 +5,8 @@ url_stub: "system/knowledge-base-coverage"
 tags: [knowledge base, coverage, statistics, sources, chatbot development]
 author: "generated"
 status: active
-created: "2026-05-15"
-last_reviewed: "2026-05-15"
+created: "2026-07-28"
+last_reviewed: "2026-07-28"
 tier: 1
 ---
 
@@ -16,11 +16,11 @@ This document describes the current state of the Ask Media Suite knowledge base:
 
 ## Knowledge base build
 
-The knowledge base was last built on 2026-05-15.
+The knowledge base was last built on 2026-07-28.
 
 ## Content coverage
 
-The knowledge base contains 2,793 chunks across 19 content types.
+The knowledge base contains 2,799 chunks across 19 content types.
 
 | Content type | Chunks |
 |---|---|
@@ -39,14 +39,14 @@ The knowledge base contains 2,793 chunks across 19 content types.
 | Explainer | 36 |
 | FAQ | 34 |
 | API Documentation | 23 |
+| System Documentation | 21 |
 | SANE Documentation | 18 |
-| System Documentation | 15 |
 | Glossary | 13 |
 | Tool Criticism | 4 |
 
 ## Retrieval evaluation
 
-Retrieval quality is measured on a fixed test question set. Scores below are from the evaluation run on n/a.
+Retrieval quality is measured on a fixed test question set. Scores below are from the evaluation run (no evaluation run yet).
 
 | Metric | Score |
 |---|---|

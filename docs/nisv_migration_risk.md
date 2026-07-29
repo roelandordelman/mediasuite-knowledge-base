@@ -1,6 +1,14 @@
 # NISV Infrastructure Migration — Risk Matrix
 
-**Document status:** draft  
+> **SUPERSEDED 2026-07-28** — the goal of migrating *toward* NISV production
+> (Stage 3 below) has been replaced by a community-hosted, NISV-decoupled
+> direction. See `docs/infrastructure_architecture.md` for the current plan.
+> This document is kept as a historical record; its component-level risk
+> analysis (§2–3) is still technically valid and is restated without the
+> NISV-destination framing in the new doc §4. See `docs/roadmap.md`'s
+> Learning log for why the direction changed.
+
+**Document status:** draft — superseded, see notice above
 **Author:** Roeland Ordelman  
 **Created:** 2026-05-15  
 **Last reviewed:** 2026-05-15  
@@ -217,7 +225,7 @@ Consolidated list of open questions to resolve before Stage 3 planning:
 ## 5. Stage 1 deployment checklist (Hetzner)
 
 Pre-conditions before inner circle researcher access:
-
+   
 - [ ] Provision Hetzner CCX23 (4 vCPU, 16GB RAM) — Ubuntu 24 LTS
 - [ ] Install Docker and Docker Compose
 - [ ] Write `docker-compose.yml` for: Ollama, ChromaDB, Fuseki, FastAPI,

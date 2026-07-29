@@ -24,7 +24,9 @@ acronym, television news data stories, Workspace+Compare Tool phrasing), 1
 retained robustness test (Similarity Tool awkward phrasing — natural equivalent
 passes), and 1 never-passing question (`example-projects` vocabulary gap).
 
-**Next priorities:** plan the NISV infrastructure migration before external researcher evaluation begins.
+**Next priorities:** resolve the governance/funding model for community-hosted,
+NISV-decoupled infrastructure (see Phase 6 and `docs/infrastructure_architecture.md`)
+before further deployment work — this replaces the earlier NISV-migration plan.
 
 ---
 
@@ -190,26 +192,49 @@ production use, where researchers need to cite sources and rely on stable links.
 ## Phase 6 — Deployment and user evaluation
 
 The goal of this phase is to deploy the chatbot and put it in front of real researchers.
-The NISV infrastructure migration is a prerequisite for external researcher testing —
-it must happen before researchers outside the immediate project are asked to use the system.
+Getting this deployed to stable, accessible infrastructure is a prerequisite for
+external researcher testing — it must happen before researchers outside the immediate
+project are asked to use the system. **This no longer means NISV infrastructure** —
+see below.
 
-### NISV infrastructure migration
+### Infrastructure architecture — community-hosted, NISV-decoupled
 
-**Next priorities:** NISV infrastructure migration is the critical path to external
-researcher evaluation. Infrastructure access pending; pre-migration preparation
-underway — risk matrix, content framework, `tool_entities` sync fix, and evaluation
-protocol in progress.
+**Pivot (2026-07-28):** the previous plan (migrate *toward* NISV production) has been
+replaced. Full reasoning and the target architecture are in
+`docs/infrastructure_architecture.md`; `docs/nisv_migration_risk.md` is kept as a
+superseded historical record, not deleted. One-line summary: NISV is
+organisationally bottlenecked (manpower, infra policy, even language constraints), so
+continuity for the public-interest tooling layer (this KB, the chatbot, the wiki
+agent — none of which touch rights-restricted data) moves to the community instead.
+Only genuinely rights-restricted functionality (archive access, authenticated
+playout — neither of which exists in this stack today) stays with NISV.
 
-- [ ] Write `docs/nisv_migration_risk.md` — complete before infrastructure access is granted
-  - [ ] Identify which services (Ollama, ChromaDB HTTP, Fuseki, FastAPI) can run on NISV infra
-  - [ ] Identify which GitHub Actions workflows will still be accessible post-migration
-  - [ ] Document fallback options if key components are blocked (e.g. cloud model API instead of local Ollama)
-- [ ] Move `mediasuite-knowledge-base` to `beeldengeluid` GitHub organisation
-- [ ] Move `media-suite-learn-chatbot` to `beeldengeluid` GitHub organisation
-- [ ] Deploy ChromaDB and Fuseki on NISV server infrastructure
-- [ ] Deploy FastAPI chatbot backend on NISV server
-- [ ] Set up automated re-ingestion pipeline (GitHub Actions or cron) triggered by source repo updates
-- [ ] Assess whether heavier embedding or generation models are feasible with available NISV compute
+- [x] Write `docs/nisv_migration_risk.md` — superseded, see above; kept for its
+      component-level risk analysis, which is still technically reusable
+- [x] Write `docs/infrastructure_architecture.md` — target model, sustainability
+      framework (access-control / regenerability / continuity), and open questions
+
+**Blocking, not yet resolved:** who pays which bill and who takes which decision for a
+community-sustained tooling layer, without founding a new legal entity
+(`docs/infrastructure_architecture.md` §6). A separate investigation into existing
+precedents has been commissioned externally. **No further infrastructure work
+(deployment artifacts, org moves, vendor selection) should proceed until this
+resolves** — building against the wrong org/funding model would be wasted effort.
+
+Once resolved:
+
+- [ ] Decide repo/org home (not `beeldengeluid` — that re-couples continuity to NISV;
+      a neutral CLARIAH-affiliated or independent community org instead)
+- [ ] Provision hosting (Hetzner or an alternative EU provider, pending the funding
+      model decision) and containerize Ollama/ChromaDB/Fuseki/FastAPI behind Nginx
+      (HTTPS + HTTP Basic Auth) — component-level detail in
+      `docs/infrastructure_architecture.md` §4
+- [ ] Run ingestion + eval on the deployed instance, smoke-test, open access to an
+      initial contributor/researcher group
+- [ ] Set up automated re-ingestion (GitHub Actions or scheduled job) — also addresses
+      the bus-factor risk in `docs/source_sustainability.md`
+- [ ] Verify wiki-agent Milvus index regenerability as rigorously as the knowledge
+      graph was verified (`docs/infrastructure_architecture.md` §3)
 
 ### User evaluation
 
@@ -267,3 +292,5 @@ Things that turned out differently than expected. Updated as the project progres
 | 2026-05-02 | Cosine similarity routing is unreliable for direct entity questions ("Tell me about the Compare Tool") when phrasing diverges from trigger questions | Added `_detect_named_entity()`: checks tool/collection names verbatim in question text; always fires entity_description with the named URI regardless of similarity score |
 | 2026-05-15 | `eval_retrieval.py` was silently scoring 27 structural questions as FAIL (`reciprocal_rank` against `[]`) — skip logic was specified in the commit message but never implemented; Hit@10 appeared to drop from 94% to 48% after ingest changes but the index was untouched | Eval correctness is as critical as retrieval quality; question category filters must be implemented at the time questions are added, not assumed |
 | 2026-05-15 | 36 stale `context/` chunks were in ChromaDB from a directory rename (`context/` → `content/`); never cleaned up; `content/collections/` and `content/disciplines/` chunks never indexed because `build_index.py --input data/content.json` was never run explicitly | `build_index.py` input path must be documented in the ingest README and verified after any directory restructure |
+| 2026-07-28 | Re-running the eval suite after a few weeks away surfaced real regressions (narrative Hit@10 84% vs. documented 86%, with previously-fixed vocabulary gaps un-fixing themselves) — deliberately not investigated now; fine-tuning was judged to make more sense after infrastructure work settles | Documented state can silently drift between sessions; re-verify before treating old numbers as current, but don't let that discovery derail a differently-scoped task |
+| 2026-07-28 | A conversation about GPU hosting needs and NISV's organisational constraints (manpower, infra policy, even language restrictions) led to reconsidering the entire migration target: NISV was never actually a hard requirement for this stack, since nothing in it touches rights-restricted data — only future authenticated-playout integration would need NISV | Migration plans should be periodically re-examined against *why* the destination was chosen, not just executed once decided; see `docs/infrastructure_architecture.md` |
